@@ -6,7 +6,7 @@
 	<msg name="gadget.user.title.url">http://www.j-tricks.com</msg>
 	<msg name="gadget.user.description">Example Gadget that displays user name, from J-Tricks</msg>
 	<msg name="property.description">messages.xml Tag description</msg>
-	<msg name="property.label">messages.xml Display username?</msg>
+	<msg name="property.label">Display username?</msg>
 	<msg name="property2.description">Status tag description</msg>
 	<msg name="property2.label">Select status tag</msg>
 </messagebundle>

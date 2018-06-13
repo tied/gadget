@@ -29,7 +29,9 @@
         <![CDATA[
         #requireResource("com.atlassian.jira.gadgets:common")
 	    #includeResources()
-	 
+	       
+        <script type="text/javascript" src="js/reports-plugin.js"></script>
+
 	    <script type="text/javascript">
 		(function () {
 		    var gadget = AJS.Gadget({
@@ -47,11 +49,11 @@
                                         selected: gadget.getPref("displayName"),
                                         options:[
                                             {
-                                                label:"Display name",
+                                                label:"Show graph",
                                                 value:"true"
                                             },
                                             {
-                                                label:"Set to false",
+                                                label:"Show text",
                                                 value:"false"
                                             }
                                         ]
@@ -84,9 +86,9 @@
 				template: function(args) {
 					var gadget = this;
 			 
-					if (gadget.getPref("displayName") == "true")
+					if (true)
 					{
-						var userDetails = AJS.$("<h1/>").text("Hello, "+args.user["fullName"]);
+						var userDetails = AJS.$("<div/>").text("Hej");
 					} else {
 						var userDetails = AJS.$("<h1/>").text("Hello!");
 					}	
