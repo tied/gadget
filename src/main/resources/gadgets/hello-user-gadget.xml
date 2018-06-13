@@ -102,11 +102,9 @@
                     //CustomFunction(gadget, data);
                     /*var container = AJS.$("<div id='chart_div'/>");
                     gadget.getView().append(container);*/
-                   // CustomFunction(gadget);
-
-                    gadget.getView().append("<p>Add container</p>");
-                    gadget.getView().append("<div id='curve_chart' style='width: 600px; height: 500px'></div>");
-                    gadget.getView().append("<p>Add container</p>");
+                    // Append element to doc, 'curve_chart' set in reports-plugin.js
+                    
+                    gadget.getView().append("<div id='curve_chart' align='center'/>");
 				    },
 				    args: [{
 					key: "user",

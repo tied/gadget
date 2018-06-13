@@ -235,7 +235,7 @@ function reportspluginTest() {
 
 function drawChart() {
 	var data = google.visualization.arrayToDataTable([
-        ['Year', 'Sales', 'Expenses'],
+        ['Date', 'Closed', 'Open'],
         ['2004',  1000,      400],
         ['2005',  1170,      460],
         ['2006',  660,       1120],
@@ -243,47 +243,16 @@ function drawChart() {
     ]);
 
     var options = {
-          title: 'Company Performance',
+          title: 'Resolved vs Created issues',
           curveType: 'function',
           legend: { position: 'bottom' }
         };
 
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+    var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
-        chart.draw(data, options);
-      }
+    chart.draw(data, options);
+}
 
+function baseURL() {
 
-/*
-function CustomFunction(gadget) {
-	                    var data = new google.visualization.DataTable();
-	                                data.addColumn('string', "Just a string"); //this.getMsg("gadget.user.activity.time.label"));
-	                                data.addColumn('number', this.getMsg("gadget.user.activity.issues.solving.label"));
-	                                data.addColumn('number', this.getMsg("gadget.user.activity.sum.label"));
-	                                data.addRows(args.chart.data);
-
-	                               
-	                                var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-	                                     
-
-	                                var width = gadgets.window.getViewportDimensions().width;
-	                                var height = width * 3/4;
-	                                chart.draw(
-	                                    data,
-	                                    {width: width, height: height,
-	                                    curveType: "function",
-	                                    legend: 'bottom',
-	                                    backgroundColor:{fill:'#DDE8FF'},
-	                                    vAxis: {  textStyle:{fontSize:10},
-	                                            baseline:0,
-	                                            baselineColor:'#9F0000'},
-	                                    hAxis: {textStyle:{fontSize:10},
-	                                            slantedText:'true',
-	                                            slantedTextAngle:45},
-	                                    colors:['#566D7E','orange'],
-	                                    fontName:'Trebuchet MS',
-	                                    pointSize: 2
-	                                });
-	                                gadget.resize();
-	                            }
-*/
+}
