@@ -28,9 +28,8 @@
     <Content type="html" view="profile">
         <![CDATA[
         #requireResource("com.atlassian.jira.gadgets:common")
+        #requireResource("com.jtricks.reports-plugin:reports-plugin-resources")
 	    #includeResources()
-	       
-        <script type="text/javascript" src="js/reports-plugin.js"></script>
 
 	    <script type="text/javascript">
 		(function () {
@@ -86,11 +85,11 @@
 				template: function(args) {
 					var gadget = this;
 			 
-					if (true)
+					if (gadget.getPref("displayName") == "true")
 					{
-						var userDetails = AJS.$("<div/>").text("Hej");
+						var userDetails = AJS.$("<div/>").text(testTest());
 					} else {
-						var userDetails = AJS.$("<h1/>").text("Hello!");
+						var userDetails = AJS.$("<h1/>").text(reportspluginTest());
 					}	
 			 
 					gadget.getView().html(userDetails);

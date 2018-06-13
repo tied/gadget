@@ -1,4 +1,4 @@
 
-function testJs() {
-    return true;
+function reportspluginTest() {
+    return "reports-plugin.js loaded";
 }
