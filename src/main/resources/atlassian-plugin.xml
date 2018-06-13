@@ -13,12 +13,14 @@
   <!-- add our web resources -->
   <web-resource key="reports-plugin-resources" name="reports-plugin Web Resources">
     <dependency>com.atlassian.auiplugin:ajs</dependency>
-    <resource type="download" name="reports-plugin.js" location="/js/reports-plugin.js">
-      <property key="content-type" value="text/javascript"/>
-    </resource>
+    <!-- JavaScript files -->
+    <resource type="download" name="reports-plugin.js" location="/js/reports-plugin.js"><property key="content-type" value="text/javascript"/></resource>
+    <resource type="download" name="googleChartLoader.js" location="js/googleChartLoader.js"><property key="content-type" value="text/javascript"/></resource>
+    <resource name="webResourceTest" type="download" location="js/test.js"/>
+
     <resource type="download" name="reports-plugin.css" location="/css/reports-plugin.css"/>
     <resource type="download" name="images/" location="/images"/>
-    <resource name="webResourceTest" type="download" location="js/test.js"/>
+
     <context>reports-plugin</context>
   </web-resource>
   <!-- REPORTS -->

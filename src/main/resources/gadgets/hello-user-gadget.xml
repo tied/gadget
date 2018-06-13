@@ -25,13 +25,17 @@
 	<UserPref name="refresh" datatype="hidden" default_value="false"/>
 	<UserPref name="displayName" datatype="hidden" default_value="true"/>
     <UserPref name="useStatusTag" datatype="hidden" default_value="true"/>
-    <Content type="html" view="profile">
+    <Content type="html" view="profile,canvas,home">
         <![CDATA[
         #requireResource("com.atlassian.jira.gadgets:common")
         #requireResource("com.jtricks.reports-plugin:reports-plugin-resources")
 	    #includeResources()
 
+       
+
 	    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
 		(function () {
 		    var gadget = AJS.Gadget({
 		        baseUrl: "__ATLASSIAN_BASE_URL__",
@@ -84,15 +88,25 @@
                 onResizeAdjustHeight: true,
 				template: function(args) {
 					var gadget = this;
-			 
+                    gadget.getView().empty(); // Reset view
+
+                    /*
 					if (gadget.getPref("displayName") == "true")
 					{
 						var userDetails = AJS.$("<div/>").text(testTest());
 					} else {
-						var userDetails = AJS.$("<h1/>").text(reportspluginTest());
-					}	
-			 
-					gadget.getView().html(userDetails);
+						var userDetails = AJS.$("<div id='curve_chart' style='width: 900px; height: 500px'/>");
+                    }	
+                    */
+					//var container = AJS.$();
+                    //CustomFunction(gadget, data);
+                    /*var container = AJS.$("<div id='chart_div'/>");
+                    gadget.getView().append(container);*/
+                   // CustomFunction(gadget);
+
+                    gadget.getView().append("<p>Add container</p>");
+                    gadget.getView().append("<div id='curve_chart' style='width: 600px; height: 500px'></div>");
+                    gadget.getView().append("<p>Add container</p>");
 				    },
 				    args: [{
 					key: "user",
