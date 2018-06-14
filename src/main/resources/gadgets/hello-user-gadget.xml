@@ -105,9 +105,9 @@
 						var userDetails = AJS.$("<div id='curve_chart' style='width: 900px; height: 500px'/>");
                     }	
                     */
-                    
+                    AJS.log("Message to termnial");
                     console.log("user: " + getCurrentUserName());
-                    getFieldInJasonAtURL("total");
+                    console.log(getFieldInJasonAtURL());
 
                     console.log(args.open["total"]);
                     // Append element to doc, 'curve_chart' set in reports-plugin.js
@@ -116,14 +116,23 @@
                     google.charts.setOnLoadCallback(drawChart);
 				    },
 				    args: [{
-					key: "open",
-					ajaxOptions: function() {
-					    return {
-                        contentType: 'application/json',
-						url: "/rest/api/2/search?jql=project='PROJ'"
-					    };
+    					key: "open",
+    					ajaxOptions: function() {
+    					    return {
+                            contentType: 'application/json',
+    						url: "/rest/api/2/search?jql=project='PROJ'"
+    					    };
 					}
-				    }]
+				    },
+                    {
+                        key: "closed",
+                        ajaxOptions: function() {
+                            return {
+                            contentType: 'application/json',
+                            url: "/rest/api/2/search?jql=project='PROJ'"
+                            };
+                    }
+                    }]
 			}
 		    });
 		})();
