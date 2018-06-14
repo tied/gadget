@@ -101,26 +101,55 @@
 
                     AJS.log("Message to termnial");
                     console.log("user: " + getCurrentUserName());
-                    
+                    console.log(getFieldInJasonAtURL(gadget));
 
                     console.log(args.open["total"]);
                     */
-                    console.log(getFieldInJasonAtURL(gadget));
+                    // var date = new Date(new Date().setDate(new Date().getDate() - 30));
+                    
+                    var rows = 30;
+                    console.log("Days");
 
-                    AJS.$.ajax({
-                    url: AJS.escapeHtml("/rest/api/2/project"), //"/rest/api/2/search?jql=project=%27PROJ%27",
-                    type: 'get',
-                    contentType: "application/json",
-                    dataType: "json",
-                    async: false,
-                    success: function(data) { console.log(data[0]); }
-                    });
+                    var dataTable = new Array(rows);
+                    dataTable[0] = new Array(3);
+                    dataTable[0][0] = "date";
+                    dataTable[0][1] = "Resolved";
+                    dataTable[0][2] = "Closed";
+                    for (var d=1; d < rows; d++) {
+                        dataTable[d] = new Array(3);
+                        dataTable[d][0] = d;
+                        var res = 0;
+                        /*
+                        AJS.$.ajax({
+                            url: AJS.escapeHtml("/rest/api/2/project"), //"/rest/api/2/search?jql=project=%27PROJ%27",
+                            type: 'get',
+                            contentType: "application/json",
+                            dataType: "json",
+                            async: false,
+                            success: function(data) { res = data["total"]; }
+                        });
+                        */
+                        dataTable[d][1] = d;
+                        /*
+                        AJS.$.ajax({
+                            url: AJS.escapeHtml("/rest/api/2/project"), //"/rest/api/2/search?jql=project=%27PROJ%27",
+                            type: 'get',
+                            contentType: "application/json",
+                            dataType: "json",
+                            async: false,
+                            success: function(data) { res = data["total"]; }
+                        });
+                        */
+                        dataTable[d][2] = d;
+                           
+                    }
 
+                    
                     
                     
                     gadget.getView().append("<div id='curve_chart' align='center'/>"); // Append element to doc, 'curve_chart' set in reports-plugin.js
                     console.log("Call to drawChart()");
-                    google.charts.setOnLoadCallback(drawChart);
+                    google.charts.setOnLoadCallback(drawChart(dataTable));
 				    },
 				    args: [{
     					key: "open",

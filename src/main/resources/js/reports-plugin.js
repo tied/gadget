@@ -233,8 +233,8 @@ function reportspluginTest() {
 console.log("request-plugin.js loaded");
 
 
-function drawChart() {
-	var data = google.visualization.arrayToDataTable([
+function drawChart(data) {
+	data = google.visualization.arrayToDataTable([
         ['Date', 'Closed', 'Open'],
         ['2004',  1000,      400],
         ['2005',  1170,      460],
