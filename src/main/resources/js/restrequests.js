@@ -16,20 +16,27 @@ function getCurrentUserName()
 	return user;
 }
 
-function getFieldInJasonAtURL(targetField)
+function getFieldInJasonAtURL()
 {
 	var result;
 	AJS.$.ajax({
-	url: "/rest/api/2/search?jql=project='PROJ'",
-	type: 'POST',
-	dataType: 'json',
+	url: AJS.escapeHtml("/rest/api/2/project"), //"/rest/api/2/search?jql=project=%27PROJ%27",
+	type: 'get',
+    contentType: "application/json",
+    dataType: "json",
 	async: false,
-	success: function(data) { result = data["targetField"]; }
+	success: function(data) { result = data["name"]; }
 	});
 	return result;
 }
 
 /*
+function getJasonObject() {
+    AJS$.getJSON("/rest/api/2/project", 
+        function(data){ $.each(data, function(){ alert(this.expand); }); });
+}
+
+
 var clientId = "admin";
 var clientSecret = "admin";
 

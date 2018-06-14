@@ -96,22 +96,29 @@
 				template: function(args) {
 					var gadget = this;
                     gadget.getView().empty(); // Reset view
-
                     /*
 					if (gadget.getPref("displayName") == "true")
-					{
-						var userDetails = AJS.$("<div/>").text(testTest());
-					} else {
-						var userDetails = AJS.$("<div id='curve_chart' style='width: 900px; height: 500px'/>");
-                    }	
-                    */
+
                     AJS.log("Message to termnial");
                     console.log("user: " + getCurrentUserName());
-                    console.log(getFieldInJasonAtURL());
+                    
 
                     console.log(args.open["total"]);
-                    // Append element to doc, 'curve_chart' set in reports-plugin.js
-                    gadget.getView().append("<div id='curve_chart' align='center'/>");
+                    */
+                    console.log(getFieldInJasonAtURL(gadget));
+
+                    AJS.$.ajax({
+                    url: AJS.escapeHtml("/rest/api/2/project"), //"/rest/api/2/search?jql=project=%27PROJ%27",
+                    type: 'get',
+                    contentType: "application/json",
+                    dataType: "json",
+                    async: false,
+                    success: function(data) { console.log(data[0]); }
+                    });
+
+                    
+                    
+                    gadget.getView().append("<div id='curve_chart' align='center'/>"); // Append element to doc, 'curve_chart' set in reports-plugin.js
                     console.log("Call to drawChart()");
                     google.charts.setOnLoadCallback(drawChart);
 				    },
