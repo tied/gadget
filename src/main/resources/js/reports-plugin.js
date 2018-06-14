@@ -230,7 +230,7 @@ google.G.load=function(b){for(var c=[],d=0;d<arguments.length;++d)c[d-0]=argumen
 function reportspluginTest() {
     return "reports-plugin.js loaded";
 }
-
+console.log("request-plugin.js loaded");
 
 
 function drawChart() {
@@ -243,7 +243,7 @@ function drawChart() {
     ]);
 
     var options = {
-          title: 'Resolved vs Created issues',
+          title: 'Open vs Closed issues',
           curveType: 'function',
           legend: { position: 'bottom' }
         };

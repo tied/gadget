@@ -34,8 +34,8 @@
        
 
 	    <script type="text/javascript">
+        console.log("Load Google chart");
         google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(drawChart);
 		(function () {
 		    var gadget = AJS.Gadget({
 		        baseUrl: "__ATLASSIAN_BASE_URL__",
@@ -98,20 +98,17 @@
 						var userDetails = AJS.$("<div id='curve_chart' style='width: 900px; height: 500px'/>");
                     }	
                     */
-					//var container = AJS.$();
-                    //CustomFunction(gadget, data);
-                    /*var container = AJS.$("<div id='chart_div'/>");
-                    gadget.getView().append(container);*/
                     // Append element to doc, 'curve_chart' set in reports-plugin.js
-                    
                     gadget.getView().append("<div id='curve_chart' align='center'/>");
+                    console.log("drawChart()");
+                    google.charts.setOnLoadCallback(drawChart);
 				    },
 				    args: [{
 					key: "user",
 					ajaxOptions: function() {
 					    return {
                         contentType: 'application/json',
-						url: "/rest/gadget/1.0/currentUser"
+						url: "/rest/api/2/search?jql=project='PROJ'"
 					    };
 					}
 				    }]

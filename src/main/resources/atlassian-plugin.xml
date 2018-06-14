@@ -16,8 +16,10 @@
     <!-- JavaScript files -->
     <resource type="download" name="reports-plugin.js" location="/js/reports-plugin.js"><property key="content-type" value="text/javascript"/></resource>
     <resource type="download" name="googleChartLoader.js" location="js/googleChartLoader.js"><property key="content-type" value="text/javascript"/></resource>
-    <resource name="webResourceTest" type="download" location="js/test.js"/>
+    <resource type="download" name="webResourceTest" location="js/test.js"><property key="content-type" value="text/javascript"/></resource>
+    <resource type="download" name="restRequestsResource" location="js/restrequests.js"><property key="content-type" value="text/javascript"/></resource>
 
+    <!-- CSS files -->
     <resource type="download" name="reports-plugin.css" location="/css/reports-plugin.css"/>
     <resource type="download" name="images/" location="/images"/>
 
