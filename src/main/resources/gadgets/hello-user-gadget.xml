@@ -41,8 +41,9 @@
 
 	    <script type="text/javascript">
         console.log("Load Google chart");
-        google.charts.load('current', {'packages':['corechart']});
-		(function () {
+        //google.charts.load('current', {'packages':['corechart']});
+        google.charts.load('current', {'packages':['bar', 'corechart', 'table']});
+        (function () {
 		    var gadget = AJS.Gadget({
 		        baseUrl: "__ATLASSIAN_BASE_URL__",
                 useOauth: "/rest/gadget/1.0/currentUser",
@@ -109,16 +110,15 @@
                     
                     var rows = 30;
                     console.log("Days");
+ 
+                    var dataTable = new google.visualization.DataTable();
+                    // Declare columns
+                    data.addColumn('datetime', 'Date');
+                    data.addColumn('int', 'Closed');
+                    data.addColumn('int', 'Open');
 
-                    var dataTable = new Array(rows);
-                    dataTable[0] = new Array(3);
-                    dataTable[0][0] = "date";
-                    dataTable[0][1] = "Resolved";
-                    dataTable[0][2] = "Closed";
                     for (var d=1; d < rows; d++) {
-                        dataTable[d] = new Array(3);
-                        dataTable[d][0] = d;
-                        var res = 0;
+                        var closed = 0;
                         /*
                         AJS.$.ajax({
                             url: AJS.escapeHtml("/rest/api/2/project"), //"/rest/api/2/search?jql=project=%27PROJ%27",
@@ -129,7 +129,7 @@
                             success: function(data) { res = data["total"]; }
                         });
                         */
-                        dataTable[d][1] = d;
+                        var open = 0;
                         /*
                         AJS.$.ajax({
                             url: AJS.escapeHtml("/rest/api/2/project"), //"/rest/api/2/search?jql=project=%27PROJ%27",
@@ -140,8 +140,7 @@
                             success: function(data) { res = data["total"]; }
                         });
                         */
-                        dataTable[d][2] = d;
-                           
+                        data.addRow([new Date(new Date().setDate(new Date().getDate() - days)), closed, open ]);    
                     }
 
                     
@@ -149,7 +148,7 @@
                     
                     gadget.getView().append("<div id='curve_chart' align='center'/>"); // Append element to doc, 'curve_chart' set in reports-plugin.js
                     console.log("Call to drawChart()");
-                    google.charts.setOnLoadCallback(drawChart(dataTable));
+                    google.charts.setOnLoadCallback(function() { drawChart(dataTable) });
 				    },
 				    args: [{
     					key: "open",
