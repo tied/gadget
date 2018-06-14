@@ -1,0 +1,71 @@
+<html>
+<head>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+      var rows = 30;
+      var data = new google.visualization.DataTable();
+      data.addColumn('datetime', 'Date');
+      data.addColumn('number', 'Closed');
+      data.addColumn('number', 'Open');
+
+      for (var i=rows; i > 0; i--) 
+      {
+        var closed = 0;
+        /*
+                        AJS.$.ajax({
+                            url: AJS.escapeHtml("/rest/api/2/project"), //"/rest/api/2/search?jql=project=%27PROJ%27",
+                            type: 'get',
+                            contentType: "application/json",
+                            dataType: "json",
+                            async: false,
+                            success: function(data) { res = data["total"]; }
+                        });
+                        */
+                        var open = 0;
+                        /*
+                        AJS.$.ajax({
+                            url: AJS.escapeHtml("/rest/api/2/project"), //"/rest/api/2/search?jql=project=%27PROJ%27",
+                            type: 'get',
+                            contentType: "application/json",
+                            dataType: "json",
+                            async: false,
+                            success: function(data) { res = data["total"]; }
+                        });
+                        */
+                        var d = new Date(new Date().setDate(new Date().getDate() - i));
+                        data.addRow([d, i, i+2 ]);
+                      }
+
+
+                      var options = {
+                        title: 'Open vs Closed issues',
+                        curveType: 'none',
+                        legend: { position: 'bottom' },
+                        lineWidth: 4,
+                        hAxis: {
+                          title: 'Time'
+                        },
+                        vAxis: {
+                          title: 'Popularity'
+                        },
+                        series: {
+                          1: {curveType: 'function'}
+                        }
+                      };
+
+                      var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+
+                      chart.draw(data, options);
+                    }
+
+
+                  </script>
+                </head>
+                <body>
+                  <div id="chart_div" style="width: 98%; height: 99%"></div>
+                </body>
+                </html>
