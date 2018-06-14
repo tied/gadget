@@ -3,7 +3,51 @@ function restRequestsTest() {
 }
 console.log("restrequests.js loaded");
 
+function getCurrentUserName()
+{
+	var user;
+	AJS.$.ajax({
+	url: "/rest/gadget/1.0/currentUser",
+	type: 'get',
+	dataType: 'json',
+	async: false,
+	success: function(data) { user = data["username"]; }
+	});
+	return user;
+}
+
+function getFieldInJasonAtURL(targetField)
+{
+	var result;
+	AJS.$.ajax({
+	url: "/rest/api/2/search?jql=project='PROJ'",
+	type: 'POST',
+	dataType: 'json',
+	async: false,
+	success: function(data) { result = data["targetField"]; }
+	});
+	return result;
+}
+
 /*
+var clientId = "admin";
+var clientSecret = "admin";
+
+// var authorizationBasic = $.base64.btoa(clientId + ':' + clientSecret);
+var authorizationBasic = window.btoa(clientId + ':' + clientSecret);
+
+var request = new XMLHttpRequest();
+request.open('POST', oAuth.AuthorizationServer, true);
+request.setRequestHeader('Content-Type', 'application/json');
+request.setRequestHeader('Authorization', 'Basic ' + authorizationBasic);
+request.setRequestHeader('Accept', 'application/json');
+request.send("username=admin&password=admin&grant_type=password");
+
+request.onreadystatechange = function () {
+    if (request.readyState === 4) {
+       alert(request.responseText);
+    }
+};
 
 var Client = require('node-rest-client').Client;
 client = new Client();
@@ -35,7 +79,7 @@ client.post("http://w405anl:2990/jira/rest/auth/1/session", loginArgs, function(
             }
         };
         // Make the request return the search results, passing the header information including the cookie.
-        client.post("http://w405anl:2990/jira/rest/api/2/search", searchArgs, function(searchResult, response) {
+        client.post("http://localhost:8090/jira/rest/api/2/search", searchArgs, function(searchResult, response) {
             console.log('status code:', response.statusCode);
             console.log('search result:', searchResult);
         });
@@ -44,3 +88,36 @@ client.post("http://w405anl:2990/jira/rest/auth/1/session", loginArgs, function(
     }
 });
 */
+/*
+var HttpClient = function(gadget) {
+    gadget.get = function(aUrl, aCallback) {
+        var anHttpRequest = new XMLHttpRequest();
+        anHttpRequest.onreadystatechange = function() { 
+            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                aCallback(anHttpRequest.responseText);
+        }
+
+        anHttpRequest.open( "GET", aUrl, true );            
+        anHttpRequest.send( null );
+        console.log("HttpClient")
+    }
+}
+*/
+/*
+var HttpClient = function() {
+    this.get = function(aUrl, aCallback) {
+        var anHttpRequest = new XMLHttpRequest();
+        anHttpRequest.onreadystatechange = function() { 
+            if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                aCallback(anHttpRequest.responseText);
+        }
+
+        anHttpRequest.open( "GET", aUrl, true );            
+        anHttpRequest.send( null );
+        console.log("HttpClient")
+    }
+}
+*/
+
+
+

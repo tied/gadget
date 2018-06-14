@@ -11,6 +11,7 @@
                  >
         <Optional feature="gadget-directory">
             <Param name="categories">
+                JIRA
                 Other
             </Param>
         </Optional>
@@ -18,6 +19,11 @@
 		<Require feature="dynamic-height"/>
 		<Require feature="setprefs" />
         <Require feature="views" />
+        <Require feature="oauthpopup" />
+        <Optional feature='auth-refresh' />
+        <Optional feature="atlassian.util" />
+
+        #oauth
         #supportedLocales("gadget.common")
 		<Locale messages="__ATLASSIAN_BASE_URL__/download/resources/com.jtricks.reports-plugin/i18n/messages.xml"/>
     </ModulePrefs>
@@ -39,6 +45,7 @@
 		(function () {
 		    var gadget = AJS.Gadget({
 		        baseUrl: "__ATLASSIAN_BASE_URL__",
+                useOauth: "/rest/gadget/1.0/currentUser",
 				config: {
                         descriptor: function (args) {
                             var gadget = this;
@@ -98,13 +105,18 @@
 						var userDetails = AJS.$("<div id='curve_chart' style='width: 900px; height: 500px'/>");
                     }	
                     */
+                    
+                    console.log("user: " + getCurrentUserName());
+                    getFieldInJasonAtURL("total");
+
+                    console.log(args.open["total"]);
                     // Append element to doc, 'curve_chart' set in reports-plugin.js
                     gadget.getView().append("<div id='curve_chart' align='center'/>");
-                    console.log("drawChart()");
+                    console.log("Call to drawChart()");
                     google.charts.setOnLoadCallback(drawChart);
 				    },
 				    args: [{
-					key: "user",
+					key: "open",
 					ajaxOptions: function() {
 					    return {
                         contentType: 'application/json',
