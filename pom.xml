@@ -9,7 +9,7 @@
         <name>Anders Vrethem</name>
         <url>None/</url>
     </organization>
-    <name>issues-metric</name>
+    <name>IssueLinePlotter2D</name>
     <description>This is the com.avrethem:issues-metric plugin for Atlassian JIRA.</description>
     <packaging>atlassian-plugin</packaging>
     <dependencies>

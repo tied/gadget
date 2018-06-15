@@ -5,10 +5,11 @@
                  description="__MSG_gadget.user.description__"
                  author="Anders Vrethem"
                  author_email="avrethem@gmail.com"
-                 screenshot='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-gadget", "images/screenshot.png")'
-                 thumbnail='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-gadget", "images/thumbnail.png")'
+                 screenshot='#staticResourceUrl("com.avrethem.issues-metric:hello-user-gadget", "screenshot.png")'
+                 thumbnail='#staticResourceUrl("com.avrethem.issues-metric:hello-user-gadget", "thumbnail.png")'
                  height="150"
     >
+        <!--                            groupID.artifactID:gadget-key                                         -->
         <Optional feature="gadget-directory">
             <Param name="categories">
                 JIRA
