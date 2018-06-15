@@ -25,14 +25,19 @@ Other
 
 #oauth
 #supportedLocales("gadget.common")
+#supportLocales
 <Locale messages="__ATLASSIAN_BASE_URL__/download/resources/com.jtricks.reports-plugin/i18n/messages.xml"/>
 </ModulePrefs>
 <UserPref name="isConfigured" datatype="hidden" default_value="false"/>
 <UserPref name="refresh" datatype="hidden" default_value="false"/>
 <UserPref name="displayName" datatype="hidden" default_value="true"/>
 <UserPref name="useStatusTag" datatype="hidden" default_value="true"/>
+<UserPref name="searchBox" datatype="hidden" default_value="Not changed"/>
 <Content type="html" view="profile,canvas,home">
 <![CDATA[
+#requireResource("com.atlassian.gadgets.publisher:ajs-gadgets")
+#requireResource("com.atlassian.jira.gadgets:jira-global")
+#requireResource("com.atlassian.jira.gadgets:autocomplete")
 #requireResource("com.atlassian.jira.gadgets:common")
 #requireResource("com.jtricks.reports-plugin:reports-plugin-resources")
 #includeResources()
@@ -51,17 +56,15 @@ google.charts.load('current', {'packages':['corechart']});
       config: {
         descriptor: function (args) {
             var gadget = this;
+            //gadgets.window.setTitle("gadget.title");
             var searchParam = args.statType;
             return  {
                 fields: [
-                searchParam,
                 {
-                    userpref: "statType",
-                    label: this.getPrefs().getMsg("gadget.common.stattype.label"),
-                    description: this.getMsg("gadget.common.stattype.description"),
-                    type: "select",
-                    selected: this.getPref("statType"),
-                    options: args.statType.stats
+                    userpref: "searchBox",
+                    label: gadget.getMsg("searchBox.label"),
+                    description: gadget.getMsg("searchBox.description"),
+                    type: "text"
                 },
                 {
                     userpref: "displayName",
@@ -102,15 +105,16 @@ google.charts.load('current', {'packages':['corechart']});
             };
         },
         args: [{
-                key: "statType",
-                ajaxOptions:  "/rest/gadget/1.0/statTypes"
-            }]
+            key: "statType",
+            ajaxOptions:  "/rest/gadget/1.0/statTypes"
+        }]
     },
     view: {
         enableReload: true,
         onResizeAdjustHeight: true,
         template: function(args) {
-           var gadget = this;
+            //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+         var gadget = this;
                     gadget.getView().empty(); // Reset view
                     /*
 					if (gadget.getPref("displayName") == "true")
@@ -121,7 +125,8 @@ google.charts.load('current', {'packages':['corechart']});
 
                     console.log(args.open["total"]);
                     */
-                    
+                    console.log(gadget.getPref("searchBox"));
+
                     function drawChart() {
                       var rows = 30;
                       var data = new google.visualization.DataTable();
@@ -187,11 +192,12 @@ google.charts.load('current', {'packages':['corechart']});
                     console.log("Call to drawChart()");
                     google.charts.setOnLoadCallback(drawChart); 
                     console.log("Completed view statements")
+                    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 },
                 args: [{
-                   key: "open",
-                   ajaxOptions: function() {
-                       return {
+                 key: "open",
+                 ajaxOptions: function() {
+                     return {
                         contentType: 'application/json',
                         url: "/rest/gadget/1.0/currentUser"
                     };

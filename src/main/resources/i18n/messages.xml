@@ -9,4 +9,9 @@
 	<msg name="property.label">Display username?</msg>
 	<msg name="property2.description">Status tag description</msg>
 	<msg name="property2.label">Select status tag</msg>
+
+	<msg name="searchBox.startVal">Blank</msg>
+	<msg name="searchBox.label">Search</msg>
+	<msg name="searchBox.description">FilterID</msg>
+
 </messagebundle>
