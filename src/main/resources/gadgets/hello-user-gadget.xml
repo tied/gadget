@@ -108,17 +108,17 @@ google.charts.load('current', {'packages':['corechart']});
         args: [{
             key: "fav",
             ajaxOptions: function() {
-             return {
+               return {
                 contentType: 'application/json',
                 url: "/rest/api/2/filter/favourite"
             };
         }
     }]
 },
-    view: {
-        enableReload: true,
-        onResizeAdjustHeight: true,
-        template: function(args) {
+view: {
+    enableReload: true,
+    onResizeAdjustHeight: true,
+    template: function(args) {
             //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             var gadget = this;
                     gadget.getView().empty(); // Reset view
@@ -131,22 +131,48 @@ google.charts.load('current', {'packages':['corechart']});
 
                     console.log(args.open["total"]);
                     */
-                    console.log(gadget.getPref("searchBox"));
+                    // get Filter by Name == gadget.getPref("searchBox") 
+                    var filter = "";
+                    var json = args.favFilters;
 
-                    function drawChart() {
-                      var rows = 30;
-                      var data = new google.visualization.DataTable();
-                      data.addColumn('datetime', 'Date');
-                      data.addColumn('number', 'Closed');
-                      data.addColumn('number', 'Open');
+                    var found = null;
 
-                      var closed = 0;
-                      var closed_status = "Closed";
-                      var open = 0;
-                      var open_status = "Open";
+                    for (var i = 0; i < json.length; i++) {
+                        var element = json[i];
+
+                        if ( element.name == gadget.getPref("searchBox") ) {
+                         filter = element.id;
+                     } 
+                 }
+                 console.log(args.favFilters);
+                 console.log("Found filter: " + filter);
+
+                 // get filter searchURL
+                 var viewURL = "";
+                 AJS.$.ajax({
+                            url: "/rest/api/2/filter/" + filter,
+                            type: 'get',
+                            contentType: "application/json",
+                            dataType: "json",
+                            async: false,
+                            success: function(data) { closed += data["viewUrl"]; }
+                        });
+                 console.log(viewURL);
+
+                 function drawChart() {
+                  var rows = 30;
+                  var data = new google.visualization.DataTable();
+                  data.addColumn('datetime', 'Date');
+                  data.addColumn('number', 'Closed');
+                  data.addColumn('number', 'Open');
+
+                  var closed = 0;
+                  var closed_status = "Closed";
+                  var open = 0;
+                  var open_status = "Open";
                       var time_period = "d"; // d == day, w == week, y == year
                       //set max result
-                      var jql = "filter=" + "&jql=%20createdDate%20>%3D%20startOfDay(-";
+                      var jql = viewURL + "%20AND%20createdDate%20>%3D%20startOfDay(-";
                       // Fullpath: /rest/api/2/search?jql=project%20%3D%20qwe%20AND%20createdDate%20>%3D%20startOfDay(-30d)%20AND%20status%20%3D%20
                       for (var i=rows; i > 0; i--) 
                       {/*
@@ -201,9 +227,9 @@ google.charts.load('current', {'packages':['corechart']});
                     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 },
                 args: [{
-                 key: "open",
-                 ajaxOptions: function() {
-                     return {
+                   key: "favFilters",
+                   ajaxOptions: function() {
+                       return {
                         contentType: 'application/json',
                         url: "/rest/api/2/filter/favourite"
                     };
