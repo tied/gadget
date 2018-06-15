@@ -33,6 +33,7 @@ Other
 <UserPref name="displayName" datatype="hidden" default_value="true"/>
 <UserPref name="useStatusTag" datatype="hidden" default_value="true"/>
 <UserPref name="searchBox" datatype="hidden" default_value="Not changed"/>
+<UserPref name="favouriteFilters" datatype="hidden" default_value=""/>
 <Content type="html" view="profile,canvas,home">
 <![CDATA[
 #requireResource("com.atlassian.gadgets.publisher:ajs-gadgets")
@@ -56,8 +57,8 @@ google.charts.load('current', {'packages':['corechart']});
       config: {
         descriptor: function (args) {
             var gadget = this;
-            //gadgets.window.setTitle("gadget.title");
-            var searchParam = args.statType;
+            console.log(args.fav); //Sucessfully loaded favourite filters
+
             return  {
                 fields: [
                 {
@@ -105,16 +106,21 @@ google.charts.load('current', {'packages':['corechart']});
             };
         },
         args: [{
-            key: "statType",
-            ajaxOptions:  "/rest/gadget/1.0/statTypes"
-        }]
-    },
+            key: "fav",
+            ajaxOptions: function() {
+             return {
+                contentType: 'application/json',
+                url: "/rest/api/2/filter/favourite"
+            };
+        }
+    }]
+},
     view: {
         enableReload: true,
         onResizeAdjustHeight: true,
         template: function(args) {
             //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-         var gadget = this;
+            var gadget = this;
                     gadget.getView().empty(); // Reset view
                     /*
 					if (gadget.getPref("displayName") == "true")
@@ -140,10 +146,10 @@ google.charts.load('current', {'packages':['corechart']});
                       var open_status = "Open";
                       var time_period = "d"; // d == day, w == week, y == year
                       //set max result
-                      var jql = "project%20%3D%20project%20AND%20createdDate%20>%3D%20startOfDay(-";
+                      var jql = "filter=" + "&jql=%20createdDate%20>%3D%20startOfDay(-";
                       // Fullpath: /rest/api/2/search?jql=project%20%3D%20qwe%20AND%20createdDate%20>%3D%20startOfDay(-30d)%20AND%20status%20%3D%20
                       for (var i=rows; i > 0; i--) 
-                      {
+                      {/*
                         AJS.$.ajax({
                             url: "/rest/api/2/search?jql=" + jql + i.toString() + "d)" + "%20AND%20status%20%3D%20" + closed_status + "&maxResults=0",
                             type: 'get',
@@ -160,7 +166,7 @@ google.charts.load('current', {'packages':['corechart']});
                             dataType: "json",
                             async: false,
                             success: function(data) { open += data["total"]; }
-                        });
+                        });*/
                         
                         var d = new Date(new Date().setDate(new Date().getDate() - i));
                         data.addRow([d, closed, open ]);
@@ -199,7 +205,7 @@ google.charts.load('current', {'packages':['corechart']});
                  ajaxOptions: function() {
                      return {
                         contentType: 'application/json',
-                        url: "/rest/gadget/1.0/currentUser"
+                        url: "/rest/api/2/filter/favourite"
                     };
                 }
             },
