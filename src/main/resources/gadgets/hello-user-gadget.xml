@@ -107,7 +107,7 @@ google.charts.load('current', {'packages':['corechart']});
         args: [{
             key: "fav",
             ajaxOptions: function() {
-             return {
+               return {
                 contentType: 'application/json',
                 url: "/rest/api/2/filter/favourite"
             };
@@ -129,10 +129,10 @@ view: {
                             var element = json[i];
 
                             if ( element.name == gadget.getPref("searchBox") ) {
-                               filter = element.id;
-                           } 
-                       }
-                       console.log("Found filter: " + filter);
+                             filter = element.id;
+                         } 
+                     }
+                     console.log("Found filter: " + filter);
 
 
                  // get filter searchURL and extract JQL-search param from filter
@@ -143,7 +143,7 @@ view: {
                     contentType: "application/json",
                     dataType: "json",
                     async: false,
-                    success: function(data) { viewURL += data["searchUrl"]; }
+                    success: function(data) { viewURL = data["searchUrl"]; }
                 });
                  var jql = viewURL.split("search?jql=")[1];
                  console.log("jql search: " + jql);
@@ -156,36 +156,34 @@ view: {
                     data.addColumn('number', 'Closed');
                     data.addColumn('number', 'Open');
 
-                    var closed = 0;
-                    var closed_status = "Closed";
-                    var open = 0;
-                    var open_status = "Open";
+                    
                       var time_period = "d"; // d == day, w == week, y == year
                       
 
-                     
-                      // Fullpath: /rest/api/2/search?jql=project%20%3D%20qwe%20AND%20createdDate%20>%3D%20startOfDay(-30d)%20AND%20status%20%3D%20
-                      console.log("/rest/api/2/search?jql=" + jql + "%20AND%20createdDate%20<%3D%20startOfDay(-30" + gadget.getPref("timeUnit") + ")" + "&maxResults=0");
-                      console.log("/rest/api/2/search?jql=" + jql + "%20AND%20resolutiondate%20<%3D%20startOfDay(-30" + gadget.getPref("timeUnit") + ")" + "&maxResults=0");
                       for (var i=rows; i > 0; i--) 
                       {
-                        console.log("iteration: " + i + "  for " + gadget.getPref("timeUnit"));
+                        var closed = 0;
+                        var open = 0;   //      /api/2/searchReq /filter JQL/                                 Issue > startDate                                                 /                   Issue < iterationDate
+                        var opened_url = "/rest/api/2/search?jql=" + jql + "%20AND%20createdDate%20>%3D%20startOfDay(-"    + rows.toString() + gadget.getPref("timeUnit") + ")" + "%20AND%20createdDate%20<%3D%20startOfDay(-"    + i.toString() + gadget.getPref("timeUnit") + ")" + "&maxResults=0";
+                        var closed_url = "/rest/api/2/search?jql=" + jql + "%20AND%20resolutiondate%20>%3D%20startOfDay(-" + rows.toString() + gadget.getPref("timeUnit") + ")" + "%20AND%20resolutiondate%20<%3D%20startOfDay(-" + i.toString() + gadget.getPref("timeUnit") + ")" + "&maxResults=0";
+                        console.log(opened_url);
+                        console.log(closed_url);
                         AJS.$.ajax({
-                            url: "/rest/api/2/search?jql=" + jql + "%20AND%20createdDate%20<%3D%20startOfDay(-" + i.toString() + gadget.getPref("timeUnit") + ")" + "&maxResults=0", //+ "%20AND%20status%20%3D%20" + closed_status + "&maxResults=0",
+                            url: opened_url, //+ "%20AND%20status%20%3D%20" + closed_status + "&maxResults=0",
                             type: 'get',
                             contentType: "application/json",
                             dataType: "json",
                             async: false,
-                            success: function(data) { closed += data["total"]; }
+                            success: function(data) { open = data["total"];  }
                         });
                         
                         AJS.$.ajax({
-                            url: "/rest/api/2/search?jql=" + jql + "%20AND%20resolutiondate%20<%3D%20startOfDay(-" + i.toString() + gadget.getPref("timeUnit") + ")" + "&maxResults=0",// + "%20AND%20status%20%3D%20" + open_status + "&maxResults=0", 
+                            url: closed_url,// + "%20AND%20status%20%3D%20" + open_status + "&maxResults=0", 
                             type: 'get',
                             contentType: "application/json",
                             dataType: "json",
                             async: false,
-                            success: function(data) { open += data["total"]; }
+                            success: function(data) { closed = data["total"]; }
                         });
                         
                         // Add dates to x-Axis
@@ -199,6 +197,8 @@ view: {
                         else
                             date.setYear(date.getYear() - i);
                         data.addRow([date, closed, open ]);
+
+                        console.log("Add row:[" +date.getDate() + " | Closed: " + closed + " | Open :" + open + " ]");
                     }
 
 
@@ -230,9 +230,9 @@ view: {
 
                 },
                 args: [{
-                 key: "favFilters",
-                 ajaxOptions: function() {
-                     return {
+                   key: "favFilters",
+                   ajaxOptions: function() {
+                       return {
                         contentType: 'application/json',
                         url: "/rest/api/2/filter/favourite"
                     };
