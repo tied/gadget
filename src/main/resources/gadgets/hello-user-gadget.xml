@@ -57,7 +57,7 @@ google.charts.load('current', {'packages':['corechart']});
       config: {
         descriptor: function (args) {
             var gadget = this;
-            console.log(args.fav); //Sucessfully loaded favourite filters
+            //console.log(args.fav); //Sucessfully loaded favourite filters
 
             return  {
                 fields: [
@@ -134,9 +134,6 @@ view: {
                     // get Filter by Name == gadget.getPref("searchBox") 
                     var filter = "";
                     var json = args.favFilters;
-
-                    var found = null;
-
                     for (var i = 0; i < json.length; i++) {
                         var element = json[i];
 
@@ -144,10 +141,10 @@ view: {
                          filter = element.id;
                      } 
                  }
-                 console.log(args.favFilters);
                  console.log("Found filter: " + filter);
 
-                 // get filter searchURL
+
+                 // get filter searchURL and extract JQL-search param from filter
                  var viewURL = "";
                  AJS.$.ajax({
                             url: "/rest/api/2/filter/" + filter,
@@ -155,9 +152,11 @@ view: {
                             contentType: "application/json",
                             dataType: "json",
                             async: false,
-                            success: function(data) { closed += data["viewUrl"]; }
+                            success: function(data) { viewURL += data["searchUrl"]; }
                         });
-                 console.log(viewURL);
+                 var jql = viewURL.split("search?jql=")[1];
+                 console.log("jql search: " + jql);
+
 
                  function drawChart() {
                   var rows = 30;
@@ -171,11 +170,13 @@ view: {
                   var open = 0;
                   var open_status = "Open";
                       var time_period = "d"; // d == day, w == week, y == year
-                      //set max result
-                      var jql = viewURL + "%20AND%20createdDate%20>%3D%20startOfDay(-";
+                      
+
+                      // REST-request to server
+                      jql = jql + "%20AND%20createdDate%20>%3D%20startOfDay(-";
                       // Fullpath: /rest/api/2/search?jql=project%20%3D%20qwe%20AND%20createdDate%20>%3D%20startOfDay(-30d)%20AND%20status%20%3D%20
                       for (var i=rows; i > 0; i--) 
-                      {/*
+                      {
                         AJS.$.ajax({
                             url: "/rest/api/2/search?jql=" + jql + i.toString() + "d)" + "%20AND%20status%20%3D%20" + closed_status + "&maxResults=0",
                             type: 'get',
@@ -192,8 +193,9 @@ view: {
                             dataType: "json",
                             async: false,
                             success: function(data) { open += data["total"]; }
-                        });*/
+                        });
                         
+                        // Add dates to x-Axis
                         var d = new Date(new Date().setDate(new Date().getDate() - i));
                         data.addRow([d, closed, open ]);
                     }
