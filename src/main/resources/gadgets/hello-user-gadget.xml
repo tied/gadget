@@ -30,7 +30,7 @@ Other
 </ModulePrefs>
 <UserPref name="isConfigured" datatype="hidden" default_value="false"/>
 <UserPref name="refresh" datatype="hidden" default_value="false"/>
-<UserPref name="displayName" datatype="hidden" default_value="true"/>
+<UserPref name="timeUnitsBox" datatype="hidden" default_value="true"/>
 <UserPref name="useStatusTag" datatype="hidden" default_value="true"/>
 <UserPref name="searchBox" datatype="hidden" default_value="Not changed"/>
 <UserPref name="favouriteFilters" datatype="hidden" default_value=""/>
@@ -68,21 +68,11 @@ google.charts.load('current', {'packages':['corechart']});
                     type: "text"
                 },
                 {
-                    userpref: "displayName",
-                    label: gadget.getMsg("property.label"),
-                    description:gadget.getMsg("property.description"),
-                    type: "select",
-                    selected: gadget.getPref("displayName"),
-                    options:[
-                    {
-                        label:"Show graph",
-                        value:"true"
-                    },
-                    {
-                        label:"Show text",
-                        value:"false"
-                    }
-                    ]
+                    userpref: "timeUnitsBox",
+                    label: gadget.getMsg("timeUnitsBox.label"),
+                    description:gadget.getMsg("timeUnitsBox.description"),
+                    type: "text",
+                    selected: gadget.getPref("timeUnitsBox")
                 },
                 {
                     userpref: "useStatusTag",
@@ -108,7 +98,7 @@ google.charts.load('current', {'packages':['corechart']});
         args: [{
             key: "fav",
             ajaxOptions: function() {
-               return {
+             return {
                 contentType: 'application/json',
                 url: "/rest/api/2/filter/favourite"
             };
@@ -122,53 +112,45 @@ view: {
             //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             var gadget = this;
                     gadget.getView().empty(); // Reset view
-                    /*
-					if (gadget.getPref("displayName") == "true")
 
-                    AJS.log("Message to termnial");
-                    console.log("user: " + getCurrentUserName());
-                    console.log(getFieldInJasonAtURL(gadget));
-
-                    console.log(args.open["total"]);
-                    */
-                    // get Filter by Name == gadget.getPref("searchBox") 
                     var filter = "";
-                    var json = args.favFilters;
-                    for (var i = 0; i < json.length; i++) {
-                        var element = json[i];
+                    if ( gadget.getPref("searchBox") != "" ) {
+                        var json = args.favFilters;
+                        for (var i = 0; i < json.length; i++) {
+                            var element = json[i];
 
-                        if ( element.name == gadget.getPref("searchBox") ) {
-                         filter = element.id;
-                     } 
-                 }
-                 console.log("Found filter: " + filter);
+                            if ( element.name == gadget.getPref("searchBox") ) {
+                               filter = element.id;
+                           } 
+                       }
+                       console.log("Found filter: " + filter);
 
 
                  // get filter searchURL and extract JQL-search param from filter
                  var viewURL = "";
                  AJS.$.ajax({
-                            url: "/rest/api/2/filter/" + filter,
-                            type: 'get',
-                            contentType: "application/json",
-                            dataType: "json",
-                            async: false,
-                            success: function(data) { viewURL += data["searchUrl"]; }
-                        });
+                    url: "/rest/api/2/filter/" + filter,
+                    type: 'get',
+                    contentType: "application/json",
+                    dataType: "json",
+                    async: false,
+                    success: function(data) { viewURL += data["searchUrl"]; }
+                });
                  var jql = viewURL.split("search?jql=")[1];
                  console.log("jql search: " + jql);
 
 
                  function drawChart() {
-                  var rows = 30;
-                  var data = new google.visualization.DataTable();
-                  data.addColumn('datetime', 'Date');
-                  data.addColumn('number', 'Closed');
-                  data.addColumn('number', 'Open');
+                    var rows = gadget.getPref("timeUnitsBox");
+                    var data = new google.visualization.DataTable();
+                    data.addColumn('datetime', 'Date');
+                    data.addColumn('number', 'Closed');
+                    data.addColumn('number', 'Open');
 
-                  var closed = 0;
-                  var closed_status = "Closed";
-                  var open = 0;
-                  var open_status = "Open";
+                    var closed = 0;
+                    var closed_status = "Closed";
+                    var open = 0;
+                    var open_status = "Open";
                       var time_period = "d"; // d == day, w == week, y == year
                       
 
@@ -219,19 +201,19 @@ view: {
               chart.draw(data, options);
           }
 
-
-
-
                     gadget.getView().append("<div id='chart_div' align='center' style='width: 98%; height: 99%'/>"); // Append element to doc, 'curve_chart' set in reports-plugin.js
                     console.log("Call to drawChart()");
                     google.charts.setOnLoadCallback(drawChart); 
                     console.log("Completed view statements")
+
+                }
                     // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
                 },
                 args: [{
-                   key: "favFilters",
-                   ajaxOptions: function() {
-                       return {
+                 key: "favFilters",
+                 ajaxOptions: function() {
+                     return {
                         contentType: 'application/json',
                         url: "/rest/api/2/filter/favourite"
                     };
