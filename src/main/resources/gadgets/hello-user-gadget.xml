@@ -31,7 +31,7 @@ Other
 <UserPref name="isConfigured" datatype="hidden" default_value="false"/>
 <UserPref name="refresh" datatype="hidden" default_value="false"/>
 <UserPref name="timeUnitsBox" datatype="hidden" default_value="true"/>
-<UserPref name="useStatusTag" datatype="hidden" default_value="true"/>
+<UserPref name="timeUnit" datatype="hidden" default_value="d"/>
 <UserPref name="searchBox" datatype="hidden" default_value="Not changed"/>
 <UserPref name="favouriteFilters" datatype="hidden" default_value=""/>
 <Content type="html" view="profile,canvas,home">
@@ -65,29 +65,38 @@ google.charts.load('current', {'packages':['corechart']});
                     userpref: "searchBox",
                     label: gadget.getMsg("searchBox.label"),
                     description: gadget.getMsg("searchBox.description"),
-                    type: "text"
+                    type: "text",
+                    selected: gadget.getMsg("searchBox.startVal")
                 },
                 {
                     userpref: "timeUnitsBox",
                     label: gadget.getMsg("timeUnitsBox.label"),
                     description:gadget.getMsg("timeUnitsBox.description"),
                     type: "text",
-                    selected: gadget.getPref("timeUnitsBox")
+                    selected: gadget.getPref("timeUnitsBox.startVal")
                 },
                 {
-                    userpref: "useStatusTag",
-                    label: gadget.getMsg("property2.label"),
-                    description:gadget.getMsg("property2.description"),
+                    userpref: "timeUnit",
+                    label: gadget.getMsg("timeUnit.label"),
+                    description:gadget.getMsg("timeUnit.description"),
                     type: "select",
-                    selected: gadget.getPref("useStatusTag"),
+                    selected: gadget.getPref("timeUnit.startVal"),
                     options:[
                     {
-                        label:"Open",
-                        value:"true"
+                        label:"Day",
+                        value:"d"
                     },
                     {
-                        label:"Closed",
-                        value:"false"
+                        label:"Week",
+                        value:"w"
+                    },
+                    {
+                        label:"Month",
+                        value:"m"
+                    },
+                    {
+                        label:"Year",
+                        value:"y"
                     }
                     ]
                 },
@@ -159,8 +168,9 @@ view: {
                       // Fullpath: /rest/api/2/search?jql=project%20%3D%20qwe%20AND%20createdDate%20>%3D%20startOfDay(-30d)%20AND%20status%20%3D%20
                       for (var i=rows; i > 0; i--) 
                       {
+                        console.log("iteration: " + i + "  for " + gadget.getPref("timeUnit"));
                         AJS.$.ajax({
-                            url: "/rest/api/2/search?jql=" + jql + i.toString() + "d)" + "%20AND%20status%20%3D%20" + closed_status + "&maxResults=0",
+                            url: "/rest/api/2/search?jql=" + jql + i.toString() + "d" + ")" + "%20AND%20status%20%3D%20" + closed_status + "&maxResults=0",
                             type: 'get',
                             contentType: "application/json",
                             dataType: "json",
@@ -169,7 +179,7 @@ view: {
                         });
                         
                         AJS.$.ajax({
-                            url: "/rest/api/2/search?jql=" + jql + i.toString() + "d)" + "%20AND%20status%20%3D%20" + open_status + "&maxResults=0", 
+                            url: "/rest/api/2/search?jql=" + jql + i.toString() + "d" + ")" + "%20AND%20status%20%3D%20" + open_status + "&maxResults=0", 
                             type: 'get',
                             contentType: "application/json",
                             dataType: "json",
