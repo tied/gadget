@@ -5,8 +5,8 @@
                  description="__MSG_gadget.user.description__"
                  author="Anders Vrethem"
                  author_email="avrethem@gmail.com"
-                 screenshot='#staticResourceUrl("com.avrethem.issues-metric:hello-user-gadget", "screenshot.png")'
-                 thumbnail='#staticResourceUrl("com.avrethem.issues-metric:hello-user-gadget", "thumbnail.png")'
+                 screenshot='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-gadget", "screenshot.png")'
+                 thumbnail='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-gadget", "thumbnail.png")'
                  height="150"
     >
         <!--                            groupID.artifactID:gadget-key                                         -->
