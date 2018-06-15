@@ -3,10 +3,10 @@
 <ModulePrefs title="__MSG_gadget.user.title__"
 title_url="__MSG_gadget.user.title.url__"
 description="__MSG_gadget.user.description__"
-author="Jobin Kuruvilla"
-author_email="author@gmail.com"
-screenshot='#staticResourceUrl("com.jtricks.reports-plugin:reports-plugin-resources", "screenshot.png")'
-thumbnail='#staticResourceUrl("com.jtricks.reports-plugin:reports-plugin-resources", "thumbnail.png")'
+author="Anders Vrethem"
+author_email="avrethem@gmail.com"
+screenshot='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-resources", "screenshot.png")'
+thumbnail='#staticResourceUrl("com.jtricks.reports-plugin:issues-metric-resources", "thumbnail.png")'
 height="150"
 >
 <Optional feature="gadget-directory">
@@ -40,7 +40,7 @@ Other
 #requireResource("com.atlassian.jira.gadgets:jira-global")
 #requireResource("com.atlassian.jira.gadgets:autocomplete")
 #requireResource("com.atlassian.jira.gadgets:common")
-#requireResource("com.jtricks.reports-plugin:reports-plugin-resources")
+#requireResource("com.avrethem.issues-metric:issues-metric-resources")
 #includeResources()
 
 

@@ -11,7 +11,7 @@
   <!-- add our i18n resource -->
   <resource type="i18n" name="i18n" location="reports-plugin"/>
   <!-- add our web resources -->
-  <web-resource key="reports-plugin-resources" name="reports-plugin Web Resources">
+  <web-resource key="issues-metric-resources" name="reports-plugin Web Resources">
     <dependency>com.atlassian.auiplugin:ajs</dependency>
     <!-- JavaScript files -->
     <resource type="download" name="reports-plugin.js" location="/js/reports-plugin.js"><property key="content-type" value="text/javascript"/></resource>
@@ -141,11 +141,11 @@
     </properties>
   </report>
   <!-- GADGETS -->
-  <gadget key="hello-gadget" name="Hello Gadget" location="gadgets/hello-gadget.xml">
+  <gadget key="hello-gadget" name="Hello gad" location="gadgets/hello-gadget.xml">
     <description>Hello Gadget!</description>
   </gadget>
-  <gadget key="hello-user-gadget" name="Hello User Gadget" location="gadgets/hello-user-gadget.xml">
-    <description>Displays user name in the gadget</description>
+  <gadget key="hello-user-gadget" name="Issues metric graph" location="gadgets/issues-graph-gadget.xml">
+    <description>Graph over issues</description>
   </gadget>
   <resource type="download" name="i18n/messages.xml" location="i18n/messages.xml">
     <param name="content-type" value="text/xml; charset=UTF-8"/>
