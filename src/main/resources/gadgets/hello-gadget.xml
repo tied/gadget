@@ -6,7 +6,7 @@
                  author="Jobin Kuruvilla"
 		 		 author_email="author@gmail.com"
                  screenshot='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-resources", "screenshot.png")'
-                 thumbnail='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-resources", "thumbnail.png")'
+                 thumbnail='#staticResourceUrl("com.avrethem.reports-plugin:issues-metric-resources", "thumbnail.png")'
 		 		 height="150">
         <Optional feature="gadget-directory">
             <Param name="categories">
@@ -14,7 +14,7 @@
             </Param>
         </Optional>
 	<Require feature="dynamic-height"/>
-	<Locale messages="__ATLASSIAN_BASE_URL__/download/resources/com.avretem.rissues-metric/i18n/messages.xml"/>
+	<Locale messages="__ATLASSIAN_BASE_URL__/download/resources/com.jtricks.reports-plugin/i18n/messages.xml"/>
     </ModulePrefs>
     <Content type="html" view="profile">
         <![CDATA[

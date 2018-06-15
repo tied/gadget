@@ -1,41 +1,40 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
-<ModulePrefs title="__MSG_gadget.user.title__"
-title_url="__MSG_gadget.user.title.url__"
-description="__MSG_gadget.user.description__"
-author="Anders Vrethem"
-author_email="avrethem@gmail.com"
-screenshot='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-resources", "screenshot.png")'
-thumbnail='#staticResourceUrl("com.jtricks.reports-plugin:issues-metric-resources", "thumbnail.png")'
-height="150"
->
-<Optional feature="gadget-directory">
-<Param name="categories">
-JIRA
-Other
-</Param>
-</Optional>
-<Require feature="oauthpopup" />
-<Require feature="dynamic-height"/>
-<Require feature="setprefs" />
-<Require feature="views" />
-<Require feature="oauthpopup" />
-<Optional feature='auth-refresh' />
-<Optional feature="atlassian.util" />
+    <ModulePrefs title="__MSG_gadget.user.title__"
+                 title_url="__MSG_gadget.user.title.url__"
+                 description="__MSG_gadget.user.description__"
+                 author="Anders Vrethem"
+                 author_email="avrethem@gmail.com"
+                 screenshot='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-gadget", "images/screenshot.png")'
+                 thumbnail='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-gadget", "images/thumbnail.png")'
+                 height="150"
+    >
+        <Optional feature="gadget-directory">
+            <Param name="categories">
+                JIRA
+                Other
+            </Param>
+        </Optional>
+        <Require feature="oauthpopup" />
+        <Require feature="dynamic-height"/>
+        <Require feature="setprefs" />
+        <Require feature="views" />
+        <Require feature="oauthpopup" />
+        <Optional feature='auth-refresh' />
+        <Optional feature="atlassian.util" />
 
-#oauth
-#supportedLocales("gadget.common")
-#supportLocales
-<Locale messages="__ATLASSIAN_BASE_URL__/download/resources/com.jtricks.reports-plugin/i18n/messages.xml"/>
-</ModulePrefs>
-<UserPref name="isConfigured" datatype="hidden" default_value="false"/>
-<UserPref name="refresh" datatype="hidden" default_value="false"/>
-<UserPref name="timeUnitsBox" datatype="hidden" default_value="true"/>
-<UserPref name="timeUnit" datatype="hidden" default_value="d"/>
-<UserPref name="searchBox" datatype="hidden" default_value="Not changed"/>
-<UserPref name="favouriteFilters" datatype="hidden" default_value=""/>
-<Content type="html" view="profile,canvas,home">
-<![CDATA[
+        #oauth
+        #supportedLocales("gadget.common")
+        #supportLocales
+        <Locale messages="__ATLASSIAN_BASE_URL__/download/resources/com.avrethem.issues-metric/i18n/messages.xml"/>
+    </ModulePrefs>
+    <UserPref name="isConfigured" datatype="hidden" default_value="false"/>
+    <UserPref name="refresh" datatype="hidden" default_value="false"/>
+    <UserPref name="timeUnitsBox" datatype="hidden" default_value="true"/>
+    <UserPref name="timeUnit" datatype="hidden" default_value="d"/>
+    <UserPref name="searchBox" datatype="hidden" default_value="Not changed"/>
+    <Content type="html" view="profile">
+        <![CDATA[
 #requireResource("com.atlassian.gadgets.publisher:ajs-gadgets")
 #requireResource("com.atlassian.jira.gadgets:jira-global")
 #requireResource("com.atlassian.jira.gadgets:autocomplete")
@@ -103,22 +102,22 @@ google.charts.load('current', {'packages':['corechart']});
                 AJS.gadget.fields.nowConfigured()
                 ]
             };
-        },
+        }, // End descriptor
         args: [{
             key: "fav",
             ajaxOptions: function() {
-               return {
+             return {
                 contentType: 'application/json',
                 url: "/rest/api/2/filter/favourite"
             };
         }
-    }]
-},
+    }] // End args
+}, // End config
 view: {
     enableReload: true,
     onResizeAdjustHeight: true,
     template: function(args) {
-            //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+            // Start template >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             var gadget = this;
                     gadget.getView().empty(); // Reset view
 
@@ -129,10 +128,10 @@ view: {
                             var element = json[i];
 
                             if ( element.name == gadget.getPref("searchBox") ) {
-                             filter = element.id;
-                         } 
-                     }
-                     console.log("Found filter: " + filter);
+                               filter = element.id;
+                           }
+                       }
+                       console.log("Found filter: " + filter);
 
 
                  // get filter searchURL and extract JQL-search param from filter
@@ -156,18 +155,18 @@ view: {
                     data.addColumn('number', 'Closed');
                     data.addColumn('number', 'Open');
 
-                    
-                      var time_period = "d"; // d == day, w == week, y == year
-                      
 
-                      for (var i=rows; i > 0; i--) 
+                      var time_period = "d"; // d == day, w == week, y == year
+
+
+                      for (var i=rows; i > 0; i--)
                       {
                         var closed = 0;
                         var open = 0;   //      /api/2/searchReq /filter JQL/                                 Issue > startDate                                                 /                   Issue < iterationDate
                         var opened_url = "/rest/api/2/search?jql=" + jql + "%20AND%20createdDate%20>%3D%20startOfDay(-"    + rows.toString() + gadget.getPref("timeUnit") + ")" + "%20AND%20createdDate%20<%3D%20startOfDay(-"    + i.toString() + gadget.getPref("timeUnit") + ")" + "&maxResults=0";
                         var closed_url = "/rest/api/2/search?jql=" + jql + "%20AND%20resolutiondate%20>%3D%20startOfDay(-" + rows.toString() + gadget.getPref("timeUnit") + ")" + "%20AND%20resolutiondate%20<%3D%20startOfDay(-" + i.toString() + gadget.getPref("timeUnit") + ")" + "&maxResults=0";
-                        console.log(opened_url);
-                        console.log(closed_url);
+                        //console.log(opened_url);
+                        //console.log(closed_url);
                         AJS.$.ajax({
                             url: opened_url, //+ "%20AND%20status%20%3D%20" + closed_status + "&maxResults=0",
                             type: 'get',
@@ -176,16 +175,16 @@ view: {
                             async: false,
                             success: function(data) { open = data["total"];  }
                         });
-                        
+
                         AJS.$.ajax({
-                            url: closed_url,// + "%20AND%20status%20%3D%20" + open_status + "&maxResults=0", 
+                            url: closed_url,// + "%20AND%20status%20%3D%20" + open_status + "&maxResults=0",
                             type: 'get',
                             contentType: "application/json",
                             dataType: "json",
                             async: false,
                             success: function(data) { closed = data["total"]; }
                         });
-                        
+
                         // Add dates to x-Axis
                         var date = new Date();
                         if ( gadget.getPref("timeUnit") == "d" )
@@ -218,21 +217,21 @@ view: {
               var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
 
               chart.draw(data, options);
-          }
+          } // End drawChart()
 
                     gadget.getView().append("<div id='chart_div' align='center' style='width: 98%; height: 99%'/>"); // Append element to doc, 'curve_chart' set in reports-plugin.js
                     console.log("Call to drawChart()");
-                    google.charts.setOnLoadCallback(drawChart); 
+                    google.charts.setOnLoadCallback(drawChart);
                     console.log("Completed view statements")
 
                 }
-                    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-                },
+
+                },// End template <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 args: [{
-                   key: "favFilters",
-                   ajaxOptions: function() {
-                       return {
+                 key: "favFilters",
+                 ajaxOptions: function() {
+                     return {
                         contentType: 'application/json',
                         url: "/rest/api/2/filter/favourite"
                     };
@@ -246,12 +245,12 @@ view: {
                         url: "/rest/gadget/1.0/currentUser"
                     };
                 }
-            }]
-        }
-    });
-})();
+            }] // End args
+        } // End view
+    }); // End gadget
+})(); // End function
 </script>
 ]]>
-</Content>
+    </Content>
 </Module>
 

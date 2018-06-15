@@ -9,7 +9,7 @@
         <name>Anders Vrethem</name>
         <url>None/</url>
     </organization>
-    <name>reports-plugin</name>
+    <name>issues-metric</name>
     <description>This is the com.avrethem:issues-metric plugin for Atlassian JIRA.</description>
     <packaging>atlassian-plugin</packaging>
     <dependencies>
