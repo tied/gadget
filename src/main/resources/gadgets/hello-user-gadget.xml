@@ -51,8 +51,18 @@ google.charts.load('current', {'packages':['corechart']});
       config: {
         descriptor: function (args) {
             var gadget = this;
+            var searchParam = args.statType;
             return  {
                 fields: [
+                searchParam,
+                {
+                    userpref: "statType",
+                    label: this.getPrefs().getMsg("gadget.common.stattype.label"),
+                    description: this.getMsg("gadget.common.stattype.description"),
+                    type: "select",
+                    selected: this.getPref("statType"),
+                    options: args.statType.stats
+                },
                 {
                     userpref: "displayName",
                     label: gadget.getMsg("property.label"),
@@ -90,13 +100,17 @@ google.charts.load('current', {'packages':['corechart']});
                 AJS.gadget.fields.nowConfigured()
                 ]
             };
-        }
+        },
+        args: [{
+                key: "statType",
+                ajaxOptions:  "/rest/gadget/1.0/statTypes"
+            }]
     },
     view: {
         enableReload: true,
         onResizeAdjustHeight: true,
         template: function(args) {
-         var gadget = this;
+           var gadget = this;
                     gadget.getView().empty(); // Reset view
                     /*
 					if (gadget.getPref("displayName") == "true")
@@ -121,7 +135,7 @@ google.charts.load('current', {'packages':['corechart']});
                       var open_status = "Open";
                       var time_period = "d"; // d == day, w == week, y == year
                       //set max result
-                      var jql = "project%20%3D%20qwe%20AND%20createdDate%20>%3D%20startOfDay(-";
+                      var jql = "project%20%3D%20project%20AND%20createdDate%20>%3D%20startOfDay(-";
                       // Fullpath: /rest/api/2/search?jql=project%20%3D%20qwe%20AND%20createdDate%20>%3D%20startOfDay(-30d)%20AND%20status%20%3D%20
                       for (var i=rows; i > 0; i--) 
                       {
@@ -155,16 +169,16 @@ google.charts.load('current', {'packages':['corechart']});
                       lineWidth: 4,
                       hAxis: {
                         title: 'Time'
-                      },
-                      vAxis: {
-                          title: 'Issues'
-                      },
-                  };
+                    },
+                    vAxis: {
+                      title: 'Issues'
+                  },
+              };
 
-                  var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+              var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
 
-                  chart.draw(data, options);
-              }
+              chart.draw(data, options);
+          }
 
 
 
@@ -172,11 +186,12 @@ google.charts.load('current', {'packages':['corechart']});
                     gadget.getView().append("<div id='chart_div' align='center' style='width: 98%; height: 99%'/>"); // Append element to doc, 'curve_chart' set in reports-plugin.js
                     console.log("Call to drawChart()");
                     google.charts.setOnLoadCallback(drawChart); 
+                    console.log("Completed view statements")
                 },
                 args: [{
-                 key: "open",
-                 ajaxOptions: function() {
-                     return {
+                   key: "open",
+                   ajaxOptions: function() {
+                       return {
                         contentType: 'application/json',
                         url: "/rest/gadget/1.0/currentUser"
                     };
