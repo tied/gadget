@@ -191,11 +191,11 @@ view: {
                         // Add dates to x-Axis
                         var date = new Date();
                         if ( gadget.getPref("timeUnit") == "d" )
-                            date.setDay( date.getDate() - i );
+                            date.setDate(date.getDate() - i);
                         else if ( gadget.getPref("timeUnit") == "w" )
-                            date.setDay( date.getDate() - i*7 );
+                            date.setDate(date.getDate() - i*7);
                         else if ( gadget.getPref("timeUnit") == "m" )
-                            date.setMonth( date.getMonth() - i );
+                            date.setMonth(date.getMonth() - i);
                         else
                             date.setYear(date.getYear() - i);
                         data.addRow([date, closed, open ]);
