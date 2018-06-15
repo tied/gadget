@@ -1,10 +1,10 @@
 <messagebundle>
-	<msg name="gadget.title">Hello Gadget</msg>
-	<msg name="gadget.title.url">http://www.j-tricks.com</msg>
-	<msg name="gadget.description">Example Gadget from J-Tricks</msg>
-	<msg name="gadget.user.title">Hello User Gadget</msg>
-	<msg name="gadget.user.title.url">http://www.j-tricks.com</msg>
-	<msg name="gadget.user.description">Example Gadget that displays user name, from J-Tricks</msg>
+	<msg name="gadget.title">Closed vs Open issues</msg>
+	<msg name="gadget.title.url">None</msg>
+	<msg name="gadget.description">Google-line graph for closed vs open issues</msg>
+	<msg name="gadget.user.title">Closed vs Open issues</msg>
+	<msg name="gadget.user.title.url">None</msg>
+	<msg name="gadget.user.description">Google-line graph for closed vs open issues</msg>
 
 	<msg name="searchBox.startVal">Blank</msg>
 	<msg name="searchBox.label">Filter name:</msg>
