@@ -163,14 +163,15 @@ view: {
                       var time_period = "d"; // d == day, w == week, y == year
                       
 
-                      // REST-request to server
-                      jql = jql + "%20AND%20createdDate%20>%3D%20startOfDay(-";
+                     
                       // Fullpath: /rest/api/2/search?jql=project%20%3D%20qwe%20AND%20createdDate%20>%3D%20startOfDay(-30d)%20AND%20status%20%3D%20
+                      console.log("/rest/api/2/search?jql=" + jql + "%20AND%20createdDate%20<%3D%20startOfDay(-30" + gadget.getPref("timeUnit") + ")" + "&maxResults=0");
+                      console.log("/rest/api/2/search?jql=" + jql + "%20AND%20resolutiondate%20<%3D%20startOfDay(-30" + gadget.getPref("timeUnit") + ")" + "&maxResults=0");
                       for (var i=rows; i > 0; i--) 
                       {
                         console.log("iteration: " + i + "  for " + gadget.getPref("timeUnit"));
                         AJS.$.ajax({
-                            url: "/rest/api/2/search?jql=" + jql + i.toString() + "d" + ")" + "%20AND%20status%20%3D%20" + closed_status + "&maxResults=0",
+                            url: "/rest/api/2/search?jql=" + jql + "%20AND%20createdDate%20<%3D%20startOfDay(-" + i.toString() + gadget.getPref("timeUnit") + ")" + "&maxResults=0", //+ "%20AND%20status%20%3D%20" + closed_status + "&maxResults=0",
                             type: 'get',
                             contentType: "application/json",
                             dataType: "json",
@@ -179,7 +180,7 @@ view: {
                         });
                         
                         AJS.$.ajax({
-                            url: "/rest/api/2/search?jql=" + jql + i.toString() + "d" + ")" + "%20AND%20status%20%3D%20" + open_status + "&maxResults=0", 
+                            url: "/rest/api/2/search?jql=" + jql + "%20AND%20resolutiondate%20<%3D%20startOfDay(-" + i.toString() + gadget.getPref("timeUnit") + ")" + "&maxResults=0",// + "%20AND%20status%20%3D%20" + open_status + "&maxResults=0", 
                             type: 'get',
                             contentType: "application/json",
                             dataType: "json",
@@ -188,8 +189,16 @@ view: {
                         });
                         
                         // Add dates to x-Axis
-                        var d = new Date(new Date().setDate(new Date().getDate() - i));
-                        data.addRow([d, closed, open ]);
+                        var date = new Date();
+                        if ( gadget.getPref("timeUnit") == "d" )
+                            date.setDay( date.getDate() - i );
+                        else if ( gadget.getPref("timeUnit") == "w" )
+                            date.setDay( date.getDate() - i*7 );
+                        else if ( gadget.getPref("timeUnit") == "m" )
+                            date.setMonth( date.getMonth() - i );
+                        else
+                            date.setYear(date.getYear() - i);
+                        data.addRow([date, closed, open ]);
                     }
 
 
