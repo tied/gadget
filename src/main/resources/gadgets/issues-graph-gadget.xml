@@ -33,7 +33,7 @@ Other
 <UserPref name="refresh" datatype="hidden" default_value="false"/>
 <UserPref name="timeUnitsBox" datatype="hidden" default_value="30"/>
 <UserPref name="timeUnit" datatype="hidden" default_value="d"/>
-<UserPref name="configNumber" datatype="hidden" default_value="1"/>
+<UserPref name="isCumulative" datatype="hidden" default_value="false"/>
 <UserPref name="filterId" datatype="hidden" />
 
 <Content type="html" view="profile,canvas">
@@ -65,18 +65,11 @@ google.charts.load('current', {'packages':['corechart']});
                 fields: [
                 filterPicker,
                 {
-                    userpref: "timeUnitsBox",
-                    label: gadget.getMsg("timeUnitsBox.label"),
-                    description:gadget.getMsg("timeUnitsBox.description"),
-                    type: "text",
-                    value: gadget.getMsg("timeUnitsBox.startVal")
-                },
-                {
                     userpref: "timeUnit",
                     label: gadget.getMsg("timeUnit.label"),
                     description:gadget.getMsg("timeUnit.description"),
                     type: "select",
-                    selected: gadget.getPref("timeUnit.startVal"),
+                    selected: gadget.getMsg("timeUnit.startVal"),
                     options:[
                     {
                         label:"Day",
@@ -93,6 +86,30 @@ google.charts.load('current', {'packages':['corechart']});
                     {
                         label:"Year",
                         value:"y"
+                    }
+                    ]
+                },
+                {
+                    userpref: "timeUnitsBox",
+                    label: gadget.getMsg("timeUnitsBox.label"),
+                    description:gadget.getMsg("timeUnitsBox.description"),
+                    type: "text",
+                    value: gadget.getMsg("timeUnitsBox.startVal")
+                },
+                {
+                    userpref: "isCumulative",
+                    label: gadget.getMsg("isCumulative.label"),
+                    description: gadget.getMsg("isCumulative.description"),
+                    type: "select",
+                    selected: gadget.getMsg("isCumulative.startVal"),
+                    options:[
+                    {
+                        label: "True",
+                        value: "true"
+                    },
+                    {
+                        label: "False",
+                        value: "false"
                     }
                     ]
                 },
@@ -140,6 +157,18 @@ view: {
 
                       for (var i=rows; i >= 0; i--)
                       {
+                        // Get current date, skip weekends 
+                        var date = new Date();
+                        if ( gadget.getPref("timeUnit") == "d" && (Math.abs(date.getDay() -i) == 6 || Math.abs(date.getDay() -i) == 0) )
+                            continue;
+                        else if ( gadget.getPref("timeUnit") == "d" )
+                            date.setDate(date.getDate() - i);
+                        else if ( gadget.getPref("timeUnit") == "w" )
+                            date.setDate(date.getDate() - i*7);
+                        else if ( gadget.getPref("timeUnit") == "m" )
+                            date.setMonth(date.getMonth() - i);
+                        else
+                            date.setYear(date.getYear() - i);
 
                         var closed = 0;
                         var open = 0;   
@@ -147,12 +176,12 @@ view: {
                         var closed_url = "/rest/api/2/search?jql=" + jql;
                         if (! jql.includes("duedate")) {
                         //                    (      Issue > startDate                  )                                                   +                              (             Issue < iterationDate            )
-                            opened_url += "%20AND%20createdDate%20>%3D%20startOfDay(-"   +rows.toString() + gadget.getPref("timeUnit")+")"  +  "%20AND%20createdDate%20<%3D%20startOfDay(-"   +i.toString()+gadget.getPref("timeUnit")+")";
-                            closed_url += "%20AND%20resolutiondate%20>%3D%20startOfDay(-"+rows.toString() + gadget.getPref("timeUnit")+")"  +  "%20AND%20resolutiondate%20<%3D%20startOfDay(-"+i.toString()+gadget.getPref("timeUnit")+")";
-                        }
-                        
-                        console.log(opened_url);
-                        console.log(closed_url);
+                        opened_url += "%20AND%20createdDate%20>%3D%20startOfDay(-"   +rows.toString() + gadget.getPref("timeUnit")+")"  +  "%20AND%20createdDate%20<%3D%20startOfDay(-"   +i.toString()+gadget.getPref("timeUnit")+")";
+                        closed_url += "%20AND%20resolutiondate%20>%3D%20startOfDay(-"+rows.toString() + gadget.getPref("timeUnit")+")"  +  "%20AND%20resolutiondate%20<%3D%20startOfDay(-"+i.toString()+gadget.getPref("timeUnit")+")";
+                    }
+
+                        //console.log(opened_url);
+                        //console.log(closed_url);
                         AJS.$.ajax({
                             url: opened_url + "&maxResults=0", // Reduce max results
                             type: 'get',
@@ -171,19 +200,11 @@ view: {
                             success: function(data) { closed = data["total"]; }
                         });
 
-                        // Add dates to x-Axis
-                        var date = new Date();
-                        if ( gadget.getPref("timeUnit") == "d" )
-                            date.setDate(date.getDate() - i);
-                        else if ( gadget.getPref("timeUnit") == "w" )
-                            date.setDate(date.getDate() - i*7);
-                        else if ( gadget.getPref("timeUnit") == "m" )
-                            date.setMonth(date.getMonth() - i);
-                        else
-                            date.setYear(date.getYear() - i);
-                        data.addRow([date, closed, open ]);
+                        if ( gadget.getPref("isCumulative") == "false")
+                            open -= closed;
 
                         console.log("Add row:[" +date.getDate() + " | Closed: " + closed + " | Open :" + open + " ]");
+                        data.addRow([date, closed, open ]);
                     }
 
 
@@ -193,7 +214,7 @@ view: {
                       legend: { position: 'bottom' },
                       lineWidth: 4,
                       hAxis: {
-                        title: 'Time'
+                        title: 'Time',
                     },
                     vAxis: {
                       title: 'Issues'
@@ -215,9 +236,9 @@ view: {
 
                 },// End template <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 args: [{
-                 key: "favFilters",
-                 ajaxOptions: function() {
-                     return {
+                   key: "favFilters",
+                   ajaxOptions: function() {
+                       return {
                         contentType: 'application/json',
                         url: "/rest/gadget/1.0/filtersAndProjects?showProjects=false" // /rest/gadget/1.0/filtersAndProjects?showProjects=false
                     };

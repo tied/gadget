@@ -14,10 +14,13 @@
 	<msg name="timeUnitsBox.description">Chose for how many time units</msg>
 	<msg name="timeUnitsBox.label">Time units:</msg>
 
-	<msg name="timeUnit.startVal">d</msg>
+	<msg name="timeUnit.startVal">Day</msg>
 	<msg name="timeUnit.description">Choses time unit interval</msg>
-	<msg name="timeUnit.label">Time unit:</msg>
+	<msg name="timeUnit.label">Period:</msg>
 
+	<msg name="isCumulative.startVal">false</msg>
+	<msg name="isCumulative.description">Add closed issues count ontop of open issues</msg>
+	<msg name="isCumulative.label">Cumulative:</msg>
 	
 
 </messagebundle>
