@@ -34,7 +34,7 @@
     <UserPref name="timeUnitsBox" datatype="hidden" default_value="30"/>
     <UserPref name="timeUnit" datatype="hidden" default_value="d"/>
     <UserPref name="searchBox" datatype="hidden" default_value="Not changed"/>
-    <Content type="html" view="profile">
+    <Content type="html" view="profile,canvas">
         <![CDATA[
 #requireResource("com.atlassian.gadgets.publisher:ajs-gadgets")
 #requireResource("com.atlassian.jira.gadgets:jira-global")
@@ -161,7 +161,7 @@ view: {
                       var time_period = "d"; // d == day, w == week, y == year
 
 
-                      for (var i=rows; i > 0; i--)
+                      for (var i=rows; i >= 0; i--)
                       {
                         var closed = 0;
                         var open = 0;   //      /api/2/searchReq /filter JQL/                                 Issue > startDate                                                 /                   Issue < iterationDate
