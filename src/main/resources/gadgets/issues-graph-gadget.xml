@@ -34,7 +34,7 @@ Other
 <UserPref name="timeUnitsBox" datatype="hidden" default_value="30"/>
 <UserPref name="timeUnit" datatype="hidden" default_value="d"/>
 <UserPref name="configNumber" datatype="hidden" default_value="1"/>
-<UserPref name="FilterId" datatype="hidden"/>
+<UserPref name="filterId" datatype="hidden" />
 
 <Content type="html" view="profile,canvas">
 <![CDATA[
@@ -99,44 +99,18 @@ google.charts.load('current', {'packages':['corechart']});
                 AJS.gadget.fields.nowConfigured()
                 ]
             };
-        }, // End of description function
-        args: [{
-         key: "filters",
-         ajaxOptions: function() {
-             return {
-                contentType: 'application/json',
-                        url: "/rest/gadget/1.0/filtersAndProjects?showProjects=false" // /rest/gadget/1.0/filtersAndProjects?showProjects=false
-                    };
-                }
-            }] // End args
+        }
 }, // End config
 view: {
     enableReload: true,
     onResizeAdjustHeight: true,
-    onResizeReload: true,
     template: function(args) {
             // Start template >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             var gadget = this;
                     gadget.getView().empty(); // Reset view
 
                     var filter = gadget.getPref("filterId").split("filter-")[1];
-                   /* console.log(filter);
-                    var json = args.favFilters["options"];
-                    console.log(json);
-                    for (var i = 0; i < json.length; i++) {
-                        var element = json[i];
-
-                        if ( element.label == gadget.getPref("filterId") ) {
-                           filter = element.value;
-                       }  
-                       console.log("For element in loop: " + element.label);
-                   }
-                   if ( gadget.getPref("filterId") == filter ) {
-                        gadget.getView().append("<h1/>Cannot find filter"); // Append element to doc, 'curve_chart' set in reports-plugin.js
-                        return;
-                    }*/
                     console.log("Found filter by Id: " + filter); 
-                     //filter = gadget.getPref("filterId"); // filter.split("filter-")[1];
 
 
                  // get filter searchURL and extract JQL-search param from filter
