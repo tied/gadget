@@ -33,8 +33,8 @@ Other
 <UserPref name="refresh" datatype="hidden" default_value="false"/>
 <UserPref name="timeUnitsBox" datatype="hidden" default_value="30"/>
 <UserPref name="timeUnit" datatype="hidden" default_value="d"/>
-<UserPref name="searchBox" datatype="hidden" default_value="Not changed"/>
 <UserPref name="configNumber" datatype="hidden" default_value="1"/>
+<UserPref name="FilterId" datatype="hidden"/>
 
 <Content type="html" view="profile,canvas">
 <![CDATA[
@@ -60,16 +60,10 @@ google.charts.load('current', {'packages':['corechart']});
         descriptor: function (args) {
             var gadget = this;
             //console.log(args.fav); //Sucessfully loaded favourite filters
-            var filterPicker = AJS.gadget.fields.filterPicker(gadget, "filterId", args.filters);
+            var filterPicker = AJS.gadget.fields.filterPicker(gadget, "filterId");
             return  {
                 fields: [
-                {
-                    userpref: "searchBox",
-                    label: gadget.getMsg("searchBox.label"),
-                    description: gadget.getMsg("searchBox.description"),
-                    type: "text",
-                    value: gadget.getMsg("searchBox.startVal")
-                },
+                filterPicker,
                 {
                     userpref: "timeUnitsBox",
                     label: gadget.getMsg("timeUnitsBox.label"),
@@ -102,15 +96,14 @@ google.charts.load('current', {'packages':['corechart']});
                     }
                     ]
                 },
-                filterPicker,
                 AJS.gadget.fields.nowConfigured()
                 ]
             };
         }, // End of description function
         args: [{
-           key: "filters",
-           ajaxOptions: function() {
-               return {
+         key: "filters",
+         ajaxOptions: function() {
+             return {
                 contentType: 'application/json',
                         url: "/rest/gadget/1.0/filtersAndProjects?showProjects=false" // /rest/gadget/1.0/filtersAndProjects?showProjects=false
                     };
@@ -126,20 +119,24 @@ view: {
             var gadget = this;
                     gadget.getView().empty(); // Reset view
 
-                    var filter = "";
-                    if ( gadget.getPref("searchBox") != "" ) {
-                        var json = args.favFilters["options"];
-                        console.log(json);
-                        for (var i = 0; i < json.length; i++) {
-                            var element = json[i];
+                    var filter = gadget.getPref("filterId").split("filter-")[1];
+                   /* console.log(filter);
+                    var json = args.favFilters["options"];
+                    console.log(json);
+                    for (var i = 0; i < json.length; i++) {
+                        var element = json[i];
 
-                            if ( element.label == gadget.getPref("searchBox") ) {
-                             filter = element.value;
-                         }
-                         console.log(element.label);
-                     }
-                     console.log("Found filter: " + filter);
-                     filter = filter.split("filter-")[1];
+                        if ( element.label == gadget.getPref("filterId") ) {
+                           filter = element.value;
+                       }  
+                       console.log("For element in loop: " + element.label);
+                   }
+                   if ( gadget.getPref("filterId") == filter ) {
+                        gadget.getView().append("<h1/>Cannot find filter"); // Append element to doc, 'curve_chart' set in reports-plugin.js
+                        return;
+                    }*/
+                    console.log("Found filter by Id: " + filter); 
+                     //filter = gadget.getPref("filterId"); // filter.split("filter-")[1];
 
 
                  // get filter searchURL and extract JQL-search param from filter
@@ -150,7 +147,7 @@ view: {
                     contentType: "application/json",
                     dataType: "json",
                     async: false,
-                    success: function(data) { viewURL = data["searchUrl"]; }
+                    success: function(data) { viewURL = data["searchUrl"]; console.log(data); }
                 });
                  var jql = viewURL.split("search?jql=")[1];
                  console.log("jql search: " + jql);
@@ -169,14 +166,21 @@ view: {
 
                       for (var i=rows; i >= 0; i--)
                       {
+
                         var closed = 0;
-                        var open = 0;   //      /api/2/searchReq /filter JQL/                                 Issue > startDate                                                 /                   Issue < iterationDate
-                        var opened_url = "/rest/api/2/search?jql=" + jql + "%20AND%20createdDate%20>%3D%20startOfDay(-"    + rows.toString() + gadget.getPref("timeUnit") + ")" + "%20AND%20createdDate%20<%3D%20startOfDay(-"    + i.toString() + gadget.getPref("timeUnit") + ")" + "&maxResults=0";
-                        var closed_url = "/rest/api/2/search?jql=" + jql + "%20AND%20resolutiondate%20>%3D%20startOfDay(-" + rows.toString() + gadget.getPref("timeUnit") + ")" + "%20AND%20resolutiondate%20<%3D%20startOfDay(-" + i.toString() + gadget.getPref("timeUnit") + ")" + "&maxResults=0";
-                        //console.log(opened_url);
-                        //console.log(closed_url);
+                        var open = 0;   
+                        var opened_url = "/rest/api/2/search?jql=" + jql; 
+                        var closed_url = "/rest/api/2/search?jql=" + jql;
+                        if (! jql.includes("duedate")) {
+                        //                    (      Issue > startDate                  )                                                   +                              (             Issue < iterationDate            )
+                            opened_url += "%20AND%20createdDate%20>%3D%20startOfDay(-"   +rows.toString() + gadget.getPref("timeUnit")+")"  +  "%20AND%20createdDate%20<%3D%20startOfDay(-"   +i.toString()+gadget.getPref("timeUnit")+")";
+                            closed_url += "%20AND%20resolutiondate%20>%3D%20startOfDay(-"+rows.toString() + gadget.getPref("timeUnit")+")"  +  "%20AND%20resolutiondate%20<%3D%20startOfDay(-"+i.toString()+gadget.getPref("timeUnit")+")";
+                        }
+                        
+                        console.log(opened_url);
+                        console.log(closed_url);
                         AJS.$.ajax({
-                            url: opened_url, //+ "%20AND%20status%20%3D%20" + closed_status + "&maxResults=0",
+                            url: opened_url + "&maxResults=0", // Reduce max results
                             type: 'get',
                             contentType: "application/json",
                             dataType: "json",
@@ -185,7 +189,7 @@ view: {
                         });
 
                         AJS.$.ajax({
-                            url: closed_url,// + "%20AND%20status%20%3D%20" + open_status + "&maxResults=0",
+                            url: closed_url + "&maxResults=0", // Reduce max results
                             type: 'get',
                             contentType: "application/json",
                             dataType: "json",
@@ -232,14 +236,14 @@ view: {
                     google.charts.setOnLoadCallback(drawChart);
                     console.log("Completed view statements")
 
-                }
+                //}
 
 
                 },// End template <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 args: [{
-                   key: "favFilters",
-                   ajaxOptions: function() {
-                       return {
+                 key: "favFilters",
+                 ajaxOptions: function() {
+                     return {
                         contentType: 'application/json',
                         url: "/rest/gadget/1.0/filtersAndProjects?showProjects=false" // /rest/gadget/1.0/filtersAndProjects?showProjects=false
                     };
