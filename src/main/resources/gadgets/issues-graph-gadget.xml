@@ -1,41 +1,43 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
-    <ModulePrefs title="__MSG_gadget.user.title__"
-                 title_url="__MSG_gadget.user.title.url__"
-                 description="__MSG_gadget.user.description__"
-                 author="Anders Vrethem"
-                 author_email="avrethem@gmail.com"
-                 screenshot='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-gadget", "screenshot.png")'
-                 thumbnail='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-gadget", "thumbnail.png")'
-                 height="150"
-    >
-        <!--                            groupID.artifactID:gadget-key                                         -->
-        <Optional feature="gadget-directory">
-            <Param name="categories">
-                JIRA
-                Other
-            </Param>
-        </Optional>
-        <Require feature="oauthpopup" />
-        <Require feature="dynamic-height"/>
-        <Require feature="setprefs" />
-        <Require feature="views" />
-        <Require feature="oauthpopup" />
-        <Optional feature='auth-refresh' />
-        <Optional feature="atlassian.util" />
+<ModulePrefs title="__MSG_gadget.user.title__"
+title_url="__MSG_gadget.user.title.url__"
+description="__MSG_gadget.user.description__"
+author="Anders Vrethem"
+author_email="avrethem@gmail.com"
+screenshot='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-gadget", "screenshot.png")'
+thumbnail='#staticResourceUrl("com.avrethem.issues-metric:issues-metric-gadget", "thumbnail.png")'
+height="150"
+>
+<!--                            groupID.artifactID:gadget-key                                         -->
+<Optional feature="gadget-directory">
+<Param name="categories">
+JIRA
+Other
+</Param>
+</Optional>
+<Require feature="oauthpopup" />
+<Require feature="dynamic-height"/>
+<Require feature="setprefs" />
+<Require feature="views" />
+<Require feature="oauthpopup" />
+<Optional feature='auth-refresh' />
+<Optional feature="atlassian.util" />
 
-        #oauth
-        #supportedLocales("gadget.common")
-        #supportLocales
-        <Locale messages="__ATLASSIAN_BASE_URL__/download/resources/com.avrethem.issues-metric/i18n/messages.xml"/>
-    </ModulePrefs>
-    <UserPref name="isConfigured" datatype="hidden" default_value="false"/>
-    <UserPref name="refresh" datatype="hidden" default_value="false"/>
-    <UserPref name="timeUnitsBox" datatype="hidden" default_value="30"/>
-    <UserPref name="timeUnit" datatype="hidden" default_value="d"/>
-    <UserPref name="searchBox" datatype="hidden" default_value="Not changed"/>
-    <Content type="html" view="profile,canvas">
-        <![CDATA[
+#oauth
+#supportedLocales("gadget.common")
+#supportLocales
+<Locale messages="__ATLASSIAN_BASE_URL__/download/resources/com.avrethem.issues-metric/i18n/messages.xml"/>
+</ModulePrefs>
+<UserPref name="isConfigured" datatype="hidden" default_value="false"/>
+<UserPref name="refresh" datatype="hidden" default_value="false"/>
+<UserPref name="timeUnitsBox" datatype="hidden" default_value="30"/>
+<UserPref name="timeUnit" datatype="hidden" default_value="d"/>
+<UserPref name="searchBox" datatype="hidden" default_value="Not changed"/>
+<UserPref name="configNumber" datatype="hidden" default_value="1"/>
+
+<Content type="html" view="profile,canvas">
+<![CDATA[
 #requireResource("com.atlassian.gadgets.publisher:ajs-gadgets")
 #requireResource("com.atlassian.jira.gadgets:jira-global")
 #requireResource("com.atlassian.jira.gadgets:autocomplete")
@@ -103,16 +105,7 @@ google.charts.load('current', {'packages':['corechart']});
                 AJS.gadget.fields.nowConfigured()
                 ]
             };
-        }, // End descriptor
-        args: [{
-            key: "fav",
-            ajaxOptions: function() {
-             return {
-                contentType: 'application/json',
-                url: "/rest/api/2/filter/favourite"
-            };
         }
-    }] // End args
 }, // End config
 view: {
     enableReload: true,
@@ -125,15 +118,18 @@ view: {
 
                     var filter = "";
                     if ( gadget.getPref("searchBox") != "" ) {
-                        var json = args.favFilters;
+                        var json = args.favFilters["options"];
+                        console.log(json);
                         for (var i = 0; i < json.length; i++) {
                             var element = json[i];
 
-                            if ( element.name == gadget.getPref("searchBox") ) {
-                               filter = element.id;
+                            if ( element.label == gadget.getPref("searchBox") ) {
+                               filter = element.value;
                            }
+                           console.log(element.label);
                        }
                        console.log("Found filter: " + filter);
+                       filter = filter.split("filter-")[1];
 
 
                  // get filter searchURL and extract JQL-search param from filter
@@ -235,7 +231,7 @@ view: {
                  ajaxOptions: function() {
                      return {
                         contentType: 'application/json',
-                        url: "/rest/api/2/filter/favourite" // or /rest/gadget/1.0/pickers/filters?fieldName=
+                        url: "/rest/gadget/1.0/filtersAndProjects?showProjects=false" // /rest/gadget/1.0/filtersAndProjects?showProjects=false
                     };
                 }
             }] // End args
@@ -244,6 +240,6 @@ view: {
 })(); // End function
 </script>
 ]]>
-    </Content>
+</Content>
 </Module>
 
