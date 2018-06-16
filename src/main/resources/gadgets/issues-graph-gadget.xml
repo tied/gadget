@@ -60,7 +60,7 @@ google.charts.load('current', {'packages':['corechart']});
         descriptor: function (args) {
             var gadget = this;
             //console.log(args.fav); //Sucessfully loaded favourite filters
-
+            var filterPicker = AJS.gadget.fields.filterPicker(gadget, "filterId", args.filters);
             return  {
                 fields: [
                 {
@@ -102,10 +102,20 @@ google.charts.load('current', {'packages':['corechart']});
                     }
                     ]
                 },
+                filterPicker,
                 AJS.gadget.fields.nowConfigured()
                 ]
             };
-        }
+        }, // End of description function
+        args: [{
+           key: "filters",
+           ajaxOptions: function() {
+               return {
+                contentType: 'application/json',
+                        url: "/rest/gadget/1.0/filtersAndProjects?showProjects=false" // /rest/gadget/1.0/filtersAndProjects?showProjects=false
+                    };
+                }
+            }] // End args
 }, // End config
 view: {
     enableReload: true,
@@ -124,12 +134,12 @@ view: {
                             var element = json[i];
 
                             if ( element.label == gadget.getPref("searchBox") ) {
-                               filter = element.value;
-                           }
-                           console.log(element.label);
-                       }
-                       console.log("Found filter: " + filter);
-                       filter = filter.split("filter-")[1];
+                             filter = element.value;
+                         }
+                         console.log(element.label);
+                     }
+                     console.log("Found filter: " + filter);
+                     filter = filter.split("filter-")[1];
 
 
                  // get filter searchURL and extract JQL-search param from filter
@@ -227,9 +237,9 @@ view: {
 
                 },// End template <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 args: [{
-                 key: "favFilters",
-                 ajaxOptions: function() {
-                     return {
+                   key: "favFilters",
+                   ajaxOptions: function() {
+                       return {
                         contentType: 'application/json',
                         url: "/rest/gadget/1.0/filtersAndProjects?showProjects=false" // /rest/gadget/1.0/filtersAndProjects?showProjects=false
                     };
