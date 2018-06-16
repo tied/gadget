@@ -31,7 +31,7 @@
     </ModulePrefs>
     <UserPref name="isConfigured" datatype="hidden" default_value="false"/>
     <UserPref name="refresh" datatype="hidden" default_value="false"/>
-    <UserPref name="timeUnitsBox" datatype="hidden" default_value="true"/>
+    <UserPref name="timeUnitsBox" datatype="hidden" default_value="30"/>
     <UserPref name="timeUnit" datatype="hidden" default_value="d"/>
     <UserPref name="searchBox" datatype="hidden" default_value="Not changed"/>
     <Content type="html" view="profile">
@@ -66,14 +66,14 @@ google.charts.load('current', {'packages':['corechart']});
                     label: gadget.getMsg("searchBox.label"),
                     description: gadget.getMsg("searchBox.description"),
                     type: "text",
-                    selected: gadget.getMsg("searchBox.startVal")
+                    value: gadget.getMsg("searchBox.startVal")
                 },
                 {
                     userpref: "timeUnitsBox",
                     label: gadget.getMsg("timeUnitsBox.label"),
                     description:gadget.getMsg("timeUnitsBox.description"),
                     type: "text",
-                    selected: gadget.getPref("timeUnitsBox.startVal")
+                    value: gadget.getMsg("timeUnitsBox.startVal")
                 },
                 {
                     userpref: "timeUnit",
@@ -117,6 +117,7 @@ google.charts.load('current', {'packages':['corechart']});
 view: {
     enableReload: true,
     onResizeAdjustHeight: true,
+    onResizeReload: true,
     template: function(args) {
             // Start template >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             var gadget = this;
@@ -234,16 +235,7 @@ view: {
                  ajaxOptions: function() {
                      return {
                         contentType: 'application/json',
-                        url: "/rest/api/2/filter/favourite"
-                    };
-                }
-            },
-            {
-                key: "closed",
-                ajaxOptions: function() {
-                    return {
-                        contentType: 'application/json',
-                        url: "/rest/gadget/1.0/currentUser"
+                        url: "/rest/api/2/filter/favourite" // or /rest/gadget/1.0/pickers/filters?fieldName=
                     };
                 }
             }] // End args
