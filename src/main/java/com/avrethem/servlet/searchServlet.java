@@ -125,9 +125,8 @@ public class searchServlet extends HttpServlet{
     }
 
     // Search for issues with parsed Query
-    static public List<Issue> getIssuesInQuery(ApplicationUser user) throws SearchException {
+    static public List<Issue> getIssuesInQuery(ApplicationUser user, String jqlQuery ) throws SearchException {
         SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
-        String jqlQuery = "project = \"QWE\" and assignee = currentUser()";
         SearchService.ParseResult parseResult = searchService.parseQuery(user, jqlQuery);
         if (parseResult.isValid()) {
             Query query = parseResult.getQuery();

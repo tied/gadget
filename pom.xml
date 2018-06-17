@@ -35,6 +35,19 @@
             <artifactId>atlassian-gadgets-api</artifactId>
             <version>3.1.7</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.atlassian.jira.plugins/jira-issue-link-jql-functions-plugin -->
+        <dependency>
+            <groupId>com.atlassian.jira.plugins</groupId>
+            <artifactId>jira-issue-link-jql-functions-plugin</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180130</version>
+        </dependency>
+
         <!-- END -->
 
 
