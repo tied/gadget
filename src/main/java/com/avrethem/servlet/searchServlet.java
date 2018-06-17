@@ -25,6 +25,10 @@ import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.query.Query;
 import com.atlassian.query.order.SortOrder;
 
+import com.atlassian.jira.issue.search.SearchRequest;
+import com.atlassian.jira.issue.search.SearchRequestManager;
+import com.atlassian.jira.component.ComponentAccessor;
+
 public class searchServlet extends HttpServlet{
     private static final long serialVersionUID = 1L;
 
@@ -35,112 +39,39 @@ public class searchServlet extends HttpServlet{
         resp.setContentType("text/html");
         PrintWriter writer = resp.getWriter();
 
-        writer.println("Searching for issues in QWE project, assigned to current user...<br><br>");
-
-        try {
-            List<Issue> issues = getIssuesInProject(loggedInUser);
-            for (Issue issue : issues) {
-                writer.println("Got Issue:" + issue.getKey() + "<br>");
-            }
-        } catch (SearchException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        writer.println("<br>DONE<br><br>");
-
-        writer.println(
-                "Searching for issues in multiple projects, with customer name Jobin, assigned to jobin or admin...<br><br>");
-
-        try {
-            List<Issue> issues = getIssuesInProjectsForCustomer(loggedInUser);
-            for (Issue issue : issues) {
-                writer.println("Got Issue:" + issue.getKey() + "<br>");
-            }
-        } catch (SearchException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        writer.println("<br>DONE<br><br>");
-
-        writer.println("Searching for issues in multiple projects, with empty assignee or reporter...<br><br>");
-
-        try {
-            List<Issue> issues = getIssuesInProjectsWithEmptyUsers(loggedInUser);
-            for (Issue issue : issues) {
-                writer.println("Got Issue:" + issue.getKey() + "<br>");
-            }
-        } catch (SearchException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        writer.println("<br>DONE<br><br>");
-
-        writer.println("Searching for issues in parsed query...<br><br>");
-/*
-        try {
-            List<Issue> issues = getIssuesInQuery(loggedInUser);
-            for (Issue issue : issues) {
-                writer.println("Got Issue:" + issue.getKey() + "<br>");
-            }
-        } catch (SearchException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }*/
-        writer.println("<br>DONE");
+        writer.println("This is how a servlet module works... <br><br>");
+        writer.println("<br>1<br><br>");
+        writer.println("<br>2<br>");
+        writer.println("<br>3<br><br>");
+        writer.println("<br>4<br><br>");
+        writer.println("<br>5");
     }
 
-    // Search for issues in QWE project, assigned to current user
-    private List<Issue> getIssuesInProject(ApplicationUser user) throws SearchException {
-        JqlQueryBuilder builder = JqlQueryBuilder.newBuilder();
-        builder.where().project("QWE").and().assigneeIsCurrentUser();
-        builder.orderBy().assignee(SortOrder.ASC);
-        Query query = builder.buildQuery();
-        SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
-        SearchResults results = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
-        return results.getIssues();
-    }
 
-    // Search for issues in multiple projects, with customer name Jobin,
-    // assigned to jobin or admin
-    private List<Issue> getIssuesInProjectsForCustomer(ApplicationUser user) throws SearchException {
-        JqlQueryBuilder builder = JqlQueryBuilder.newBuilder();
-        builder.where().project("TEST", "QWE").and().assignee().in("jobinkk", "admin").and().customField(10000L)
-                .eq("jobinkk");
-        builder.orderBy().assignee(SortOrder.ASC);
-        Query query = builder.buildQuery();
-        SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
-        SearchResults results = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
-        return results.getIssues();
-    }
-
-    // Search for issues in multiple projects, with empty assignee or reporter
-    private List<Issue> getIssuesInProjectsWithEmptyUsers(ApplicationUser user) throws SearchException {
-        JqlQueryBuilder builder = JqlQueryBuilder.newBuilder();
-        builder.where().project("TEST", "QWE").and().sub().assigneeIsEmpty().or().reporterIsEmpty().endsub();
-        builder.orderBy().assignee(SortOrder.ASC);
-        Query query = builder.buildQuery();
-        SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
-        SearchResults results = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
-        return results.getIssues();
-    }
-
-    // Search for issues with parsed Query
     static public List<Issue> getIssuesInQuery(ApplicationUser user, String jqlQuery ) throws SearchException {
         SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
         SearchService.ParseResult parseResult = searchService.parseQuery(user, jqlQuery);
+
         if (parseResult.isValid()) {
             Query query = parseResult.getQuery();
-
-            //IssueSearchParameters params = SearchService.IssueSearchParameters.builder().query(query).build();
-            //String queryPath = searchService.getIssueSearchPath(user, params);
-            //System.out.println("Query Path:"+queryPath);
-
             SearchResults results = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
             return results.getIssues();
         } else {
             System.out.println("Error parsing query:" + jqlQuery);
             return Collections.emptyList();
         }
+    }
+
+    static public List<Issue> getIssuesInFilter(ApplicationUser user, String filterId ) throws SearchException {
+        SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
+
+        SearchRequestManager srm = ComponentAccessor.getComponentOfType(SearchRequestManager.class);
+        SearchRequest filter = srm.getSearchRequestById(user, Long.valueOf(filterId));
+        // filterName == filter.getQuery().getQueryString();
+
+            Query query = filter.getQuery();
+            SearchResults results = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
+            return results.getIssues();
     }
 
 }

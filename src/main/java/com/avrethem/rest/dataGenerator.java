@@ -52,24 +52,28 @@ public class dataGenerator {
         ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
 
         try {
-            List<Issue> issues = searchServlet.getIssuesInQuery(user, "project = \"QWE\"");
-            List<String> issues_as_string = new ArrayList<String>();
-            JSONObject json = new JSONObject();
+            //System.out.println("[SYSTEM] filterId: " + filterIdString);
+            filterIdString = filterIdString.split("filter-")[1];
+            //System.out.println("[SYSTEM] filterId: " + filterIdString);
 
-            JSONArray array = new JSONArray();
+            List<Issue> issues = searchServlet.getIssuesInFilter(user, filterIdString);
+            JSONObject jsonObject = new JSONObject();
+            JSONArray jsonArray = new JSONArray();
+
             try {
             for (Issue issue : issues) {
-                System.out.println("[SYSTEM] Got Issue:" + issue.getKey() );
-                JSONObject item = new JSONObject();
+                //System.out.println("[SYSTEM] Got Issue:" + issue.getKey() );
+                JSONObject jsonItem = new JSONObject();
 
-                    item.put("created", issue.getCreated());
-                    item.put("resolution", (issue.getResolutionDate() == null) ? "none" : issue.getResolutionDate());
-                    item.put("status", issue.getStatusId());
+                    jsonItem.put("created", issue.getCreated());
+                    jsonItem.put("resolutionDate", (issue.getResolutionDate() == null) ? "none" : issue.getResolutionDate());
+                    jsonItem.put("resolution", (issue.getResolution() == null) ? "none" : issue.getResolution());
+                    jsonItem.put("status", issue.getStatusId());
 
-                array.put(item);
+                jsonArray.put(jsonItem);
             }
-            json.put("issues", array);
-            return Response.ok(json.toString(),  MediaType.APPLICATION_JSON).build();
+            jsonObject.put("issues", jsonArray);
+            return Response.ok(jsonObject.toString(),  MediaType.APPLICATION_JSON).build();
 
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
@@ -83,23 +87,8 @@ public class dataGenerator {
     }
 
 
-/*
-    @GET
-    @AnonymousAllowed
-    @Produces({MediaType.APPLICATION_JSON})
-    @Path("/getFromsearchServlet")
-    public Response getFromsearchServlet(@QueryParam("filterId") String filterIdString)
-    {
-        ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
-        try {
-            ApplicationUser loggedInUser = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
-            List<Issue> issues = searchServlet.getIssuesInQuery(user);
-            return Response.ok(issues).build();
-        } catch (SearchException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return Response.ok(new String("Error")).build();
+    public String getJqlString(Query query) {
+        return ComponentAccessor.getComponentOfType(SearchService.class).getJqlString(query);
+    }
 
-    }*/
 }
