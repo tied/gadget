@@ -259,7 +259,8 @@ view: {
                         contentType: 'application/json',
                         url: "__ATLASSIAN_BASE_URL__/rest/datagenerator/1.0/message/getDatasetFromQuery",
                         data: {
-                            filterId : gadgets.util.unescapeString(this.getPref("filterId"))
+                            filterId : gadgets.util.unescapeString(this.getPref("filterId")),
+                            timePeriod : gadgets.util.unescapeString(this.getPref("timeUnitsBox") + this.getPref("timeUnit"))
                         }
                     }
                 }

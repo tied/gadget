@@ -47,7 +47,8 @@ public class dataGenerator {
     @AnonymousAllowed
     @Produces({MediaType.APPLICATION_JSON})
     @Path("/getDatasetFromQuery")
-    public Response getDatasetFromQuery(@QueryParam("filterId") String filterIdString)
+    public Response getDatasetFromQuery(@QueryParam("filterId") String filterIdString,
+                                        @QueryParam("timePeriod") String timePeriodString)
     {
         ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
 
@@ -56,7 +57,7 @@ public class dataGenerator {
             filterIdString = filterIdString.split("filter-")[1];
             //System.out.println("[SYSTEM] filterId: " + filterIdString);
 
-            List<Issue> issues = searchServlet.getIssuesInFilter(user, filterIdString);
+            List<Issue> issues = searchServlet.getIssuesInFilterBackInTime(user, filterIdString, timePeriodString);
             JSONObject jsonObject = new JSONObject();
             JSONArray jsonArray = new JSONArray();
 
