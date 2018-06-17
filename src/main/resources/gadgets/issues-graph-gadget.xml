@@ -19,8 +19,8 @@ Other
 <Require feature="oauthpopup" />
 <Require feature="dynamic-height"/>
 <Require feature="setprefs" />
+<Require feature="settitle"/>
 <Require feature="views" />
-<Require feature="oauthpopup" />
 <Optional feature='auth-refresh' />
 <Optional feature="atlassian.util" />
 
@@ -60,6 +60,7 @@ google.charts.load('current', {'packages':['corechart']});
         descriptor: function (args) {
             var gadget = this;
             //console.log(args.fav); //Sucessfully loaded favourite filters
+            gadgets.window.setTitle("Issue graph plugins");
             var filterPicker = AJS.gadget.fields.filterPicker(gadget, "filterId");
             return  {
                 fields: [
@@ -258,7 +259,7 @@ view: {
                         contentType: 'application/json',
                         url: "__ATLASSIAN_BASE_URL__/rest/datagenerator/1.0/message/getDatasetFromQuery",
                         data: {
-                            filterId : "filter1"
+                            filterId : gadgets.util.unescapeString(this.getPref("filterId"))
                         }
                     }
                 }

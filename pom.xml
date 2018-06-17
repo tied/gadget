@@ -29,6 +29,16 @@
             <scope>provided</scope>
         </dependency>
         -->
+        <!-- My explicits imported dependencies -->
+        <dependency>
+            <groupId>com.atlassian.gadgets</groupId>
+            <artifactId>atlassian-gadgets-api</artifactId>
+            <version>3.1.7</version>
+        </dependency>
+        <!-- END -->
+
+
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
