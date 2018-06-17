@@ -14,11 +14,22 @@ public class dataGenerator {
 
     @GET
     @AnonymousAllowed
-    @Produces({MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("/testmessage")
     public Response getMessage()
     {
-       
-
-        return Response.ok(new dataGeneratorModel("Hello World")).build();
+       return Response.ok(new dataGeneratorModel("Hello World")).build();
     }
+
+    @GET
+    @AnonymousAllowed
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("/getDatasetFromQuery")
+    public Response getDatasetFromQuery(@QueryParam("filterId") String filterIdString)
+    {
+        return Response.ok(new dataGeneratorModel(filterIdString)).build();
+    }
+
+
+
 }

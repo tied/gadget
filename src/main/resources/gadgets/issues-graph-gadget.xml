@@ -124,6 +124,15 @@ view: {
     template: function(args) {
             // Start template >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             var gadget = this;
+            // Java JQL-search rest resource testing 
+            console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+            console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+            console.log(args.dataset)
+
+            console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+            console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+
+            // End Java JQL-search
                     gadget.getView().empty(); // Reset view
 
                     var filter = gadget.getPref("filterId").split("filter-")[1];
@@ -203,7 +212,7 @@ view: {
                         if ( gadget.getPref("isCumulative") == "false")
                             open -= closed;
 
-                        console.log("Add row:[" +date.getDate() + " | Closed: " + closed + " | Open :" + open + " ]");
+                        //console.log("Add row:[" +date.getDate() + " | Closed: " + closed + " | Open :" + open + " ]");
                         data.addRow([date, closed, open ]);
                     }
 
@@ -242,6 +251,16 @@ view: {
                         contentType: 'application/json',
                         url: "/rest/gadget/1.0/filtersAndProjects?showProjects=false" // /rest/gadget/1.0/filtersAndProjects?showProjects=false
                     };
+                },
+                key: "dataset",
+                ajaxOptions: function() {
+                    return {
+                        contentType: 'application/json',
+                        url: "__ATLASSIAN_BASE_URL__/rest/datagenerator/1.0/message/getDatasetFromQuery",
+                        data: {
+                            filterId : "filter1"
+                        }
+                    }
                 }
             }] // End args
         } // End view
