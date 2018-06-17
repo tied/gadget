@@ -12,21 +12,27 @@
   <resource type="i18n" name="i18n" location="reports-plugin"/>
   <!-- Images -->
   <resource type="download" name="logo.png" location="plugin-logo.png"/>
-  <resource type="download" name="screenshot.png"  location="plugin-screenshot.png"/>
-  <resource type="download" name="thumbnail.png"   location="plugin-thumbnail.png"/>
+  <resource type="download" name="screenshot.png" location="plugin-screenshot.png"/>
+  <resource type="download" name="thumbnail.png" location="plugin-thumbnail.png"/>
   <!-- add our web resources -->
   <web-resource key="issues-metric-resources" name="reports-plugin Web Resources">
     <dependency>com.atlassian.auiplugin:ajs</dependency>
     <!-- JavaScript files -->
-    <resource type="download" name="reports-plugin.js" location="/js/reports-plugin.js"><property key="content-type" value="text/javascript"/></resource>
-    <resource type="download" name="googleChartLoader.js" location="js/googleChartLoader.js"><property key="content-type" value="text/javascript"/></resource>
-    <resource type="download" name="webResourceTest" location="js/test.js"><property key="content-type" value="text/javascript"/></resource>
-    <resource type="download" name="restRequestsResource" location="js/restrequests.js"><property key="content-type" value="text/javascript"/></resource>
-
+    <resource type="download" name="reports-plugin.js" location="/js/reports-plugin.js">
+      <property key="content-type" value="text/javascript"/>
+    </resource>
+    <resource type="download" name="googleChartLoader.js" location="js/googleChartLoader.js">
+      <property key="content-type" value="text/javascript"/>
+    </resource>
+    <resource type="download" name="webResourceTest" location="js/test.js">
+      <property key="content-type" value="text/javascript"/>
+    </resource>
+    <resource type="download" name="restRequestsResource" location="js/restrequests.js">
+      <property key="content-type" value="text/javascript"/>
+    </resource>
     <!-- CSS files -->
     <resource type="download" name="reports-plugin.css" location="/css/reports-plugin.css"/>
     <resource type="download" name="images/" location="/images"/>
-
     <context>reports-plugin</context>
   </web-resource>
   <!-- REPORTS -->
@@ -154,4 +160,11 @@
   <resource type="download" name="i18n/messages.xml" location="i18n/messages.xml">
     <param name="content-type" value="text/xml; charset=UTF-8"/>
   </resource>
+  <servlet name="search Servlet" i18n-name-key="search-servlet.name" key="search-servlet" class="com.avrethem.servlet.searchServlet">
+    <description key="search-servlet.description">The search Servlet Plugin</description>
+    <url-pattern>/searchservlet</url-pattern>
+  </servlet>
+  <rest name="data Generator" i18n-name-key="data-generator.name" key="data-generator" path="/datagenerator" version="1.0">
+    <description key="data-generator.description">The data Generator Plugin</description>
+  </rest>
 </atlassian-plugin>

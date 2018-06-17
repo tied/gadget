@@ -127,7 +127,7 @@ view: {
                     gadget.getView().empty(); // Reset view
 
                     var filter = gadget.getPref("filterId").split("filter-")[1];
-                    console.log("Found filter by Id: " + filter); 
+                    console.log("Found filter by Id: " + filter);
 
 
                  // get filter searchURL and extract JQL-search param from filter
@@ -157,7 +157,7 @@ view: {
 
                       for (var i=rows; i >= 0; i--)
                       {
-                        // Get current date, skip weekends 
+                        // Get current date, skip weekends
                         var date = new Date();
                         if ( gadget.getPref("timeUnit") == "d" && (Math.abs(date.getDay() -i) == 6 || Math.abs(date.getDay() -i) == 0) )
                             continue;
@@ -171,8 +171,8 @@ view: {
                             date.setYear(date.getYear() - i);
 
                         var closed = 0;
-                        var open = 0;   
-                        var opened_url = "/rest/api/2/search?jql=" + jql; 
+                        var open = 0;
+                        var opened_url = "/rest/api/2/search?jql=" + jql;
                         var closed_url = "/rest/api/2/search?jql=" + jql;
                         if (! jql.includes("duedate")) {
                         //                    (      Issue > startDate                  )                                                   +                              (             Issue < iterationDate            )
@@ -251,4 +251,3 @@ view: {
 ]]>
 </Content>
 </Module>
-

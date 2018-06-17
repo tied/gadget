@@ -10,4 +10,3 @@ console.log("request-plugin.js loaded");
 function baseURL() {
 
 }
-
