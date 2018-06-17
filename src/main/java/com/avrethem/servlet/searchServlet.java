@@ -76,7 +76,7 @@ public class searchServlet extends HttpServlet{
         writer.println("<br>DONE<br><br>");
 
         writer.println("Searching for issues in parsed query...<br><br>");
-
+/*
         try {
             List<Issue> issues = getIssuesInQuery(loggedInUser);
             for (Issue issue : issues) {
@@ -85,7 +85,7 @@ public class searchServlet extends HttpServlet{
         } catch (SearchException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
+        }*/
         writer.println("<br>DONE");
     }
 
@@ -125,7 +125,7 @@ public class searchServlet extends HttpServlet{
     }
 
     // Search for issues with parsed Query
-    private List<Issue> getIssuesInQuery(ApplicationUser user) throws SearchException {
+    static public List<Issue> getIssuesInQuery(ApplicationUser user) throws SearchException {
         SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
         String jqlQuery = "project = \"QWE\" and assignee = currentUser()";
         SearchService.ParseResult parseResult = searchService.parseQuery(user, jqlQuery);
