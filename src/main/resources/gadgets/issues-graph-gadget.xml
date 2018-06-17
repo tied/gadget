@@ -20,6 +20,7 @@ Other
 <Require feature="dynamic-height"/>
 <Require feature="setprefs" />
 <Require feature="views" />
+<Require feature="settitle"/>
 <Require feature="oauthpopup" />
 <Optional feature='auth-refresh' />
 <Optional feature="atlassian.util" />
@@ -60,6 +61,7 @@ google.charts.load('current', {'packages':['corechart']});
         descriptor: function (args) {
             var gadget = this;
             //console.log(args.fav); //Sucessfully loaded favourite filters
+            gadgets.window.setTitle("Issue graph plugins");
             var filterPicker = AJS.gadget.fields.filterPicker(gadget, "filterId");
             return  {
                 fields: [
