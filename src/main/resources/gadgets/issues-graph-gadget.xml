@@ -153,7 +153,7 @@ view: {
                  var jql = viewURL.split("search?jql=")[1];
                  console.log("jql search: " + jql);
 
-*/
+                 */
                  function drawChart() {
                     var rows = gadget.getPref("timeUnitsBox");
                     var data = new google.visualization.DataTable();
@@ -166,8 +166,8 @@ view: {
 
 
                     var date = new Date();
-                    console.log(date.getYear() +"-"+date.getMonth() + "-" + date.getDate());
-                        
+                    console.log("Today is : " + date.toISOString().substr(0, 19).replace('T', ' '));
+
                     if ( gadget.getPref("timeUnit") == "d" )
                         date.setDate(date.getDate() - gadget.getPref("timeUnitsBox"));
                     else if ( gadget.getPref("timeUnit") == "w" )
@@ -180,27 +180,27 @@ view: {
                     var jsonArray = args.dataset["issues"];
 
                     for ( var i=(jsonArray["length"] - 1); i >= 0; i--) {
-                       
+                        
+                        console.log("-------------------------------------------------");
                         console.log("created: " + jsonArray[i].created.toString());
                         console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString());
 
                         date.setDate(date.getDate() + 1);
-                        console.log(date.getYear() +"-"+date.getMonth() + "-" + date.getDate());
-                        
-
+                        console.log("Current date: " + date.toISOString().substr(0, 21).replace('T', ' '));
+                        console.log("-------------------------------------------------");
 
                         if ( gadget.getPref("isCumulative") == "false")
                             open -= closed;
-                        
+
                         if ( gadget.getPref("timeUnit") == "d" && (Math.abs(date.getDay() - gadget.getPref("timeUnitsBox")) == 6 || Math.abs(date.getDay() - gadget.getPref("timeUnitsBox")) == 0) )
-                        continue;
+                            continue;
 
                         //console.log("Add row:[" +date.getDate() + " | Closed: " + closed + " | Open :" + open + " ]");
                         data.addRow([date, closed, open ]);
                     }
                     
 
-                        
+
                     
 
 
