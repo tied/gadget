@@ -150,23 +150,26 @@ view: {
 
                     
                     // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
-                    var dateToday = new Date();
-                    console.log("Today is : " + dateToday.toISOString().substr(0, 19).replace('T', ' '));
+                    var lastDate = new Date();
+                    var date = lastDate;
+                    var firstDate;
+                    console.log("Today is : " + lastDate.toISOString().substr(0, 19).replace('T', ' '));
 
                     // Turn back time in date
                     if ( gadget.getPref("timeUnit") == "d" )
-                        dateToday.setDate(dateToday.getDate() - gadget.getPref("timeUnitsBox"));
+                        date.setDate(date.getDate() - gadget.getPref("timeUnitsBox"));
                     else if ( gadget.getPref("timeUnit") == "w" )
-                        dateToday.setDate(dateToday.getDate() - gadget.getPref("timeUnitsBox")*7);
+                        date.setDate(date.getDate() - gadget.getPref("timeUnitsBox")*7);
                     else if ( gadget.getPref("timeUnit") == "m" )
-                        dateToday.setMonth(dateToday.getMonth() - gadget.getPref("timeUnitsBox"));
+                        date.setMonth(date.getMonth() - gadget.getPref("timeUnitsBox"));
                     else
-                        dateToday.setYear(dateToday.getYear() - gadget.getPref("timeUnitsBox"));
+                        date.setYear(date.getYear() - gadget.getPref("timeUnitsBox"));
                     
+                    // Get the date where iteration should start
+                    firstDate = date;
 
-                    var date = dateToday;
-                    var stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-                    console.log("First day is : " + dateToday.toISOString().substr(0, 19).replace('T', ' '));
+                    var stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
+                    console.log("First date is : " + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' '));
                     // get Json object array from args [{...}] that pulls it from GET-request 
                     var jsonArray = args.dataset["issues"];
 
@@ -194,28 +197,29 @@ view: {
                             data.addRow([stupidDateFormat, closed, open ]);
                             date.setDate(date.getDate() +1 );
                         }
-                        
-                        console.log("created: " + jsonArray[i].created.toString().split(" ")[0]);
-                        console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString().split(" ")[0]);
-                        console.log("Current date: " + date.toISOString().substr(0, 10).replace('T', ' '));//.split(" ")[0]);           
-                       // console.log("Growing from : " + jsonArray[i].created.toString() ); 
-                        
 
                         if ( jsonArray[i].created.toString().split(" ")[0] == date.toISOString().substr(0, 10).replace('T', ' ') )
                             open++;
                         if ( jsonArray[i].resolutionDate.toString().split(" ")[0] == date.toISOString().substr(0, 10).replace('T', ' ') )
                             closed++;
 
-                        // DateFormat is a mess, stupidDateFormat works in googleLine...
-                       
-                        stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-                        console.log("Add row:[" + stupidDateFormat.toISOString().substr(0, 10).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
-                        //data.addRow([stupidDateFormat, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
-                        data.addRow([stupidDateFormat, closed, open ]);
+                        // DateFormat is a mess, stupidDateFormat works in googleLine...          
+                        stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
 
+                        console.log("created: " + jsonArray[i].created.toString().split(" ")[0]);
+                        console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString().split(" ")[0]);
+                        console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
+                        // console.log("Growing from : " + jsonArray[i].created.toString() ); 
+                        console.log("Add row:[" + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
                         console.log("-------------------------------------------------");
+
+                        
+                        
+
+                        
                     }
-                    
+                    //data.addRow([stupidDateFormat, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+                    data.addRow([stupidDateFormat, closed, open ]);
 
 
                     
@@ -228,10 +232,10 @@ view: {
                       lineWidth: 4,
                       hAxis: {
                         viewWindow: {
-                            //min: new Date(dateToday.getFullYear(), dateToday.getMonth(), dateToday.getDate()),
+                            //min: new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate()),
                             min: new Date(2018,5,1),
                             
-                            max: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
+                            max: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+1)
                             //max: new Date(2018,5,18) //new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
                     
                         },
