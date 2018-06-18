@@ -82,17 +82,7 @@ public class searchServlet extends HttpServlet{
         String jqlQuery = filter.getQuery().getQueryString();
         jqlQuery += " AND createdDate >= startOfDay(-" + backInTime + ")";
         System.out.println("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
-
-        SearchService.ParseResult parseResult = searchService.parseQuery(user, jqlQuery);
-
-        if (parseResult.isValid()) {
-            Query query = parseResult.getQuery();
-            SearchResults results = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
-            return results.getIssues();
-        } else {
-            System.out.println("[GADGET::dataGenerator] Error parsing query:" + jqlQuery);
-            return Collections.emptyList();
-        }
+        return getIssuesInQuery(user, jqlQuery);
     }
 
 }

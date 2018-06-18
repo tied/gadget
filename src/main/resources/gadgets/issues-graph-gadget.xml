@@ -138,7 +138,7 @@ view: {
 
                     var filter = gadget.getPref("filterId").split("filter-")[1];
                     console.log("Found filter by Id: " + filter);
-
+/*
 
                  // get filter searchURL and extract JQL-search param from filter
                  var viewURL = "";
@@ -153,7 +153,7 @@ view: {
                  var jql = viewURL.split("search?jql=")[1];
                  console.log("jql search: " + jql);
 
-
+*/
                  function drawChart() {
                     var rows = gadget.getPref("timeUnitsBox");
                     var data = new google.visualization.DataTable();
@@ -161,61 +161,47 @@ view: {
                     data.addColumn('number', 'Closed');
                     data.addColumn('number', 'Open');
 
+                    var open = 0;
+                    var closed = 0;
 
-                      var time_period = "d"; // d == day, w == week, y == year
 
+                    var date = new Date();
+                    console.log(date.getYear() +"-"+date.getMonth() + "-" + date.getDate());
+                        
+                    if ( gadget.getPref("timeUnit") == "d" )
+                        date.setDate(date.getDate() - gadget.getPref("timeUnitsBox"));
+                    else if ( gadget.getPref("timeUnit") == "w" )
+                        date.setDate(date.getDate() - gadget.getPref("timeUnitsBox")*7);
+                    else if ( gadget.getPref("timeUnit") == "m" )
+                        date.setMonth(date.getMonth() - gadget.getPref("timeUnitsBox"));
+                    else
+                        date.setYear(date.getYear() - gadget.getPref("timeUnitsBox"));
+                    
+                    var jsonArray = args.dataset["issues"];
 
-                      for (var i=rows; i >= 0; i--)
-                      {
-                        // Get current date, skip weekends
-                        var date = new Date();
-                        if ( gadget.getPref("timeUnit") == "d" && (Math.abs(date.getDay() -i) == 6 || Math.abs(date.getDay() -i) == 0) )
-                            continue;
-                        else if ( gadget.getPref("timeUnit") == "d" )
-                            date.setDate(date.getDate() - i);
-                        else if ( gadget.getPref("timeUnit") == "w" )
-                            date.setDate(date.getDate() - i*7);
-                        else if ( gadget.getPref("timeUnit") == "m" )
-                            date.setMonth(date.getMonth() - i);
-                        else
-                            date.setYear(date.getYear() - i);
+                    for ( var i=(jsonArray["length"] - 1); i >= 0; i--) {
+                       
+                        console.log("created: " + jsonArray[i].created.toString());
+                        console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString());
 
-                        var closed = 0;
-                        var open = 0;
-                        var opened_url = "/rest/api/2/search?jql=" + jql;
-                        var closed_url = "/rest/api/2/search?jql=" + jql;
-                        if (! jql.includes("duedate")) {
-                        //                    (      Issue > startDate                  )                                                   +                              (             Issue < iterationDate            )
-                        opened_url += "%20AND%20createdDate%20>%3D%20startOfDay(-"   +rows.toString() + gadget.getPref("timeUnit")+")"  +  "%20AND%20createdDate%20<%3D%20startOfDay(-"   +i.toString()+gadget.getPref("timeUnit")+")";
-                        closed_url += "%20AND%20resolutiondate%20>%3D%20startOfDay(-"+rows.toString() + gadget.getPref("timeUnit")+")"  +  "%20AND%20resolutiondate%20<%3D%20startOfDay(-"+i.toString()+gadget.getPref("timeUnit")+")";
-                    }
+                        date.setDate(date.getDate() + 1);
+                        console.log(date.getYear() +"-"+date.getMonth() + "-" + date.getDate());
+                        
 
-                        //console.log(opened_url);
-                        //console.log(closed_url);
-                        AJS.$.ajax({
-                            url: opened_url + "&maxResults=0", // Reduce max results
-                            type: 'get',
-                            contentType: "application/json",
-                            dataType: "json",
-                            async: false,
-                            success: function(data) { open = data["total"];  }
-                        });
-
-                        AJS.$.ajax({
-                            url: closed_url + "&maxResults=0", // Reduce max results
-                            type: 'get',
-                            contentType: "application/json",
-                            dataType: "json",
-                            async: false,
-                            success: function(data) { closed = data["total"]; }
-                        });
 
                         if ( gadget.getPref("isCumulative") == "false")
                             open -= closed;
+                        
+                        if ( gadget.getPref("timeUnit") == "d" && (Math.abs(date.getDay() - gadget.getPref("timeUnitsBox")) == 6 || Math.abs(date.getDay() - gadget.getPref("timeUnitsBox")) == 0) )
+                        continue;
 
                         //console.log("Add row:[" +date.getDate() + " | Closed: " + closed + " | Open :" + open + " ]");
                         data.addRow([date, closed, open ]);
                     }
+                    
+
+                        
+                    
 
 
                     var options = {
@@ -246,9 +232,9 @@ view: {
 
                 },// End template <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 args: [{
-                   key: "favFilters",
-                   ajaxOptions: function() {
-                       return {
+                 key: "favFilters",
+                 ajaxOptions: function() {
+                     return {
                         contentType: 'application/json',
                         url: "/rest/gadget/1.0/filtersAndProjects?showProjects=false" // /rest/gadget/1.0/filtersAndProjects?showProjects=false
                     };
