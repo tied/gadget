@@ -161,13 +161,12 @@ view: {
                     data.addColumn('number', 'Closed');
                     data.addColumn('number', 'Open');
 
-                    var open = 0;
-                    var closed = 0;
-
-
+                    
+                    // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
                     var date = new Date();
                     console.log("Today is : " + date.toISOString().substr(0, 19).replace('T', ' '));
 
+                    // Turn back time in date
                     if ( gadget.getPref("timeUnit") == "d" )
                         date.setDate(date.getDate() - gadget.getPref("timeUnitsBox"));
                     else if ( gadget.getPref("timeUnit") == "w" )
@@ -177,25 +176,43 @@ view: {
                     else
                         date.setYear(date.getYear() - gadget.getPref("timeUnitsBox"));
                     
+                    // get Json object array from args [{...}] that pulls it from GET-request 
                     var jsonArray = args.dataset["issues"];
 
+                    var open = 0;
+                    var closed = 0;
+                    // Loop backwards to get issue-dates in ascending order
                     for ( var i=(jsonArray["length"] - 1); i >= 0; i--) {
-                        date.setDate(date.getDate() + 1);
+
+                        // Issues will be sorted in ascending order 
+                        // Loop until date == createdDate for next issue in jsonArray
+                        // Compare String, no need to parse to a date? Date.parse("2018-10-15") 
+                        while ( date.toISOString().substr(0, 10).replace('T', ' ') < 
+                                jsonArray[i].created.toString().split(" ")[0]   ) 
+                        { 
+                            if ( date.getDay() == 6 || date.getDay() == 0 ) // 6 is saturday, 0 is monday 
+                            {
+                                date.setDate(date.getDate() +1 );
+                                continue; // Skip weekdays
+                            }
+                            console.log("Iteration date: " + date.toISOString().substr(0, 10).replace('T', ' '));
                             
-                        console.log("-------------------------------------------------");
+                            //Add a row and prepare next iteration
+                            data.addRow([date, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+                            date.setDate(date.getDate() +1 );
+                        }
+                        console.log("----------------------Issue----------------------");
                         console.log("created: " + jsonArray[i].created.toString().split(" ")[0]);
                         console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString().split(" ")[0]);
-                        console.log("Current date: " + date.toISOString().substr(0, 21).replace('T', ' ').split(" ")[0]);
+                        console.log("Current date: " + date.toISOString().substr(0, 10).replace('T', ' '));//.split(" ")[0]);           
+                       // console.log("Growing from : " + jsonArray[i].created.toString() ); 
                         console.log("-------------------------------------------------");
 
-                        if ( gadget.getPref("isCumulative") == "false")
-                            open -= closed;
 
-                        if ( gadget.getPref("timeUnit") == "d" && (Math.abs(date.getDay() - gadget.getPref("timeUnitsBox")) == 6 || Math.abs(date.getDay() - gadget.getPref("timeUnitsBox")) == 0) )
-                            continue;
+
 
                         //console.log("Add row:[" +date.getDate() + " | Closed: " + closed + " | Open :" + open + " ]");
-                        data.addRow([date, closed, open ]);
+                        data.addRow([date, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
                     }
                     
 
