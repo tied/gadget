@@ -180,13 +180,12 @@ view: {
                     var jsonArray = args.dataset["issues"];
 
                     for ( var i=(jsonArray["length"] - 1); i >= 0; i--) {
-                        
-                        console.log("-------------------------------------------------");
-                        console.log("created: " + jsonArray[i].created.toString());
-                        console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString());
-
                         date.setDate(date.getDate() + 1);
-                        console.log("Current date: " + date.toISOString().substr(0, 21).replace('T', ' '));
+                            
+                        console.log("-------------------------------------------------");
+                        console.log("created: " + jsonArray[i].created.toString().split(" ")[0]);
+                        console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString().split(" ")[0]);
+                        console.log("Current date: " + date.toISOString().substr(0, 21).replace('T', ' ').split(" ")[0]);
                         console.log("-------------------------------------------------");
 
                         if ( gadget.getPref("isCumulative") == "false")
