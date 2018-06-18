@@ -145,7 +145,7 @@ view: {
                     // Format settings for data rows in chart
                     var data = new google.visualization.DataTable();
                     data.addColumn('date', 'Date');
-                    data.addColumn('number', 'Closed');
+                    data.addColumn('number', 'Resolved');
                     data.addColumn('number', 'Open');
 
                     
@@ -162,11 +162,11 @@ view: {
                     else if ( gadget.getPref("timeUnit") == "m" )
                         date.setMonth(date.getMonth() - gadget.getPref("timeUnitsBox"));
                     else
-                        date.setYear(date.getYear() - gadget.getPref("timeUnitsBox"));
+                        date.setYear(date.getFullYear() - gadget.getPref("timeUnitsBox"));
                     
                     // Get the date where iteration should start
                     var firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
-
+                    // Set a stupid date format so google-line's timeline is presented proporly!
                     var stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
                     console.log("First date is : " + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' '));
                     // get Json object array from args [{...}] that pulls it from GET-request 
