@@ -165,15 +165,16 @@ view: {
                     
 
                     var date = dateToday;
+                    var stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
                     console.log("First day is : " + dateToday.toISOString().substr(0, 19).replace('T', ' '));
                     // get Json object array from args [{...}] that pulls it from GET-request 
                     var jsonArray = args.dataset["issues"];
 
-                    var open = 0;
-                    var closed = 0;
+                    var open = 1;
+                    var closed = 1;
                     // Loop backwards to get issue-dates in ascending order
                     for ( var i=(jsonArray["length"] - 1); i >= 0; i--) {
-
+                        console.log("---------------Add Issue to graph----------------");
                         // Issues will be sorted in ascending order 
                         // Loop until date == createdDate for next issue in jsonArray
                         // Compare String, no need to parse to a date? Date.parse("2018-10-15") 
@@ -188,15 +189,17 @@ view: {
                             console.log("Iteration date: " + date.toISOString().substr(0, 10).replace('T', ' '));
 
                             //Add a row and prepare next iteration
-                            data.addRow([date, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+                            //data.addRow([date, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+                            stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                            data.addRow([stupidDateFormat, closed, open ]);
                             date.setDate(date.getDate() +1 );
                         }
-                        console.log("---------------Add Issue to graph----------------");
+                        
                         console.log("created: " + jsonArray[i].created.toString().split(" ")[0]);
                         console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString().split(" ")[0]);
                         console.log("Current date: " + date.toISOString().substr(0, 10).replace('T', ' '));//.split(" ")[0]);           
                        // console.log("Growing from : " + jsonArray[i].created.toString() ); 
-                        console.log("-------------------------------------------------");
+                        
 
                         if ( jsonArray[i].created.toString().split(" ")[0] == date.toISOString().substr(0, 10).replace('T', ' ') )
                             open++;
@@ -204,9 +207,13 @@ view: {
                             closed++;
 
                         // DateFormat is a mess, stupidDateFormat works in googleLine...
-                        var stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-                        //console.log("Add row:[" +date.getDate() + " | Closed: " + closed + " | Open :" + open + " ]");
-                        data.addRow([stupidDateFormat, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+                       
+                        stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                        console.log("Add row:[" + stupidDateFormat.toISOString().substr(0, 10).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
+                        //data.addRow([stupidDateFormat, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+                        data.addRow([stupidDateFormat, closed, open ]);
+
+                        console.log("-------------------------------------------------");
                     }
                     
 
@@ -221,8 +228,12 @@ view: {
                       lineWidth: 4,
                       hAxis: {
                         viewWindow: {
-                            min: new Date(2018,6,1), //dateToday.getFullYear(), dateToday.getMonth(), dateToday.getDate()),
-                            max: new Date(2018,6,18) //new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
+                            //min: new Date(dateToday.getFullYear(), dateToday.getMonth(), dateToday.getDate()),
+                            min: new Date(2018,5,1),
+                            
+                            max: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
+                            //max: new Date(2018,5,18) //new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
+                    
                         },
                         title: 'Time',
                         gridlines: {count: 15}
