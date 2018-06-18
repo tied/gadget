@@ -166,18 +166,19 @@ view: {
                         date.setYear(date.getYear() - gadget.getPref("timeUnitsBox"));
                     
                     // Get the date where iteration should start
-                    firstDate = date;
+                    firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
 
                     var stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
                     console.log("First date is : " + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' '));
                     // get Json object array from args [{...}] that pulls it from GET-request 
                     var jsonArray = args.dataset["issues"];
 
-                    var open = 1;
-                    var closed = 1;
+                    var open = 0;
+                    var closed = 0;
                     // Loop backwards to get issue-dates in ascending order
                     for ( var i=(jsonArray["length"] - 1); i >= 0; i--) {
                         console.log("---------------Add Issue to graph----------------");
+
                         // Issues will be sorted in ascending order 
                         // Loop until date == createdDate for next issue in jsonArray
                         // Compare String, no need to parse to a date? Date.parse("2018-10-15") 
@@ -189,12 +190,12 @@ view: {
                                 date.setDate(date.getDate() +1 );
                                 continue; // Skip weekdays
                             }
-                            console.log("Iteration date: " + date.toISOString().substr(0, 10).replace('T', ' '));
+                            console.log("Add timeLine point: " + date.toISOString().substr(0, 10).replace('T', ' '));
 
                             //Add a row and prepare next iteration
-                            //data.addRow([date, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
                             stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-                            data.addRow([stupidDateFormat, closed, open ]);
+                            data.addRow([date, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+                            //data.addRow([stupidDateFormat, closed, open ]);
                             date.setDate(date.getDate() +1 );
                         }
 
@@ -209,22 +210,16 @@ view: {
                         console.log("created: " + jsonArray[i].created.toString().split(" ")[0]);
                         console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString().split(" ")[0]);
                         console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
-                        // console.log("Growing from : " + jsonArray[i].created.toString() ); 
                         console.log("Add row:[" + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
-                        console.log("-------------------------------------------------");
-
-                        
-                        
-
-                        
+                        console.log("-------------------------------------------------");    
                     }
                     //data.addRow([stupidDateFormat, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
-                    data.addRow([stupidDateFormat, closed, open ]);
+                    data.addRow([stupidDateFormat, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
 
 
                     
 
-
+                    console.log("First date to record: " + firstDate.toISOString().substr(0, 19).replace('T', ' '))
                     var options = {
                       title: 'Open vs Closed issues',
                       curveType: 'none',
@@ -232,8 +227,8 @@ view: {
                       lineWidth: 4,
                       hAxis: {
                         viewWindow: {
-                            //min: new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate()),
-                            min: new Date(2018,5,1),
+                            min: new Date(firstDate.getFullYear(), (firstDate.getMonth()), firstDate.getDate()),
+                            //min: new Date(2018,5,1),
                             
                             max: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+1)
                             //max: new Date(2018,5,18) //new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
