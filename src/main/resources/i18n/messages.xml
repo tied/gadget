@@ -18,7 +18,7 @@
 	<msg name="timeUnit.description">Choses time unit interval</msg>
 	<msg name="timeUnit.label">Period:</msg>
 
-	<msg name="isCumulative.startVal">false</msg>
+	<msg name="isCumulative.startVal">true</msg>
 	<msg name="isCumulative.description">Add closed issues count ontop of open issues</msg>
 	<msg name="isCumulative.label">Cumulative:</msg>
 	
