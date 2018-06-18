@@ -138,44 +138,34 @@ view: {
 
                     var filter = gadget.getPref("filterId").split("filter-")[1];
                     console.log("Found filter by Id: " + filter);
-/*
 
-                 // get filter searchURL and extract JQL-search param from filter
-                 var viewURL = "";
-                 AJS.$.ajax({
-                    url: "/rest/api/2/filter/" + filter,
-                    type: 'get',
-                    contentType: "application/json",
-                    dataType: "json",
-                    async: false,
-                    success: function(data) { viewURL = data["searchUrl"]; console.log(data); }
-                });
-                 var jql = viewURL.split("search?jql=")[1];
-                 console.log("jql search: " + jql);
-
-                 */
+                    // Prepares dataset and draws it to chart
                  function drawChart() {
                     var rows = gadget.getPref("timeUnitsBox");
+                    // Format settings for data rows in chart
                     var data = new google.visualization.DataTable();
-                    data.addColumn('datetime', 'Date');
+                    data.addColumn('date', 'Date');
                     data.addColumn('number', 'Closed');
                     data.addColumn('number', 'Open');
 
                     
                     // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
-                    var date = new Date();
-                    console.log("Today is : " + date.toISOString().substr(0, 19).replace('T', ' '));
+                    var dateToday = new Date();
+                    console.log("Today is : " + dateToday.toISOString().substr(0, 19).replace('T', ' '));
 
                     // Turn back time in date
                     if ( gadget.getPref("timeUnit") == "d" )
-                        date.setDate(date.getDate() - gadget.getPref("timeUnitsBox"));
+                        dateToday.setDate(dateToday.getDate() - gadget.getPref("timeUnitsBox"));
                     else if ( gadget.getPref("timeUnit") == "w" )
-                        date.setDate(date.getDate() - gadget.getPref("timeUnitsBox")*7);
+                        dateToday.setDate(dateToday.getDate() - gadget.getPref("timeUnitsBox")*7);
                     else if ( gadget.getPref("timeUnit") == "m" )
-                        date.setMonth(date.getMonth() - gadget.getPref("timeUnitsBox"));
+                        dateToday.setMonth(dateToday.getMonth() - gadget.getPref("timeUnitsBox"));
                     else
-                        date.setYear(date.getYear() - gadget.getPref("timeUnitsBox"));
+                        dateToday.setYear(dateToday.getYear() - gadget.getPref("timeUnitsBox"));
                     
+
+                    var date = dateToday;
+                    console.log("First day is : " + dateToday.toISOString().substr(0, 19).replace('T', ' '));
                     // get Json object array from args [{...}] that pulls it from GET-request 
                     var jsonArray = args.dataset["issues"];
 
@@ -196,12 +186,12 @@ view: {
                                 continue; // Skip weekdays
                             }
                             console.log("Iteration date: " + date.toISOString().substr(0, 10).replace('T', ' '));
-                            
+
                             //Add a row and prepare next iteration
                             data.addRow([date, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
                             date.setDate(date.getDate() +1 );
                         }
-                        console.log("----------------------Issue----------------------");
+                        console.log("---------------Add Issue to graph----------------");
                         console.log("created: " + jsonArray[i].created.toString().split(" ")[0]);
                         console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString().split(" ")[0]);
                         console.log("Current date: " + date.toISOString().substr(0, 10).replace('T', ' '));//.split(" ")[0]);           
@@ -213,8 +203,10 @@ view: {
                         if ( jsonArray[i].resolutionDate.toString().split(" ")[0] == date.toISOString().substr(0, 10).replace('T', ' ') )
                             closed++;
 
+                        // DateFormat is a mess, stupidDateFormat works in googleLine...
+                        var stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
                         //console.log("Add row:[" +date.getDate() + " | Closed: " + closed + " | Open :" + open + " ]");
-                        data.addRow([date, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+                        data.addRow([stupidDateFormat, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
                     }
                     
 
@@ -228,11 +220,16 @@ view: {
                       legend: { position: 'bottom' },
                       lineWidth: 4,
                       hAxis: {
+                        viewWindow: {
+                            min: new Date(2018,6,1), //dateToday.getFullYear(), dateToday.getMonth(), dateToday.getDate()),
+                            max: new Date(2018,6,18) //new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
+                        },
                         title: 'Time',
+                        gridlines: {count: 15}
                     },
                     vAxis: {
                       title: 'Issues'
-                  },
+                  }
               };
 
               var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
