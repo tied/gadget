@@ -33,7 +33,7 @@ Other
 <UserPref name="refresh" datatype="hidden" default_value="false"/>
 <UserPref name="timeUnitsBox" datatype="hidden" default_value="30"/>
 <UserPref name="timeUnit" datatype="hidden" default_value="d"/>
-<UserPref name="isCumulative" datatype="hidden" default_value="false"/>
+<UserPref name="isCumulative" datatype="hidden" default_value="true"/>
 <UserPref name="filterId" datatype="hidden" />
 
 <Content type="html" view="profile,canvas">
@@ -144,8 +144,8 @@ view: {
                     var rows = gadget.getPref("timeUnitsBox");
                     // Format settings for data rows in chart
                     var data = new google.visualization.DataTable();
-                    data.addColumn('date', 'Date');
-                    data.addColumn('number', 'Resolved');
+                    data.addColumn('string', 'Date');
+                    data.addColumn('number', 'Closed');
                     data.addColumn('number', 'Open');
 
                     
@@ -193,14 +193,14 @@ view: {
 
                             //Add a row and prepare next iteration
                             stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-                            data.addRow([stupidDateFormat, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+                            data.addRow([stupidDateFormat.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
                             //data.addRow([stupidDateFormat, closed, open ]);
                             date.setDate(date.getDate() +1 );
                         }
 
                         if ( jsonArray[i].created.toString().split(" ")[0] == date.toISOString().substr(0, 10).replace('T', ' ') )
                             open++;
-                        if ( jsonArray[i].resolutionDate.toString().split(" ")[0] == date.toISOString().substr(0, 10).replace('T', ' ') )
+                        if ( jsonArray[i].status.toString() == "To Do" )
                             closed++;
 
                         // DateFormat is a mess, stupidDateFormat works in googleLine...          
@@ -213,7 +213,7 @@ view: {
                         console.log("-------------------------------------------------");    
                     }
                     //data.addRow([stupidDateFormat, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
-                    data.addRow([stupidDateFormat, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+                    data.addRow([stupidDateFormat.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
 
 
                     

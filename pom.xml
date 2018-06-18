@@ -29,7 +29,7 @@
             <scope>provided</scope>
         </dependency>
         -->
-        <!-- My explicits imported dependencies -->
+        <!-- My explicit imported dependencies -->
         <dependency>
             <groupId>com.atlassian.gadgets</groupId>
             <artifactId>atlassian-gadgets-api</artifactId>

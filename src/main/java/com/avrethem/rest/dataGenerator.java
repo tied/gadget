@@ -1,32 +1,27 @@
 package com.avrethem.rest;
 
-import com.atlassian.jira.jql.parser.JqlQueryParser;
+import com.atlassian.jira.bc.issue.search.SearchService;
 import com.atlassian.jira.component.ComponentAccessor;
+
 import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.search.SearchException;
-import com.atlassian.jira.issue.search.SearchResults;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.util.json.JSONArray;
 import com.atlassian.jira.util.json.JSONException;
 import com.atlassian.jira.util.json.JSONObject;
-import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.plugins.rest.common.security.AnonymousAllowed;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import com.atlassian.query.Query;
-import com.atlassian.sal.api.component.ComponentLocator;
+
+
 import com.avrethem.servlet.searchServlet;
 
-import com.atlassian.jira.bc.issue.search.SearchService;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.List;
 
 
 /*
@@ -65,11 +60,14 @@ public class dataGenerator {
             for (Issue issue : issues) {
                 //System.out.println("[SYSTEM] Got Issue:" + issue.getKey() );
                 JSONObject jsonItem = new JSONObject();
+                //StatusManager statusManager;
+                //Response.Status status = statusManager.getStatus(issue.getStatusId());
 
                     jsonItem.put("created", issue.getCreated());
                     jsonItem.put("resolutionDate", (issue.getResolutionDate() == null) ? "none" : issue.getResolutionDate());
-                    jsonItem.put("resolution", (issue.getResolution() == null) ? "none" : issue.getResolution());
-                    jsonItem.put("status", issue.getStatusId());
+                    //jsonItem.put("resolution", (issue.getResolution() == null) ? "none" : issue.getResolution());
+                    //jsonItem.put("statusId", issue.getStatusId());
+                    jsonItem.put("status", issue.getStatusObject().getName());
 
                 jsonArray.put(jsonItem);
             }
