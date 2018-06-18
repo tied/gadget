@@ -208,8 +208,10 @@ view: {
                        // console.log("Growing from : " + jsonArray[i].created.toString() ); 
                         console.log("-------------------------------------------------");
 
-
-
+                        if ( jsonArray[i].created.toString().split(" ")[0] == date.toISOString().substr(0, 10).replace('T', ' ') )
+                            open++;
+                        if ( jsonArray[i].resolutionDate.toString().split(" ")[0] == date.toISOString().substr(0, 10).replace('T', ' ') )
+                            closed++;
 
                         //console.log("Add row:[" +date.getDate() + " | Closed: " + closed + " | Open :" + open + " ]");
                         data.addRow([date, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
