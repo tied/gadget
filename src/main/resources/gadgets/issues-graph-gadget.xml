@@ -209,7 +209,7 @@ view: {
                     while ( date.toISOString().substr(0, 10).replace('T', ' ') < 
                         jsonArray[i].created.toString().split(" ")[0]   ) 
                     { 
-                        if ( date.getDay() == 6 || date.getDay() == 0 ) // 6 is saturday, 0 is monday 
+                        if ( date.getDay() == 6 || date.getDay() == 0 && gadget.getPref("timeUnit") == "d") // 6 is saturday, 0 is monday 
                         {
                             date.setDate(date.getDate() +1 );
                             continue; // Skip weekdays
@@ -220,7 +220,17 @@ view: {
                         stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
                         data.addRow([stupidDateFormat.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
                         //data.addRow([stupidDateFormat, closed, open ]);
-                        date.setDate(date.getDate() +1 );
+
+
+                         if ( gadget.getPref("timeUnit") == "d" )
+                            date.setDate(date.getDate() + 1);
+                        else if ( gadget.getPref("timeUnit") == "w" )
+                            date.setDate(date.getDate() + 1*7);
+                        else if ( gadget.getPref("timeUnit") == "m" )
+                            date.setMonth(date.getMonth() + 1);
+                        else
+                            date.setYear(date.getFullYear() + 1);
+                       // date.setDate(date.getDate() +1 );
                     }
 
                     if ( jsonArray[i].created.toString().split(" ")[0] <= date.toISOString().substr(0, 10).replace('T', ' ') )
