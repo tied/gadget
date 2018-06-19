@@ -60,10 +60,11 @@ google.charts.load('current', {'packages':['corechart']});
       config: {
         descriptor: function (args) {
             var gadget = this;
-            //console.log(args.fav); //Sucessfully loaded favourite filters
+
             gadgets.window.setTitle(gadget.getMsg("gadget.title"));
             var filterPicker = AJS.gadget.fields.filterPicker(gadget, "filterId");
 
+            // Create JSON-object from args.statuses
             var text = '[ ';
             var jsonArray = args.statuses;
             for ( var i=(jsonArray["length"] - 1); i >= 0; i--) {
@@ -72,7 +73,7 @@ google.charts.load('current', {'packages':['corechart']});
             text = text.substring(0, text.length - 1);
             text += ' ]';
 
-                        
+            // Send UI to config tab, more info: https://developer.atlassian.com/server/framework/gadgets/field-definitions/        
             return  {
                 fields: [
                 filterPicker,
@@ -130,40 +131,57 @@ google.charts.load('current', {'packages':['corechart']});
                     label: "Status:",
                     description: "Choose status",
                     type: "select",
-                    selected: gadget.getPref("statusName"), //[gadget.getPref("statusSelected")].name,
+                    selected: gadget.getPref("statusName"), 
                     options: JSON.parse(text)
                 },
                 AJS.gadget.fields.nowConfigured()
                 ]
             };
-        },
+        }, // arguments to descriptor: function(args) above
         args: [{
-                key: "statuses",
-                ajaxOptions: function() {
-                    return {
-                        contentType: 'application/json',
-                        url: "__ATLASSIAN_BASE_URL__/rest/api/latest/status"
-                    }
+            key: "statuses",
+            ajaxOptions: function() {
+                return {
+                    contentType: 'application/json',
+                    url: "__ATLASSIAN_BASE_URL__/rest/api/latest/status"
                 }
+            }
             }] // End args
 }, // End config
 view: {
     enableReload: true,
     onResizeAdjustHeight: true,
-    template: function(args) {
-            // Start template >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            var gadget = this;
+            /**
+             * Template function renders should render view or html
+             *
+             * Usage of parameter is: args.'key'
+             *
+             * @param {JSONArray}    args        A json filled with arguments from args[{...}] section
+             * 
+             * @return {type} void
+             */
+             template: function(args) {
+                var gadget = this;
 
-            console.log("Chosen status by name: " + gadget.getPref("statusName"));
-            console.log(args.dataset)
-            console.log(args.byStatus);
+            //console.log("Chosen status by name: " + gadget.getPref("statusName"));
+            //console.log(args.dataset)
+            //console.log(args.byStatus);
             gadget.getView().empty(); // Reset view
 
+            // Filter comes in format 'filter-filterID'
             var filter = gadget.getPref("filterId").split("filter-")[1];
-            console.log("Found filter by Id: " + filter);
+            //console.log("Found filter by Id: " + filter);
 
-            function setDateBackwardsInTime(date, num) {
-                 // Turn back time in date
+            /**
+             * Turn back time in parameter date. (use period)
+             *
+             * Set date backawards in time depending on param 'num' and gadget.getPref
+             * @param {Date}    date        Date to set
+             * @param {int}     num         Number of time units to set date backwards
+             * 
+             * @return {type} void
+             */
+             function setDateBackwardsInTime(date, num) {
                 if ( gadget.getPref("timeUnit") == "d" )
                     date.setDate(date.getDate() - num);
                 else if ( gadget.getPref("timeUnit") == "w" )
@@ -174,31 +192,33 @@ view: {
                     date.setYear(date.getFullYear() - num);
             }
 
-            // Prepares dataset and draws it to chart
-            function drawChart() {
+            
+            /**
+             * Prepares dataset and draws it
+             *
+             * Prepares dataset by adding rows, draws a Google line chart
+             *
+             *
+             * @return {type} void
+             */
+             function drawChart() {
                 var rows = gadget.getPref("timeUnitsBox");
-                // Format settings for data rows in chart
                 var data = new google.visualization.DataTable();
-                data.addColumn('string', 'Date');
+                data.addColumn('string', 'Date');                                                       // Format settings for data rows in chart
                 data.addColumn('number', gadget.getPref("statusName"));
                 data.addColumn('number', 'Open');
 
+                var date = new Date();                                                                  // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
+                //console.log("Today is : " + lastDate.toISOString().substr(0, 19).replace('T', ' '));
 
-                // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
-                var lastDate = new Date();
-                var date = lastDate;
-                console.log("Today is : " + lastDate.toISOString().substr(0, 19).replace('T', ' '));
-
-               
                 setDateBackwardsInTime(date, gadget.getPref("timeUnitsBox"));
 
-                // Get the date where iteration should start
-                var firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
-                // Set a stupid date format so google-line's timeline is presented proporly!
-                var stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
-                console.log("First date is : " + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' '));
-                // get Json object array from args [{...}] that pulls it from GET-request 
-                var jsonArray = args.dataset["issues"];
+                var firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);       // Get the date where iteration should start
+                
+                var stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1); // Set a stupid date format so google-line's timeline is presented proporly!
+                //console.log("First date is : " + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' '));
+                
+                var jsonArray = args.dataset["issues"];                                                 // get Json object array from args [{...}] that pulls it from GET-request 
                 var byStatus = args.byStatus["snapshots"];
                 var index = 0;
 
@@ -214,18 +234,14 @@ view: {
                     while ( date.toISOString().substr(0, 10).replace('T', ' ') < 
                         jsonArray[i].created.toString().split(" ")[0]   ) 
                     { 
-                        if ( date.getDay() == 6 || date.getDay() == 0 && gadget.getPref("timeUnit") == "d") // 6 is saturday, 0 is monday 
+                        if ( date.getDay() == 6 || date.getDay() == 0 && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == monday Only when day
                         {
                             date.setDate(date.getDate() +1 );
-                            continue; // Skip weekdays
+                            continue; 
                         }
-                        //console.log("Add timeLine point: " + date.toISOString().substr(0, 10).replace('T', ' '));
 
-                        //Add a row and prepare next iteration
                         stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
                         data.addRow([stupidDateFormat.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
-                        //data.addRow([stupidDateFormat, closed, open ]);
-
 
                         setDateBackwardsInTime(date, -1);
                     }
@@ -243,23 +259,20 @@ view: {
                     if ( date.toISOString().substr(0, 10).replace('T', ' ') >  tmp.toISOString().substr(0, 10).replace('T', ' ') )
                         index = (index+1)%byStatus.length;
 
-                    // DateFormat is a mess, stupidDateFormat works in googleLine...          
-                    stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
-/*
-                    console.log("created: " + jsonArray[i].created.toString().split(" ")[0]);
+
+                    stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1); // DateFormat is a mess, stupidDateFormat works in googleLine...     
+                    
+                    /*console.log("created: " + jsonArray[i].created.toString().split(" ")[0]);
                     console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString().split(" ")[0]);
                     console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
                     console.log("Add row:[" + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
                     console.log("-------------------------------------------------");    */
                 }
-                //data.addRow([stupidDateFormat, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
                 data.addRow([stupidDateFormat.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
 
 
-
-
-                console.log("First date to record: " + firstDate.toISOString().substr(0, 19).replace('T', ' '));
-                console.log("Last date to record: " + new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+1).toISOString().substr(0, 19).replace('T', ' '));
+                //console.log("First date to record: " + firstDate.toISOString().substr(0, 19).replace('T', ' '));
+                //console.log("Last date to record: " + new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+1).toISOString().substr(0, 19).replace('T', ' '));
 
                 var options = {
                   title: 'Open vs ' + gadget.getPref("statusName") + ' issues',
@@ -269,31 +282,25 @@ view: {
                   hAxis: {
                     viewWindow: {
                         min: new Date(firstDate.getFullYear(), (firstDate.getMonth()), firstDate.getDate()),
-                            //min: new Date(2018,5,1),
-                            
-                            max: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+1)
-                            //max: new Date(2018,5,18) //new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
-
-                        },
-                        title: 'Time',
-                        gridlines: {count: 15}
+                        max: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+1)
                     },
-                    vAxis: {
-                      title: 'Issues'
-                  }
-              };
+                    //title: 'Time',
+                    gridlines: {count: 15}
+                },
+                vAxis: {
+                  //title: 'Issues'
+              }
+          };
 
-              var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-
-              chart.draw(data, options);
+          var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+          chart.draw(data, options);
             } // End drawChart()
 
-            gadget.getView().append("<div id='chart_div' align='center' style='width: 98%; height: 99%'/>"); // Append element to doc, 'curve_chart' set in reports-plugin.js
-            console.log("Call to drawChart()");
+            gadget.getView().append("<div id='chart_div' align='center' style='width: 98%; height: 99%'/>");    // Append element with id of 'curve_chart' 
             google.charts.setOnLoadCallback(drawChart);
-            console.log("Completed view statements")
+            console.log("IssueLinePlotter 2D loaded");
 
-            },// End template <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            },// End template function
             args: [{
                 key: "dataset",
                 ajaxOptions: function() {
@@ -306,8 +313,8 @@ view: {
                         }
                     };
                 }
-                },
-                {
+            },
+            {
                 key: "byStatus",
                 ajaxOptions: function() {
                     return {
