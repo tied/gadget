@@ -81,7 +81,7 @@ google.charts.load('current', {'packages':['corechart']});
                     label: gadget.getMsg("timeUnit.label"),
                     description:gadget.getMsg("timeUnit.description"),
                     type: "select",
-                    selected: gadget.getMsg("timeUnit.startVal"),
+                    selected: gadget.getPref("timeUnit"),
                     options:[
                     {
                         label:"Day",
@@ -106,14 +106,14 @@ google.charts.load('current', {'packages':['corechart']});
                     label: gadget.getMsg("timeUnitsBox.label"),
                     description:gadget.getMsg("timeUnitsBox.description"),
                     type: "text",
-                    value: gadget.getMsg("timeUnitsBox.startVal")
+                    value: gadget.getPref("timeUnitsBox")
                 },
                 {
                     userpref: "isCumulative",
                     label: gadget.getMsg("isCumulative.label"),
                     description: gadget.getMsg("isCumulative.description"),
                     type: "select",
-                    selected: gadget.getMsg("isCumulative.startVal"),
+                    selected: gadget.getPref("isCumulative"),
                     options:[
                     {
                         label: "True",
@@ -156,6 +156,7 @@ view: {
 
             console.log("Chosen status by name: " + gadget.getPref("statusName"));
             console.log(args.dataset)
+            console.log(args.byStatus);
             gadget.getView().empty(); // Reset view
 
             var filter = gadget.getPref("filterId").split("filter-")[1];
@@ -286,9 +287,23 @@ view: {
                             filterId : gadgets.util.unescapeString(this.getPref("filterId")),
                             timePeriod : gadgets.util.unescapeString(this.getPref("timeUnitsBox") + this.getPref("timeUnit"))
                         }
-                    }
+                    };
                 }
-            }] // End args
+                },
+                {
+                key: "byStatus",
+                ajaxOptions: function() {
+                    return {
+                        contentType: 'application/json',
+                        url: "__ATLASSIAN_BASE_URL__/rest/datagenerator/1.0/message/getDatesetByStatusAndByDate",
+                        data: {
+                            filterId : gadgets.util.unescapeString(this.getPref("filterId")),
+                            timePeriod : gadgets.util.unescapeString(this.getPref("timeUnitsBox") + this.getPref("timeUnit")),
+                            statusByName: gadgets.util.unescapeString(this.getPref("statusName"))
+                        }
+                    };
+                }
+                }] // End args
         } // End view
     }); // End gadget
 })(); // End function

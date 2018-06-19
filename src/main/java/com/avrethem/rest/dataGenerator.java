@@ -48,9 +48,9 @@ public class dataGenerator {
         ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
 
         try {
-            //System.out.println("[SYSTEM] filterId: " + filterIdString);
+            System.out.println("[SYSTEM] filterId: " + filterIdString);
             filterIdString = filterIdString.split("filter-")[1];
-            //System.out.println("[SYSTEM] filterId: " + filterIdString);
+            System.out.println("[SYSTEM] filterId: " + filterIdString);
 
             List<Issue> issues = searchServlet.getIssuesInFilter(user, filterIdString);
 
@@ -107,21 +107,22 @@ public class dataGenerator {
             JSONArray jsonArray = new JSONArray();
 
             try {
-                int iterations = Integer.parseInt(timePeriodString.substring(0,(timePeriodString.length()-2)));
-                String timeUnit = timePeriodString.substring((timePeriodString.length()-3), (timePeriodString.length()-2));
-
+                int iterations = Integer.parseInt(timePeriodString.substring(0,(timePeriodString.length()-1)));
+                String timeUnit = timePeriodString.substring((timePeriodString.length()-1), (timePeriodString.length()));
+                System.out.println("[MEESSAGE] status: " + statusString);
+                System.out.println("[MEESSAGE] timeUnit: " + timeUnit);
                 for (int i=iterations; i >= 0; i--) {
 
                     JSONObject jsonItem = new JSONObject();
                     String backInTime = Integer.toString(i) + timeUnit;
                     List<Issue> issues = searchServlet.getIssuesByFilterAndByStatusBackInTime(user, filterIdString, statusString, backInTime);
 
-                    jsonItem.put("date", backInTime);
-                    jsonItem.put(statusString, Integer.toString(issues.size()) );
+                    jsonItem.put("backintime", backInTime);
+                    jsonItem.put("total", Integer.toString(issues.size()) );
 
                     jsonArray.put(jsonItem);
                 }
-                jsonObject.put((statusString + "s"), jsonArray);
+                jsonObject.put(("totals"), jsonArray);
                 return Response.ok(jsonObject.toString(),  MediaType.APPLICATION_JSON).build();
 
             } catch (JSONException e) {
