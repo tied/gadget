@@ -164,8 +164,8 @@ view: {
                 var gadget = this;
 
             //console.log("Chosen status by name: " + gadget.getPref("statusName"));
-            //console.log(args.dataset)
-            //console.log(args.byStatus);
+            console.log(args.dataset)
+            console.log(args.byStatus);
             gadget.getView().empty(); // Reset view
 
             // Filter comes in format 'filter-filterID'
@@ -258,7 +258,7 @@ view: {
 
                     if ( date.toISOString().substr(0, 10).replace('T', ' ') >  tmp.toISOString().substr(0, 10).replace('T', ' ') )
                         index = (index+1)%byStatus.length;
-
+                    console.log("Index: " + index);
 
                     stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1); // DateFormat is a mess, stupidDateFormat works in googleLine...     
                     
@@ -268,6 +268,8 @@ view: {
                     console.log("Add row:[" + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
                     console.log("-------------------------------------------------");    */
                 }
+                console.log("Add Last row:[" + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
+                console.log("Index: " + index);
                 data.addRow([stupidDateFormat.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
 
 

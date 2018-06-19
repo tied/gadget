@@ -19,6 +19,9 @@ import com.atlassian.query.Query;
 
 
 import com.avrethem.servlet.searchServlet;
+import com.avrethem.UtilPair;
+
+import javafx.util.Pair;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
@@ -27,8 +30,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
-
+import java.util.*;
 
 /*
  A resource of message.
@@ -66,9 +68,9 @@ public class dataGenerator {
             JSONArray jsonArray = new JSONArray();
 
             try {
-            for (Issue issue : issues) {
-                //log.info("[SYSTEM] Got Issue:" + issue.getKey() );
-                JSONObject jsonItem = new JSONObject();
+                for (Issue issue : issues) {
+                    //log.info("[SYSTEM] Got Issue:" + issue.getKey() );
+                    JSONObject jsonItem = new JSONObject();
 
                     jsonItem.put("created", issue.getCreated());
                     //jsonItem.put("resolutionDate", (issue.getResolutionDate() == null) ? "none" : issue.getResolutionDate());
@@ -78,20 +80,18 @@ public class dataGenerator {
                     /*
     //Possible way to extract info on Issue history
                 List<ChangeHistory> changes = ComponentAccessor.getChangeHistoryManager().getChangeHistories(issue);
-
                 ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
                 List<ChangeItemBean> changeItemBeans= changeHistoryManager.getChangeItemsForField(issue, "status");
                 for ( ChangeItemBean c : changeItemBeans ) {
                     //log.info("[Issue]: " + issue.getKey() + " "+ c.getField() + ":" + c.getToString() + " " + c.getCreated() );
                     log.info("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFrom() + "\t to:" + c.getTo()  );
-
                 }*/
 
 
-                jsonArray.put(jsonItem);
-            }
-            jsonObject.put("issues", jsonArray);
-            return Response.ok(jsonObject.toString(),  MediaType.APPLICATION_JSON).build();
+                    jsonArray.put(jsonItem);
+                }
+                jsonObject.put("issues", jsonArray);
+                return Response.ok(jsonObject.toString(),  MediaType.APPLICATION_JSON).build();
 
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
@@ -106,6 +106,8 @@ public class dataGenerator {
 
 
 
+
+
     @GET
     @AnonymousAllowed
     @Produces({MediaType.APPLICATION_JSON})
@@ -115,41 +117,64 @@ public class dataGenerator {
                                                 @QueryParam("statusByName") String statusString)
     {
         ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
+        TreeMap<String, UtilPair> m = new TreeMap<String, UtilPair>();
 
         try {
             filterIdString = filterIdString.split("filter-")[1];
+            //log.info("[SYSTEM] filterId: " + filterIdString);
 
-            JSONObject jsonObject = new JSONObject();
-            JSONArray jsonArray = new JSONArray();
+            List<Issue> issues = searchServlet.getIssuesInFilter(user, filterIdString);
+/*
+                for (Issue issue : issues) {
+                    String issueDate = issue.getCreated().toString().substring(0, 10);
+                    m.put(issueDate, m.get(issueDate).add(1, 0));
 
-            try {
-                int iterations = Integer.parseInt(timePeriodString.substring(0,(timePeriodString.length()-1)));
-                String timeUnit = timePeriodString.substring((timePeriodString.length()-1), (timePeriodString.length()));
-                //log.info("[MEESSAGE] status: " + statusString);
-                //log.info("[MEESSAGE] timeUnit: " + timeUnit);
-                for (int i=iterations; i >= 0; i--) {
+                    ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
+                    List<ChangeItemBean> changeItemBeans= changeHistoryManager.getChangeItemsForField(issue, "status");
+                    for ( ChangeItemBean c : changeItemBeans ) {
+                        System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to:" + c.getToString()  );
 
+                        // If a issue comes from 'Closed' map[Date]-- && issue goes to 'Closed' map[Date]++
+                        issueDate = c.getCreated().toString().substring(0, 10);
+                        if ( c.getFromString() == statusString )
+                            m.put(issueDate, m.get(issueDate).add(0, 1));
+                        if ( c.getToString()   == statusString )
+                            m.put(issueDate, m.get(issueDate).sub(0, 1));
+                    }
+                }*/
+        } catch (SearchException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        try {
+                JSONObject jsonObject = new JSONObject();
+                JSONArray jsonArray = new JSONArray();
+
+                for(Map.Entry<String, UtilPair> entry : m.entrySet()) {
                     JSONObject jsonItem = new JSONObject();
-                    String backInTime = Integer.toString(i) + timeUnit;
-                    List<Issue> issues = searchServlet.getIssuesByFilterAndByStatusBackInTime(user, filterIdString, statusString, backInTime);
 
-                    jsonItem.put("backintime", backInTime);
-                    jsonItem.put("total", Integer.toString(issues.size()) );
-                 //   log.info("[MEESSAGE] issues: " + issues.size() );
+                    jsonItem.put("date", entry.getKey());
+                    jsonItem.put("opened", entry.getValue().open);
+                    jsonItem.put("closed", entry.getValue().closed);
 
                     jsonArray.put(jsonItem);
+
+                    System.out.println(entry.getKey() + " => Open: " + entry.getValue().open + " Closed: " + entry.getValue().closed);
                 }
-                jsonObject.put(("snapshots"), jsonArray);
+
+
+
+
+
+                jsonObject.put("issues", jsonArray);
                 return Response.ok(jsonObject.toString(),  MediaType.APPLICATION_JSON).build();
 
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        } catch (SearchException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
         return Response.serverError().build();
     }
 

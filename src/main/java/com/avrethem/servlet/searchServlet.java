@@ -88,8 +88,8 @@ public class searchServlet extends HttpServlet{
         SearchRequestManager srm = ComponentAccessor.getComponentOfType(SearchRequestManager.class);
         SearchRequest filter = srm.getSearchRequestById(user, Long.valueOf(filterId));
         String jqlQuery = filter.getQuery().getQueryString();
-        jqlQuery += " AND status was " + status + " ON startOfDay(-" + backInTime + ")";
-        log.info("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
+        jqlQuery += " AND status was " + status + " ON endOfDay(-" + backInTime + ")";
+        System.out.println("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
         return getIssuesInQuery(user, jqlQuery);
     }
 
