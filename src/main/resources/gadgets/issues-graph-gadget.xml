@@ -61,7 +61,7 @@ google.charts.load('current', {'packages':['corechart']});
         descriptor: function (args) {
             var gadget = this;
             //console.log(args.fav); //Sucessfully loaded favourite filters
-            gadgets.window.setTitle("Issue graph plugins");
+            gadgets.window.setTitle(gadget.getMsg("gadget.title"));
             var filterPicker = AJS.gadget.fields.filterPicker(gadget, "filterId");
 
             var text = '[ ';
@@ -93,7 +93,7 @@ google.charts.load('current', {'packages':['corechart']});
                     },
                     {
                         label:"Month",
-                        value:"m"
+                        value:"M"
                     },
                     {
                         label:"Year",
@@ -127,7 +127,7 @@ google.charts.load('current', {'packages':['corechart']});
                 },
                 {
                     userpref: "statusName",
-                    label: "Status",
+                    label: "Status:",
                     description: "Choose status",
                     type: "select",
                     selected: gadget.getPref("statusName"), //[gadget.getPref("statusSelected")].name,
@@ -168,7 +168,7 @@ view: {
                     date.setDate(date.getDate() - num);
                 else if ( gadget.getPref("timeUnit") == "w" )
                     date.setDate(date.getDate() - num*7);
-                else if ( gadget.getPref("timeUnit") == "m" )
+                else if ( gadget.getPref("timeUnit") == "M" )
                     date.setMonth(date.getMonth() - num);
                 else
                     date.setYear(date.getFullYear() - num);
@@ -239,11 +239,9 @@ view: {
                     
                     var tmp = new Date(); //turnBackTime(gadget.getPref("timeUnit"), numberBack);
                     setDateBackwardsInTime(tmp, numberBack);
-                    
-                    if ( date.toISOString().substr(0, 10).replace('T', ' ') >=  tmp.toISOString().substr(0, 10).replace('T', ' ') )
-                    {
+
+                    if ( date.toISOString().substr(0, 10).replace('T', ' ') >  tmp.toISOString().substr(0, 10).replace('T', ' ') )
                         index = (index+1)%byStatus.length;
-                    }
 
                     // DateFormat is a mess, stupidDateFormat works in googleLine...          
                     stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);

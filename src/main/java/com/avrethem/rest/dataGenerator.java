@@ -19,6 +19,7 @@ import com.atlassian.query.Query;
 
 
 import com.avrethem.servlet.searchServlet;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -34,6 +35,8 @@ import java.util.List;
  */
 @Path("/message")
 public class dataGenerator {
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(dataGenerator.class);
+
     @GET
     @AnonymousAllowed
     @Produces({MediaType.APPLICATION_JSON})
@@ -53,38 +56,38 @@ public class dataGenerator {
         ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
 
         try {
-            System.out.println("[SYSTEM] filterId: " + filterIdString);
             filterIdString = filterIdString.split("filter-")[1];
-            System.out.println("[SYSTEM] filterId: " + filterIdString);
+            //log.info("[SYSTEM] filterId: " + filterIdString);
 
             List<Issue> issues = searchServlet.getIssuesInFilter(user, filterIdString);
-
             //List<Issue> issues = searchServlet.getIssuesInFilterBackInTime(user, filterIdString, timePeriodString);
+
             JSONObject jsonObject = new JSONObject();
             JSONArray jsonArray = new JSONArray();
 
             try {
             for (Issue issue : issues) {
-                //System.out.println("[SYSTEM] Got Issue:" + issue.getKey() );
+                //log.info("[SYSTEM] Got Issue:" + issue.getKey() );
                 JSONObject jsonItem = new JSONObject();
-                //StatusManager statusManager;
-                //Response.Status status = statusManager.getStatus(issue.getStatusId());
 
                     jsonItem.put("created", issue.getCreated());
                     //jsonItem.put("resolutionDate", (issue.getResolutionDate() == null) ? "none" : issue.getResolutionDate());
                     //jsonItem.put("resolution", (issue.getResolution() == null) ? "none" : issue.getResolution());
                     //jsonItem.put("statusId", issue.getStatusId());
-                    jsonItem.put("status", issue.getStatusObject().getName());
-
-    /* Possible way to extract info on Issue history
+                    //jsonItem.put("status", issue.getStatusObject().getName());
+                    /*
+    //Possible way to extract info on Issue history
                 List<ChangeHistory> changes = ComponentAccessor.getChangeHistoryManager().getChangeHistories(issue);
 
                 ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
                 List<ChangeItemBean> changeItemBeans= changeHistoryManager.getChangeItemsForField(issue, "status");
                 for ( ChangeItemBean c : changeItemBeans ) {
-                    System.out.println("[Issue]: " + issue.getKey() + " "+ c.getField() + ":" + c.getToString() + " " + c.getCreated() );
-                }
-*/
+                    //log.info("[Issue]: " + issue.getKey() + " "+ c.getField() + ":" + c.getToString() + " " + c.getCreated() );
+                    log.info("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFrom() + "\t to:" + c.getTo()  );
+
+                }*/
+
+
                 jsonArray.put(jsonItem);
             }
             jsonObject.put("issues", jsonArray);
@@ -116,15 +119,14 @@ public class dataGenerator {
         try {
             filterIdString = filterIdString.split("filter-")[1];
 
-
             JSONObject jsonObject = new JSONObject();
             JSONArray jsonArray = new JSONArray();
 
             try {
                 int iterations = Integer.parseInt(timePeriodString.substring(0,(timePeriodString.length()-1)));
                 String timeUnit = timePeriodString.substring((timePeriodString.length()-1), (timePeriodString.length()));
-                System.out.println("[MEESSAGE] status: " + statusString);
-                System.out.println("[MEESSAGE] timeUnit: " + timeUnit);
+                //log.info("[MEESSAGE] status: " + statusString);
+                //log.info("[MEESSAGE] timeUnit: " + timeUnit);
                 for (int i=iterations; i >= 0; i--) {
 
                     JSONObject jsonItem = new JSONObject();
@@ -133,6 +135,7 @@ public class dataGenerator {
 
                     jsonItem.put("backintime", backInTime);
                     jsonItem.put("total", Integer.toString(issues.size()) );
+                 //   log.info("[MEESSAGE] issues: " + issues.size() );
 
                     jsonArray.put(jsonItem);
                 }

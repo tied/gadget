@@ -31,6 +31,7 @@ import com.atlassian.jira.component.ComponentAccessor;
 
 public class searchServlet extends HttpServlet{
     private static final long serialVersionUID = 1L;
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(searchServlet.class);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -57,7 +58,7 @@ public class searchServlet extends HttpServlet{
             SearchResults results = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
             return results.getIssues();
         } else {
-            System.out.println("[GADGET::dataGenerator] Error parsing query:" + jqlQuery);
+            log.error("[issues-metric]@searchServlet::getIssueInQuery] Error parsing query:" + jqlQuery);
             return Collections.emptyList();
         }
     }
@@ -75,24 +76,20 @@ public class searchServlet extends HttpServlet{
     }
 
     static public List<Issue> getIssuesInFilterBackInTime(ApplicationUser user, String filterId, String backInTime ) throws SearchException {
-        SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
-
         SearchRequestManager srm = ComponentAccessor.getComponentOfType(SearchRequestManager.class);
         SearchRequest filter = srm.getSearchRequestById(user, Long.valueOf(filterId));
         String jqlQuery = filter.getQuery().getQueryString();
         jqlQuery += " AND createdDate >= startOfDay(-" + backInTime + ")";
-        System.out.println("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
+        log.info("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
         return getIssuesInQuery(user, jqlQuery);
     }
 
     static public List<Issue> getIssuesByFilterAndByStatusBackInTime(ApplicationUser user, String filterId, String  status, String backInTime ) throws SearchException {
-        SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
-
         SearchRequestManager srm = ComponentAccessor.getComponentOfType(SearchRequestManager.class);
         SearchRequest filter = srm.getSearchRequestById(user, Long.valueOf(filterId));
         String jqlQuery = filter.getQuery().getQueryString();
-        jqlQuery += " AND status was " + status + " ON startOfMonth(-" + backInTime + ")";
-        System.out.println("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
+        jqlQuery += " AND status was " + status + " ON startOfDay(-" + backInTime + ")";
+        log.info("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
         return getIssuesInQuery(user, jqlQuery);
     }
 

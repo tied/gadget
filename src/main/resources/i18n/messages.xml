@@ -1,5 +1,5 @@
 <messagebundle>
-	<msg name="gadget.title">Closed vs Open issues</msg>
+	<msg name="gadget.title">IssueLinePlotter 2D</msg>
 	<msg name="gadget.title.url">None</msg>
 	<msg name="gadget.description">Google-line graph for closed vs open issues</msg>
 	<msg name="gadget.user.title">Closed vs Open issues</msg>
@@ -16,7 +16,7 @@
 
 	<msg name="timeUnit.startVal">Day</msg>
 	<msg name="timeUnit.description">Choses time unit interval</msg>
-	<msg name="timeUnit.label">Period:</msg>
+	<msg name="timeUnit.label">Resolution:</msg>
 
 	<msg name="isCumulative.startVal">true</msg>
 	<msg name="isCumulative.description">Add closed issues count ontop of open issues</msg>
