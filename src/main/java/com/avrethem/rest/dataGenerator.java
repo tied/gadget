@@ -52,7 +52,9 @@ public class dataGenerator {
             filterIdString = filterIdString.split("filter-")[1];
             //System.out.println("[SYSTEM] filterId: " + filterIdString);
 
-            List<Issue> issues = searchServlet.getIssuesInFilterBackInTime(user, filterIdString, timePeriodString);
+            List<Issue> issues = searchServlet.getIssuesInFilter(user, filterIdString);
+
+            //List<Issue> issues = searchServlet.getIssuesInFilterBackInTime(user, filterIdString, timePeriodString);
             JSONObject jsonObject = new JSONObject();
             JSONArray jsonArray = new JSONArray();
 
@@ -64,10 +66,11 @@ public class dataGenerator {
                 //Response.Status status = statusManager.getStatus(issue.getStatusId());
 
                     jsonItem.put("created", issue.getCreated());
-                    jsonItem.put("resolutionDate", (issue.getResolutionDate() == null) ? "none" : issue.getResolutionDate());
+                    //jsonItem.put("resolutionDate", (issue.getResolutionDate() == null) ? "none" : issue.getResolutionDate());
                     //jsonItem.put("resolution", (issue.getResolution() == null) ? "none" : issue.getResolution());
                     //jsonItem.put("statusId", issue.getStatusId());
                     jsonItem.put("status", issue.getStatusObject().getName());
+                    issue.getParentId().
 
                 jsonArray.put(jsonItem);
             }

@@ -167,7 +167,7 @@ view: {
                 // Format settings for data rows in chart
                 var data = new google.visualization.DataTable();
                 data.addColumn('string', 'Date');
-                data.addColumn('number', 'Closed');
+                data.addColumn('number', gadget.getPref("statusName"));
                 data.addColumn('number', 'Open');
 
 
@@ -198,7 +198,7 @@ view: {
                 var closed = 0;
                 // Loop backwards to get issue-dates in ascending order
                 for ( var i=(jsonArray["length"] - 1); i >= 0; i--) {
-                    console.log("---------------Add Issue to graph----------------");
+                    //console.log("---------------Add Issue to graph----------------");
 
                     // Issues will be sorted in ascending order 
                     // Loop until date == createdDate for next issue in jsonArray
@@ -211,7 +211,7 @@ view: {
                             date.setDate(date.getDate() +1 );
                             continue; // Skip weekdays
                         }
-                        console.log("Add timeLine point: " + date.toISOString().substr(0, 10).replace('T', ' '));
+                        //console.log("Add timeLine point: " + date.toISOString().substr(0, 10).replace('T', ' '));
 
                         //Add a row and prepare next iteration
                         stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -220,19 +220,19 @@ view: {
                         date.setDate(date.getDate() +1 );
                     }
 
-                    if ( jsonArray[i].created.toString().split(" ")[0] == date.toISOString().substr(0, 10).replace('T', ' ') )
+                    if ( jsonArray[i].created.toString().split(" ")[0] <= date.toISOString().substr(0, 10).replace('T', ' ') )
                         open++;
                     if ( jsonArray[i].status.toString() == gadget.getPref("statusName") )
                         closed++;
 
                     // DateFormat is a mess, stupidDateFormat works in googleLine...          
                     stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
-
+/*
                     console.log("created: " + jsonArray[i].created.toString().split(" ")[0]);
                     console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString().split(" ")[0]);
                     console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
                     console.log("Add row:[" + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
-                    console.log("-------------------------------------------------");    
+                    console.log("-------------------------------------------------");    */
                 }
                 //data.addRow([stupidDateFormat, closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
                 data.addRow([stupidDateFormat.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
@@ -244,7 +244,7 @@ view: {
                 console.log("Last date to record: " + new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+1).toISOString().substr(0, 19).replace('T', ' '));
 
                 var options = {
-                  title: 'Open vs Closed issues',
+                  title: 'Open vs ' + gadget.getPref("statusName") + ' issues',
                   curveType: 'none',
                   legend: { position: 'bottom' },
                   lineWidth: 4,
