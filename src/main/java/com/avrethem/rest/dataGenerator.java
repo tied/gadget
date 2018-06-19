@@ -70,12 +70,59 @@ public class dataGenerator {
                     //jsonItem.put("resolution", (issue.getResolution() == null) ? "none" : issue.getResolution());
                     //jsonItem.put("statusId", issue.getStatusId());
                     jsonItem.put("status", issue.getStatusObject().getName());
-                    issue.getParentId().
 
                 jsonArray.put(jsonItem);
             }
             jsonObject.put("issues", jsonArray);
             return Response.ok(jsonObject.toString(),  MediaType.APPLICATION_JSON).build();
+
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } catch (SearchException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return Response.serverError().build();
+    }
+
+
+
+    @GET
+    @AnonymousAllowed
+    @Produces({MediaType.APPLICATION_JSON})
+    @Path("/getDatesetByStatusAndByDate")
+    public Response getDatesetByStatusAndByDate(@QueryParam("filterId") String filterIdString,
+                                                @QueryParam("timePeriod") String timePeriodString,
+                                                @QueryParam("statusByName") String statusString)
+    {
+        ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
+
+        try {
+            filterIdString = filterIdString.split("filter-")[1];
+
+
+            JSONObject jsonObject = new JSONObject();
+            JSONArray jsonArray = new JSONArray();
+
+            try {
+                int iterations = Integer.parseInt(timePeriodString.substring(0,(timePeriodString.length()-2)));
+                String timeUnit = timePeriodString.substring((timePeriodString.length()-3), (timePeriodString.length()-2));
+
+                for (int i=iterations; i >= 0; i--) {
+
+                    JSONObject jsonItem = new JSONObject();
+                    String backInTime = Integer.toString(i) + timeUnit;
+                    List<Issue> issues = searchServlet.getIssuesByFilterAndByStatusBackInTime(user, filterIdString, statusString, backInTime);
+
+                    jsonItem.put("date", backInTime);
+                    jsonItem.put(statusString, Integer.toString(issues.size()) );
+
+                    jsonArray.put(jsonItem);
+                }
+                jsonObject.put((statusString + "s"), jsonArray);
+                return Response.ok(jsonObject.toString(),  MediaType.APPLICATION_JSON).build();
 
             } catch (JSONException e) {
                 // TODO Auto-generated catch block

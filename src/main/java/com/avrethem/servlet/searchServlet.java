@@ -85,4 +85,15 @@ public class searchServlet extends HttpServlet{
         return getIssuesInQuery(user, jqlQuery);
     }
 
+    static public List<Issue> getIssuesByFilterAndByStatusBackInTime(ApplicationUser user, String filterId, String  status, String backInTime ) throws SearchException {
+        SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
+
+        SearchRequestManager srm = ComponentAccessor.getComponentOfType(SearchRequestManager.class);
+        SearchRequest filter = srm.getSearchRequestById(user, Long.valueOf(filterId));
+        String jqlQuery = filter.getQuery().getQueryString();
+        jqlQuery += " AND status was " + status + " ON startOfMonth(-" + backInTime + ")";
+        System.out.println("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
+        return getIssuesInQuery(user, jqlQuery);
+    }
+
 }
