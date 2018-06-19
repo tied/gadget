@@ -117,6 +117,8 @@ public class dataGenerator {
                                                 @QueryParam("statusByName") String statusString)
     {
         ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
+
+        // Build map
         TreeMap<String, UtilPair> m = new TreeMap<String, UtilPair>();
 
         try {
@@ -133,15 +135,16 @@ public class dataGenerator {
                     ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
                     List<ChangeItemBean> changeItemBeans= changeHistoryManager.getChangeItemsForField(issue, "status");
                     for ( ChangeItemBean c : changeItemBeans ) {
-                        System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to:" + c.getToString()  );
-
+                        System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString()  );
+                        //System.out.println( " status: " + statusString );
                         // If a issue comes from 'Closed' map[Date]-- && issue goes to 'Closed' map[Date]++
                         issueDate = c.getCreated().toString().substring(0, 10);
                         pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                        if ( c.getFromString() == statusString )
-                            m.put(issueDate, pair.add(0, 1));
-                        if ( c.getToString()   == statusString )
+                        if ( c.getFromString().equals(statusString) )
                             m.put(issueDate, pair.sub(0, 1));
+                        if ( c.getToString().equals(statusString) )
+                            m.put(issueDate, pair.add(0, 1));
+
                     }
                 }
         } catch (SearchException e) {
@@ -154,16 +157,22 @@ public class dataGenerator {
                 JSONObject jsonObject = new JSONObject();
                 JSONArray jsonArray = new JSONArray();
 
+                int totOpen = 0;
+                int totClosed = 0;
+
                 for(Map.Entry<String, UtilPair> entry : m.entrySet()) {
                     JSONObject jsonItem = new JSONObject();
 
-                    jsonItem.put("date", entry.getKey());
-                    jsonItem.put("opened", entry.getValue().open);
-                    jsonItem.put("closed", entry.getValue().closed);
+                    totOpen += entry.getValue().open;
+                    totClosed += entry.getValue().closed;
+
+                    jsonItem.put("issuedate", entry.getKey());
+                    jsonItem.put("opened", totOpen);
+                    jsonItem.put("closed", totClosed);
 
                     jsonArray.put(jsonItem);
 
-                    System.out.println(entry.getKey() + " => Open: " + entry.getValue().open + " Closed: " + entry.getValue().closed);
+                    System.out.println(entry.getKey() + " Open: " + entry.getValue().open + " " + statusString + ": " + entry.getValue().closed);
                 }
                 jsonObject.put("issues", jsonArray);
 
