@@ -4,11 +4,16 @@ import com.atlassian.jira.bc.issue.search.SearchService;
 import com.atlassian.jira.component.ComponentAccessor;
 
 import com.atlassian.jira.issue.Issue;
+import com.atlassian.jira.issue.changehistory.ChangeHistory;
+import com.atlassian.jira.issue.changehistory.ChangeHistoryManager;
+import com.atlassian.jira.issue.comments.Comment;
+import com.atlassian.jira.issue.history.ChangeItemBean;
 import com.atlassian.jira.issue.search.SearchException;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.util.json.JSONArray;
 import com.atlassian.jira.util.json.JSONException;
 import com.atlassian.jira.util.json.JSONObject;
+import com.atlassian.jira.util.ofbiz.GenericValueUtils;
 import com.atlassian.plugins.rest.common.security.AnonymousAllowed;
 import com.atlassian.query.Query;
 
@@ -71,6 +76,15 @@ public class dataGenerator {
                     //jsonItem.put("statusId", issue.getStatusId());
                     jsonItem.put("status", issue.getStatusObject().getName());
 
+    /* Possible way to extract info on Issue history
+                List<ChangeHistory> changes = ComponentAccessor.getChangeHistoryManager().getChangeHistories(issue);
+
+                ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
+                List<ChangeItemBean> changeItemBeans= changeHistoryManager.getChangeItemsForField(issue, "status");
+                for ( ChangeItemBean c : changeItemBeans ) {
+                    System.out.println("[Issue]: " + issue.getKey() + " "+ c.getField() + ":" + c.getToString() + " " + c.getCreated() );
+                }
+*/
                 jsonArray.put(jsonItem);
             }
             jsonObject.put("issues", jsonArray);
@@ -122,7 +136,7 @@ public class dataGenerator {
 
                     jsonArray.put(jsonItem);
                 }
-                jsonObject.put(("totals"), jsonArray);
+                jsonObject.put(("snapshots"), jsonArray);
                 return Response.ok(jsonObject.toString(),  MediaType.APPLICATION_JSON).build();
 
             } catch (JSONException e) {

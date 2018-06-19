@@ -194,6 +194,8 @@ view: {
                 console.log("First date is : " + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' '));
                 // get Json object array from args [{...}] that pulls it from GET-request 
                 var jsonArray = args.dataset["issues"];
+                var byStatus = args.byStatus["snapshots"];
+                var index = 0;
 
                 var open = 0;
                 var closed = 0;
@@ -223,9 +225,33 @@ view: {
 
                     if ( jsonArray[i].created.toString().split(" ")[0] <= date.toISOString().substr(0, 10).replace('T', ' ') )
                         open++;
-                    if ( jsonArray[i].status.toString() == gadget.getPref("statusName") )
-                        closed++;
+                    closed = parseInt(byStatus[index].total);
+                   // if ( jsonArray[i].status.toString() == gadget.getPref("statusName") )
+                     //   closed++;
+                    //
 
+                    var numberBack = byStatus[index].backintime.substring(0, (byStatus[index].backintime).length-1);
+                    
+                    var tmp = new Date(); //turnBackTime(gadget.getPref("timeUnit"), numberBack);
+                    // Turn back time in date
+                     if ( gadget.getPref("timeUnit") == "d" )
+                        tmp.setDate(tmp.getDate() - numberBack);
+                    else if ( gadget.getPref("timeUnit") == "w" )
+                        tmp.setDate(tmp.getDate() - numberBack*7);
+                    else if ( gadget.getPref("timeUnit") == "m" )
+                        tmp.setMonth(tmp.getMonth() - numberBack);
+                    else
+                        tmp.setYear(date.getFullYear() - numberBack);
+                    if ( date.toISOString().substr(0, 10).replace('T', ' ') >=  tmp.toISOString().substr(0, 10).replace('T', ' ') )
+                    {
+                        index = (index+1)%byStatus.length;
+                    }
+                    /*
+                    console.log("StatusCount: " + byStatus[index].total);
+                    console.log("index: " + index);
+                    console.log("Tmp date: " + tmp.toISOString().substr(0, 10).replace('T', ' '));
+                    console.log("Ite date: " + date.toISOString().substr(0, 10).replace('T', ' '));
+*/
                     // DateFormat is a mess, stupidDateFormat works in googleLine...          
                     stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);
 /*
