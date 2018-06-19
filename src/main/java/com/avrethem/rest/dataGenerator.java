@@ -124,10 +124,11 @@ public class dataGenerator {
             //log.info("[SYSTEM] filterId: " + filterIdString);
 
             List<Issue> issues = searchServlet.getIssuesInFilter(user, filterIdString);
-/*
+
                 for (Issue issue : issues) {
                     String issueDate = issue.getCreated().toString().substring(0, 10);
-                    m.put(issueDate, m.get(issueDate).add(1, 0));
+                    UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
+                    m.put(issueDate, pair.add(1, 0));
 
                     ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
                     List<ChangeItemBean> changeItemBeans= changeHistoryManager.getChangeItemsForField(issue, "status");
@@ -136,17 +137,19 @@ public class dataGenerator {
 
                         // If a issue comes from 'Closed' map[Date]-- && issue goes to 'Closed' map[Date]++
                         issueDate = c.getCreated().toString().substring(0, 10);
+                        pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                         if ( c.getFromString() == statusString )
-                            m.put(issueDate, m.get(issueDate).add(0, 1));
+                            m.put(issueDate, pair.add(0, 1));
                         if ( c.getToString()   == statusString )
-                            m.put(issueDate, m.get(issueDate).sub(0, 1));
+                            m.put(issueDate, pair.sub(0, 1));
                     }
-                }*/
+                }
         } catch (SearchException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
+        // Build Json
         try {
                 JSONObject jsonObject = new JSONObject();
                 JSONArray jsonArray = new JSONArray();
@@ -162,19 +165,16 @@ public class dataGenerator {
 
                     System.out.println(entry.getKey() + " => Open: " + entry.getValue().open + " Closed: " + entry.getValue().closed);
                 }
-
-
-
-
-
                 jsonObject.put("issues", jsonArray);
+
+                //If successfull
                 return Response.ok(jsonObject.toString(),  MediaType.APPLICATION_JSON).build();
 
             } catch (JSONException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-
+            // If failing
         return Response.serverError().build();
     }
 
