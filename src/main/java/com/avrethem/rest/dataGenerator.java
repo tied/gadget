@@ -133,19 +133,27 @@ public class dataGenerator {
 
             // Make Query
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
-            jqlString += "AND status CHANGED AFTER " + firstDateString;
+            jqlString += "AND (createdDate >= " + firstDateString + " OR (status CHANGED AFTER " + firstDateString + " OR status CHANGED ON " + firstDateString + "))";
+
             List<Issue> issues = searchServlet.getIssuesByQueryString(user, jqlString);
 
+            System.out.println("firstDate :" + firstDateString );
             synchronized (issues) {
                 for (Issue issue : issues) {
-                    //System.out.println("[SYSTEM] Got Issue:" + issue.getKey() );
+
                     String issueDate = issue.getCreated().toString().substring(0, 10);
-                    if ( issueDate.compareTo(firstDateString) > 0 ) {
+                    System.out.println("New issue found created on:" + issueDate );
+
+
+                    if ( issueDate.compareTo(firstDateString) >= 0 ) {
+                        System.out.println("Adding new open issue " + issue.getKey() );
                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                         m.put(issueDate, pair.add(1, 0));
+
                     }else {
                         //System.out.println("[Issue]: " + issue.getKey() + " : " + issueDate);
                     }
+
                     ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
                     List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS);
 
@@ -157,6 +165,7 @@ public class dataGenerator {
                                     // If a issue comes from 'Closed' map[Date]-- && issue goes to 'Closed' map[Date]++
 
                                     // Only issue change date AFTER firstDate
+
                                     issueDate = c.getCreated().toString().substring(0, 10);
                                     if ( issueDate.compareTo(firstDateString) > 0 ) {
                                         //System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
@@ -208,7 +217,7 @@ public class dataGenerator {
         System.out.println("Open: " + openBefore);
         System.out.println("Closed: " + closedBefore);
 
-       UtilPair pair = new UtilPair();
+       UtilPair pair = m.containsKey(firstDateString) ? m.get(firstDateString) : new UtilPair();
        m.put(firstDateString, pair.add(openBefore, closedBefore)); // Insert into first date in map
 
 
