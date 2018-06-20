@@ -131,24 +131,35 @@ public class dataGenerator {
             List<Issue> issues = searchServlet.getIssuesInFilter(user, filterIdString);
             synchronized (issues) {
                 for (Issue issue : issues) {
-                    System.out.println("[SYSTEM] Got Issue:" + issue.getKey() );
+                    //System.out.println("[SYSTEM] Got Issue:" + issue.getKey() );
                     String issueDate = issue.getCreated().toString().substring(0, 10);
                     UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                     m.put(issueDate, pair.add(1, 0));
 
                     ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
                     List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS); //"status");
-                    System.out.println("Size of history: " + changeItemBeans.size());
+                    //System.out.println("Size of history: " + changeItemBeans.size());
                     synchronized (m) {
 
-                        System.out.println("Issue status: " + issue.getStatus().getName() );
-                        if ( changeItemBeans.size() == 0 && issue.getStatus().getName().equals(statusString)){
+/*
+                        if ( issue.getStatus().getName().equals(statusString) && changeItemBeans.size() == 0 ){
+                            pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                             m.put(issueDate, pair.add(0, 1));
+                        } else if ( changeItemBeans.size() == 0 ) {
+                            System.out.println("[Size == 0] Got Issue:" + issue.getKey() );
+                            System.out.println("Issue status: " + issue.getStatus().getName() );
                         }
-                        else {
+                        else if ( issue.getStatus().getName().equals(statusString) ){
+                            pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
+                                m.put(issueDate, pair.add(0, 1));
+
+                            //System.out.println("[Closed tag] Got Issue:" + issue.getKey() );
+                            //System.out.println("Issue status: " + issue.getStatus().getName() );
+                        }*/
+                        //else {
                             for (ChangeItemBean c : changeItemBeans) {
                                 synchronized (c) {
-                                    System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
+                                    //System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
                                     //System.out.println( " status: " + statusString );
                                     // If a issue comes from 'Closed' map[Date]-- && issue goes to 'Closed' map[Date]++
                                     issueDate = c.getCreated().toString().substring(0, 10);
@@ -161,7 +172,7 @@ public class dataGenerator {
                                 }
 
                             }
-                        }
+                        //}
 
                     }
                 }
