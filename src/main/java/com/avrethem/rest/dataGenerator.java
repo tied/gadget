@@ -126,26 +126,31 @@ public class dataGenerator {
             //log.info("[SYSTEM] filterId: " + filterIdString);
 
             List<Issue> issues = searchServlet.getIssuesInFilter(user, filterIdString);
-
+            synchronized (issues) {
                 for (Issue issue : issues) {
                     String issueDate = issue.getCreated().toString().substring(0, 10);
                     UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                     m.put(issueDate, pair.add(1, 0));
 
                     ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
-                    List<ChangeItemBean> changeItemBeans= changeHistoryManager.getChangeItemsForField(issue, "status");
-                    for ( ChangeItemBean c : changeItemBeans ) {
-                        System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString()  );
-                        //System.out.println( " status: " + statusString );
-                        // If a issue comes from 'Closed' map[Date]-- && issue goes to 'Closed' map[Date]++
-                        issueDate = c.getCreated().toString().substring(0, 10);
-                        pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                        if ( c.getFromString().equals(statusString) )
-                            m.put(issueDate, pair.sub(0, 1));
-                        if ( c.getToString().equals(statusString) )
-                            m.put(issueDate, pair.add(0, 1));
+                    List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, "status");
+                    synchronized (m) {
+                        for (ChangeItemBean c : changeItemBeans) {
+                            System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
+                            //System.out.println( " status: " + statusString );
+                            // If a issue comes from 'Closed' map[Date]-- && issue goes to 'Closed' map[Date]++
+                            issueDate = c.getCreated().toString().substring(0, 10);
+                            pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
+                            if (c.getToString().equals(statusString))
+                                m.put(issueDate, pair.add(0, 1));
 
+                            if (c.getFromString().equals(statusString))
+                                m.put(issueDate, pair.sub(0, 1));
+
+
+                        }
                     }
+                }
                 }
         } catch (SearchException e) {
             // TODO Auto-generated catch block
@@ -172,7 +177,7 @@ public class dataGenerator {
 
                     jsonArray.put(jsonItem);
 
-                    System.out.println(entry.getKey() + " Open: " + entry.getValue().open + " " + statusString + ": " + entry.getValue().closed);
+                  //  System.out.println(entry.getKey() + " Open: " + entry.getValue().open + " " + statusString + ": " + entry.getValue().closed);
                 }
                 jsonObject.put("issues", jsonArray);
 
