@@ -70,6 +70,8 @@ public class searchServlet extends HttpServlet{
         SearchRequest filter = srm.getSearchRequestById(user, Long.valueOf(filterId));
         // filterName == filter.getQuery().getQueryString();
 
+        String jqlQuery = filter.getQuery().getQueryString();
+        System.out.println("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
             Query query = filter.getQuery();
             SearchResults results = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
             return results.getIssues();

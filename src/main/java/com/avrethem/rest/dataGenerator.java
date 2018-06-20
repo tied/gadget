@@ -3,12 +3,15 @@ package com.avrethem.rest;
 import com.atlassian.jira.bc.issue.search.SearchService;
 import com.atlassian.jira.component.ComponentAccessor;
 
+import com.atlassian.jira.config.StatusManager;
 import com.atlassian.jira.issue.Issue;
+import com.atlassian.jira.issue.IssueFieldConstants;
 import com.atlassian.jira.issue.changehistory.ChangeHistory;
 import com.atlassian.jira.issue.changehistory.ChangeHistoryManager;
 import com.atlassian.jira.issue.comments.Comment;
 import com.atlassian.jira.issue.history.ChangeItemBean;
 import com.atlassian.jira.issue.search.SearchException;
+import com.atlassian.jira.issue.status.Status;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.util.json.JSONArray;
 import com.atlassian.jira.util.json.JSONException;
@@ -128,27 +131,38 @@ public class dataGenerator {
             List<Issue> issues = searchServlet.getIssuesInFilter(user, filterIdString);
             synchronized (issues) {
                 for (Issue issue : issues) {
+                    System.out.println("[SYSTEM] Got Issue:" + issue.getKey() );
                     String issueDate = issue.getCreated().toString().substring(0, 10);
                     UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                     m.put(issueDate, pair.add(1, 0));
 
                     ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
-                    List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, "status");
+                    List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS); //"status");
+                    System.out.println("Size of history: " + changeItemBeans.size());
                     synchronized (m) {
-                        for (ChangeItemBean c : changeItemBeans) {
-                            System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
-                            //System.out.println( " status: " + statusString );
-                            // If a issue comes from 'Closed' map[Date]-- && issue goes to 'Closed' map[Date]++
-                            issueDate = c.getCreated().toString().substring(0, 10);
-                            pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                            if (c.getToString().equals(statusString))
-                                m.put(issueDate, pair.add(0, 1));
 
-                            if (c.getFromString().equals(statusString))
-                                m.put(issueDate, pair.sub(0, 1));
-
-
+                        System.out.println("Issue status: " + issue.getStatus().getName() );
+                        if ( changeItemBeans.size() == 0 && issue.getStatus().getName().equals(statusString)){
+                            m.put(issueDate, pair.add(0, 1));
                         }
+                        else {
+                            for (ChangeItemBean c : changeItemBeans) {
+                                synchronized (c) {
+                                    System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
+                                    //System.out.println( " status: " + statusString );
+                                    // If a issue comes from 'Closed' map[Date]-- && issue goes to 'Closed' map[Date]++
+                                    issueDate = c.getCreated().toString().substring(0, 10);
+                                    pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
+                                    if (c.getToString().equals(statusString))
+                                        m.put(issueDate, pair.add(0, 1));
+
+                                    if (c.getFromString().equals(statusString))
+                                        m.put(issueDate, pair.sub(0, 1));
+                                }
+
+                            }
+                        }
+
                     }
                 }
                 }
