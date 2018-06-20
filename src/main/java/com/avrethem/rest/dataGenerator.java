@@ -34,6 +34,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
+import java.util.Date;
 
 /*
  A resource of message.
@@ -117,9 +118,31 @@ public class dataGenerator {
     @Path("/getDatesetByStatusAndByDate")
     public Response getDatesetByStatusAndByDate(@QueryParam("filterId") String filterIdString,
                                                 @QueryParam("timePeriod") String timePeriodString,
+                                                @QueryParam("firstDate") String firstDateString,
                                                 @QueryParam("statusByName") String statusString)
     {
         ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
+
+        /*
+        Date firstDate = new Date();
+        firstDate.getTime()
+        System.out.println(firstDate.toString());
+
+        String ch = timePeriodString.substring(timePeriodString.length()-2, timePeriodString.length()-1);
+        String number = timePeriodString.substring(0, timePeriodString.length()-2);
+        System.out.println("Char: " + ch);
+        System.out.println("Char: " + number);
+
+        if ( ch.equals("d") )
+            firstDate.setDate(firstDate.getDate() - Integer.parseInt(number));
+        else if ( ch.equals("w") )
+            firstDate.setDate(firstDate.getDate() - Integer.parseInt(number)*7);
+        else if ( ch.equals("M") )
+            firstDate.setMonth(firstDate.getMonth() - Integer.parseInt(number));
+        else
+            firstDate.setMonth(firstDate.getMonth() - Integer.parseInt(number));
+        */
+        System.out.println("First date: " + firstDateString);
 
         // Build map
         TreeMap<String, UtilPair> m = new TreeMap<String, UtilPair>();
@@ -128,7 +151,10 @@ public class dataGenerator {
             filterIdString = filterIdString.split("filter-")[1];
             //log.info("[SYSTEM] filterId: " + filterIdString);
 
-            List<Issue> issues = searchServlet.getIssuesInFilter(user, filterIdString);
+            String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
+            jqlString += "AND status CHANGED AFTER endOfDay(-" + timePeriodString + ")";
+            List<Issue> issues = searchServlet.getIssuesByQueryString(user, jqlString);
+                    //searchServlet.getIssuesInFilterAndByTransitionDate(user, filterIdString, timePeriodString);
             synchronized (issues) {
                 for (Issue issue : issues) {
                     //System.out.println("[SYSTEM] Got Issue:" + issue.getKey() );
@@ -163,12 +189,16 @@ public class dataGenerator {
                                     //System.out.println( " status: " + statusString );
                                     // If a issue comes from 'Closed' map[Date]-- && issue goes to 'Closed' map[Date]++
                                     issueDate = c.getCreated().toString().substring(0, 10);
-                                    pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                                    if (c.getToString().equals(statusString))
-                                        m.put(issueDate, pair.add(0, 1));
+                                    if ( issueDate.compareTo(firstDateString) > 0 ) {
+                                        System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
 
-                                    if (c.getFromString().equals(statusString))
-                                        m.put(issueDate, pair.sub(0, 1));
+                                        pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
+                                        if (c.getToString().equals(statusString))
+                                            m.put(issueDate, pair.add(0, 1));
+
+                                        if (c.getFromString().equals(statusString))
+                                            m.put(issueDate, pair.sub(0, 1));
+                                    }
                                 }
 
                             }
@@ -182,13 +212,33 @@ public class dataGenerator {
             e.printStackTrace();
         }
 
+        // Set start value of firstDate, because of imported projects showing wrong results
+        int totOpen = 0;
+        int totClosed = 0;
+        try {
+            String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
+            jqlString += "AND createdDate < endOfDay(-" + timePeriodString + ") AND status = " + statusString;
+            List<Issue> issues_closed = searchServlet.getIssuesByQueryString(user, jqlString);
+
+            totClosed = issues_closed.size();
+
+            jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
+            jqlString += "AND createdDate < endOfDay(-" + timePeriodString + ") AND status != " + statusString;
+            List<Issue> issues_open = searchServlet.getIssuesByQueryString(user, jqlString);
+
+            totOpen = issues_open.size() + totClosed;
+
+
+        }catch (SearchException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        System.out.println("Open: " + totOpen);
+        System.out.println("Closed: " + totClosed);
         // Build Json
         try {
                 JSONObject jsonObject = new JSONObject();
                 JSONArray jsonArray = new JSONArray();
-
-                int totOpen = 0;
-                int totClosed = 0;
 
                 for(Map.Entry<String, UtilPair> entry : m.entrySet()) {
                     JSONObject jsonItem = new JSONObject();

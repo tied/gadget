@@ -53,6 +53,26 @@ console.log("Load Google chart");
 google.charts.load('current', {'packages':['corechart']});
 
 
+/**
+             * Turn back time in parameter date. (use period)
+             *
+             * Set date backawards in time depending on param 'num' and gadget.getPref
+             * @param {Date}    date        Date to set
+             * @param {int}     num         Number of time units to set date backwards
+             * 
+             * @return {type} void
+             */
+             function setDateBackwardsInTime(date, num, unit) {
+                if ( unit == "d" )
+                    date.setDate(date.getDate() - num);
+                else if ( unit == "w" )
+                    date.setDate(date.getDate() - num*7);
+                else if ( unit == "M" )
+                    date.setMonth(date.getMonth() - num);
+                else
+                    date.setYear(date.getFullYear() - num);
+            }
+
 (function () {
   var gadget = AJS.Gadget({
       baseUrl: "__ATLASSIAN_BASE_URL__",
@@ -172,25 +192,7 @@ view: {
             var filter = gadget.getPref("filterId").split("filter-")[1];
             //console.log("Found filter by Id: " + filter);
 
-            /**
-             * Turn back time in parameter date. (use period)
-             *
-             * Set date backawards in time depending on param 'num' and gadget.getPref
-             * @param {Date}    date        Date to set
-             * @param {int}     num         Number of time units to set date backwards
-             * 
-             * @return {type} void
-             */
-             function setDateBackwardsInTime(date, num) {
-                if ( gadget.getPref("timeUnit") == "d" )
-                    date.setDate(date.getDate() - num);
-                else if ( gadget.getPref("timeUnit") == "w" )
-                    date.setDate(date.getDate() - num*7);
-                else if ( gadget.getPref("timeUnit") == "M" )
-                    date.setMonth(date.getMonth() - num);
-                else
-                    date.setYear(date.getFullYear() - num);
-            }
+            
 
             
             /**
@@ -211,7 +213,7 @@ view: {
                 var date = new Date();                                                                  // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
                 //console.log("Today is : " + lastDate.toISOString().substr(0, 19).replace('T', ' '));
 
-                setDateBackwardsInTime(date, gadget.getPref("timeUnitsBox"));
+                setDateBackwardsInTime(date, gadget.getPref("timeUnitsBox"), gadget.getPref("timeUnit"));
                 var firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);       // Get the date where iteration should start
                 
                 var jsonArray = args.dataset["issues"];                                             // get Json object array from args [{...}] that pulls it from GET-request 
@@ -236,7 +238,7 @@ view: {
                         //stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
                         data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
 
-                        setDateBackwardsInTime(date, -1);
+                        setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
                     }
 
                     if ( date.toISOString().substr(0, 10) >= jsonArray[i].issuedate.toString().split(" ")[0] )
@@ -289,12 +291,15 @@ view: {
             args: [{
                 key: "dataset",
                 ajaxOptions: function() {
+                    var d = new Date();
+                    setDateBackwardsInTime(d, this.getPref("timeUnitsBox"), this.getPref("timeUnit"));
                     return {
                         contentType: 'application/json',
                         url: "__ATLASSIAN_BASE_URL__/rest/datagenerator/1.0/message/getDatesetByStatusAndByDate",
                         data: {
                             filterId : gadgets.util.unescapeString(this.getPref("filterId")),
                             timePeriod : gadgets.util.unescapeString(this.getPref("timeUnitsBox") + this.getPref("timeUnit")),
+                            firstDate : gadgets.util.unescapeString(d.toISOString().substr(0, 10)),
                             statusByName: gadgets.util.unescapeString(this.getPref("statusName"))
                         }
                     };

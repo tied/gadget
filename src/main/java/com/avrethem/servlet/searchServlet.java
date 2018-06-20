@@ -1,6 +1,5 @@
 package com.avrethem.servlet;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.*;
@@ -14,20 +13,16 @@ import java.util.Collections;
 import java.util.List;
 
 import com.atlassian.jira.bc.issue.search.SearchService;
-import com.atlassian.jira.bc.issue.search.SearchService.IssueSearchParameters;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.search.SearchException;
 import com.atlassian.jira.issue.search.SearchResults;
-import com.atlassian.jira.jql.builder.JqlQueryBuilder;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.web.bean.PagerFilter;
 import com.atlassian.query.Query;
-import com.atlassian.query.order.SortOrder;
 
 import com.atlassian.jira.issue.search.SearchRequest;
 import com.atlassian.jira.issue.search.SearchRequestManager;
-import com.atlassian.jira.component.ComponentAccessor;
 
 public class searchServlet extends HttpServlet{
     private static final long serialVersionUID = 1L;
@@ -49,7 +44,7 @@ public class searchServlet extends HttpServlet{
     }
 
 
-    static public List<Issue> getIssuesInQuery(ApplicationUser user, String jqlQuery ) throws SearchException {
+    static public List<Issue> getIssuesByQueryString(ApplicationUser user, String jqlQuery ) throws SearchException {
         SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
         SearchService.ParseResult parseResult = searchService.parseQuery(user, jqlQuery);
 
@@ -58,10 +53,18 @@ public class searchServlet extends HttpServlet{
             SearchResults results = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
             return results.getIssues();
         } else {
-            log.error("[issues-metric]@searchServlet::getIssueInQuery] Error parsing query:" + jqlQuery);
+            System.out.println("[issues-metric]@searchServlet::getIssueInQuery] Error parsing query:" + jqlQuery);
             return Collections.emptyList();
         }
     }
+
+    static public String getQueryStringbyFilter(ApplicationUser user, String filterId ) throws SearchException {
+        SearchRequestManager srm = ComponentAccessor.getComponentOfType(SearchRequestManager.class);
+        SearchRequest filter = srm.getSearchRequestById(user, Long.valueOf(filterId));
+        System.out.println("getQueryByString: " + filter.getQuery().getQueryString());
+        return filter.getQuery().getQueryString();
+    }
+
 
     static public List<Issue> getIssuesInFilter(ApplicationUser user, String filterId ) throws SearchException {
         SearchService searchService = ComponentAccessor.getComponent(SearchService.class);
@@ -77,14 +80,15 @@ public class searchServlet extends HttpServlet{
             return results.getIssues();
     }
 
-    static public List<Issue> getIssuesInFilterBackInTime(ApplicationUser user, String filterId, String backInTime ) throws SearchException {
+    static public List<Issue> getIssuesInFilterAndByTransitionDate(ApplicationUser user, String filterId, String backInTime ) throws SearchException {
         SearchRequestManager srm = ComponentAccessor.getComponentOfType(SearchRequestManager.class);
         SearchRequest filter = srm.getSearchRequestById(user, Long.valueOf(filterId));
         String jqlQuery = filter.getQuery().getQueryString();
         jqlQuery += " AND createdDate >= startOfDay(-" + backInTime + ")";
         log.info("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
-        return getIssuesInQuery(user, jqlQuery);
+        return getIssuesByQueryString(user, jqlQuery);
     }
+
 
     static public List<Issue> getIssuesByFilterAndByStatusBackInTime(ApplicationUser user, String filterId, String  status, String backInTime ) throws SearchException {
         SearchRequestManager srm = ComponentAccessor.getComponentOfType(SearchRequestManager.class);
@@ -92,7 +96,7 @@ public class searchServlet extends HttpServlet{
         String jqlQuery = filter.getQuery().getQueryString();
         jqlQuery += " AND status was " + status + " ON endOfDay(-" + backInTime + ")";
         log.info("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
-        return getIssuesInQuery(user, jqlQuery);
+        return getIssuesByQueryString(user, jqlQuery);
     }
 
 }
