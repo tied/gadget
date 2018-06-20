@@ -133,7 +133,7 @@ public class dataGenerator {
 
             // Make Query
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
-            jqlString += "AND status CHANGED AFTER endOfDay(-" + timePeriodString + ")";
+            jqlString += "AND status CHANGED AFTER " + firstDateString;
             List<Issue> issues = searchServlet.getIssuesByQueryString(user, jqlString);
 
             synchronized (issues) {
@@ -189,13 +189,13 @@ public class dataGenerator {
         int closedBefore = 0;
         try {
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
-            jqlString += "AND createdDate < endOfDay(-" + timePeriodString + ") AND status = " + statusString;
+            jqlString += "AND createdDate < " + firstDateString + " AND status = " + statusString;
             List<Issue> issues_closed = searchServlet.getIssuesByQueryString(user, jqlString);
 
             closedBefore = issues_closed.size();
 
             jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
-            jqlString += "AND createdDate < endOfDay(-" + timePeriodString + ") AND status != " + statusString;
+            jqlString += "AND createdDate < " + firstDateString + " AND status != " + statusString;
             List<Issue> issues_open = searchServlet.getIssuesByQueryString(user, jqlString);
 
             openBefore = issues_open.size() + closedBefore;
