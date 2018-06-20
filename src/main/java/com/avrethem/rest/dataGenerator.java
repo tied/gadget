@@ -182,29 +182,36 @@ public class dataGenerator {
         }
 
         // Set start value of firstDate, because of imported projects showing wrong results
-        int totOpen = 0;
-        int totClosed = 0;
+        int openBefore = 0;
+        int closedBefore = 0;
         try {
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
             jqlString += "AND createdDate < endOfDay(-" + timePeriodString + ") AND status = " + statusString;
             List<Issue> issues_closed = searchServlet.getIssuesByQueryString(user, jqlString);
 
-            totClosed = issues_closed.size();
+            closedBefore = issues_closed.size();
 
             jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
             jqlString += "AND createdDate < endOfDay(-" + timePeriodString + ") AND status != " + statusString;
             List<Issue> issues_open = searchServlet.getIssuesByQueryString(user, jqlString);
 
-            totOpen = issues_open.size() + totClosed;
+            openBefore = issues_open.size() + closedBefore;
 
 
         }catch (SearchException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        System.out.println("Open: " + totOpen);
-        System.out.println("Closed: " + totClosed);
+        System.out.println("Open: " + openBefore);
+        System.out.println("Closed: " + closedBefore);
+
+       UtilPair pair = new UtilPair();
+       m.put(firstDateString, pair.add(openBefore, closedBefore)); // Insert into first date in map
+
+
         // Build Json
+        int totOpen = 0;
+        int totClosed = 0;
         try {
                 JSONObject jsonObject = new JSONObject();
                 JSONArray jsonArray = new JSONArray();
