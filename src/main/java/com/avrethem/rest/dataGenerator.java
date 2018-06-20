@@ -123,27 +123,6 @@ public class dataGenerator {
     {
         ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
 
-        /*
-        Date firstDate = new Date();
-        firstDate.getTime()
-        System.out.println(firstDate.toString());
-
-        String ch = timePeriodString.substring(timePeriodString.length()-2, timePeriodString.length()-1);
-        String number = timePeriodString.substring(0, timePeriodString.length()-2);
-        System.out.println("Char: " + ch);
-        System.out.println("Char: " + number);
-
-        if ( ch.equals("d") )
-            firstDate.setDate(firstDate.getDate() - Integer.parseInt(number));
-        else if ( ch.equals("w") )
-            firstDate.setDate(firstDate.getDate() - Integer.parseInt(number)*7);
-        else if ( ch.equals("M") )
-            firstDate.setMonth(firstDate.getMonth() - Integer.parseInt(number));
-        else
-            firstDate.setMonth(firstDate.getMonth() - Integer.parseInt(number));
-        */
-        System.out.println("First date: " + firstDateString);
-
         // Build map
         TreeMap<String, UtilPair> m = new TreeMap<String, UtilPair>();
 
@@ -151,48 +130,38 @@ public class dataGenerator {
             filterIdString = filterIdString.split("filter-")[1];
             //log.info("[SYSTEM] filterId: " + filterIdString);
 
+
+            // Make Query
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
             jqlString += "AND status CHANGED AFTER endOfDay(-" + timePeriodString + ")";
             List<Issue> issues = searchServlet.getIssuesByQueryString(user, jqlString);
-                    //searchServlet.getIssuesInFilterAndByTransitionDate(user, filterIdString, timePeriodString);
+
             synchronized (issues) {
                 for (Issue issue : issues) {
                     //System.out.println("[SYSTEM] Got Issue:" + issue.getKey() );
                     String issueDate = issue.getCreated().toString().substring(0, 10);
-                    UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                    m.put(issueDate, pair.add(1, 0));
-
+                    if ( issueDate.compareTo(firstDateString) > 0 ) {
+                        UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
+                        m.put(issueDate, pair.add(1, 0));
+                    }else {
+                        System.out.println("[Issue]: " + issue.getKey() + " : " + issueDate);
+                    }
                     ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
-                    List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS); //"status");
-                    //System.out.println("Size of history: " + changeItemBeans.size());
+                    List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS);
+
                     synchronized (m) {
-
-/*
-                        if ( issue.getStatus().getName().equals(statusString) && changeItemBeans.size() == 0 ){
-                            pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                            m.put(issueDate, pair.add(0, 1));
-                        } else if ( changeItemBeans.size() == 0 ) {
-                            System.out.println("[Size == 0] Got Issue:" + issue.getKey() );
-                            System.out.println("Issue status: " + issue.getStatus().getName() );
-                        }
-                        else if ( issue.getStatus().getName().equals(statusString) ){
-                            pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                                m.put(issueDate, pair.add(0, 1));
-
-                            //System.out.println("[Closed tag] Got Issue:" + issue.getKey() );
-                            //System.out.println("Issue status: " + issue.getStatus().getName() );
-                        }*/
-                        //else {
                             for (ChangeItemBean c : changeItemBeans) {
                                 synchronized (c) {
                                     //System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
                                     //System.out.println( " status: " + statusString );
                                     // If a issue comes from 'Closed' map[Date]-- && issue goes to 'Closed' map[Date]++
+
+                                    // Only issue change date AFTER firstDate
                                     issueDate = c.getCreated().toString().substring(0, 10);
                                     if ( issueDate.compareTo(firstDateString) > 0 ) {
                                         System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
 
-                                        pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
+                                        UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                                         if (c.getToString().equals(statusString))
                                             m.put(issueDate, pair.add(0, 1));
 

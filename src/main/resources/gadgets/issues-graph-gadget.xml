@@ -221,7 +221,8 @@ view: {
                 var open = 0;
                 var closed = 0;
                 // Loop in acsending dates
-                for ( var i=0; i < jsonArray["length"]; i++) {
+                for ( var i=0; i < jsonArray["length"]; i++) 
+                {
                     //console.log("---------------Add Issue to graph----------------");
                     // Issues will be sorted in ascending order 
                     // Loop until date == createdDate for next issue in jsonArray
@@ -257,6 +258,22 @@ view: {
                 //console.log("Add Last row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
                 data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
 
+
+                // If date have not iterated to todays date
+                var now = new Date();
+                while ( date.toISOString().substr(0, 10) <= now.toISOString().substr(0, 10) )
+                {
+                    if ( date.getDay() == 6 || date.getDay() == 0 && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == monday Only when day
+                        {
+                            date.setDate(date.getDate() +1 );
+                            continue; 
+                        }
+
+                        //stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                        data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+
+                        setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
+                }
 
                 //console.log("First date to record: " + firstDate.toISOString().substr(0, 19).replace('T', ' '));
                 //console.log("Last date to record: " + new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+1).toISOString().substr(0, 19).replace('T', ' '));
