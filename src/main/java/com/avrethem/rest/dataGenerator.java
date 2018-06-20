@@ -130,28 +130,25 @@ public class dataGenerator {
             filterIdString = filterIdString.split("filter-")[1];
             //log.info("[SYSTEM] filterId: " + filterIdString);
 
-
             // Make Query
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
             jqlString += "AND (createdDate >= " + firstDateString + " OR (status CHANGED AFTER " + firstDateString + " OR status CHANGED ON " + firstDateString + "))";
 
             List<Issue> issues = searchServlet.getIssuesByQueryString(user, jqlString);
 
-            System.out.println("firstDate :" + firstDateString );
             synchronized (issues) {
                 for (Issue issue : issues) {
 
                     String issueDate = issue.getCreated().toString().substring(0, 10);
-                    System.out.println("New issue found created on:" + issueDate );
+                    System.out.println("-------------------------------------------------------------------------------------------");
+                    System.out.println("Found new issue created    " + issueDate );
 
 
                     if ( issueDate.compareTo(firstDateString) >= 0 ) {
-                        System.out.println("Adding new open issue " + issue.getKey() );
+                        System.out.println("## Add open issue \t\t\t\t @ " + issue.getKey() );
                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                         m.put(issueDate, pair.add(1, 0));
 
-                    }else {
-                        //System.out.println("[Issue]: " + issue.getKey() + " : " + issueDate);
                     }
 
                     ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
@@ -160,24 +157,19 @@ public class dataGenerator {
                     synchronized (m) {
                             for (ChangeItemBean c : changeItemBeans) {
                                 synchronized (c) {
-                                    //System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
-                                    //System.out.println( " status: " + statusString );
-                                    // If a issue comes from 'Closed' map[Date]-- && issue goes to 'Closed' map[Date]++
-
-                                    // Only issue change date AFTER firstDate
-
                                     issueDate = c.getCreated().toString().substring(0, 10);
                                     if ( issueDate.compareTo(firstDateString) > 0 ) {
-                                        //System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
+                                        String beanDate = c.getCreated().toString().substring(0,10);
+                                        System.out.println("--- New transistion:" + "\t " + beanDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
 
                                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                                         if (c.getToString().equals(statusString)) {
-                                            m.put(issueDate, pair.add(0, 1));
-                                            System.out.println(issue.getKey() + "\t " + issueDate + " ++");
+                                            m.put(beanDate, pair.add(0, 1));
+                                            System.out.println(">> Adding closed isssue    " + beanDate + "\t\t@ " + issue.getKey());
                                         }
                                         if (c.getFromString().equals(statusString)) {
-                                            m.put(issueDate, pair.sub(0, 1));
-                                            System.out.println(issue.getKey() + "\t " + issueDate + " --");
+                                            m.put(beanDate, pair.sub(0, 1));
+                                            System.out.println("<< Reopen closed isssue    " + beanDate + "\t\t@ " + issue.getKey());
                                         }
                                     }
                                 }
