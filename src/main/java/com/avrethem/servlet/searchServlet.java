@@ -51,6 +51,7 @@ public class searchServlet extends HttpServlet{
         if (parseResult.isValid()) {
             Query query = parseResult.getQuery();
             SearchResults results = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
+            System.out.println("[issues-metric]@searchServlet::getIssuesByQueryString(...)]Do Query: '" + jqlQuery + "'");
             return results.getIssues();
         } else {
             System.out.println("[issues-metric]@searchServlet::getIssueInQuery] Error parsing query:" + jqlQuery);
@@ -61,7 +62,7 @@ public class searchServlet extends HttpServlet{
     static public String getQueryStringbyFilter(ApplicationUser user, String filterId ) throws SearchException {
         SearchRequestManager srm = ComponentAccessor.getComponentOfType(SearchRequestManager.class);
         SearchRequest filter = srm.getSearchRequestById(user, Long.valueOf(filterId));
-        System.out.println("getQueryByString: " + filter.getQuery().getQueryString());
+        //System.out.println("getQueryByString: " + filter.getQuery().getQueryString());
         return filter.getQuery().getQueryString();
     }
 

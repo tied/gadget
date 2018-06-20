@@ -144,7 +144,7 @@ public class dataGenerator {
                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                         m.put(issueDate, pair.add(1, 0));
                     }else {
-                        System.out.println("[Issue]: " + issue.getKey() + " : " + issueDate);
+                        //System.out.println("[Issue]: " + issue.getKey() + " : " + issueDate);
                     }
                     ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
                     List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS);
@@ -159,14 +159,17 @@ public class dataGenerator {
                                     // Only issue change date AFTER firstDate
                                     issueDate = c.getCreated().toString().substring(0, 10);
                                     if ( issueDate.compareTo(firstDateString) > 0 ) {
-                                        System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
+                                        //System.out.println("[Issue]: " + issue.getKey() + "\t " + c.getCreated() + " \t from: " + c.getFromString() + "\t to: " + c.getToString());
 
                                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                                        if (c.getToString().equals(statusString))
+                                        if (c.getToString().equals(statusString)) {
                                             m.put(issueDate, pair.add(0, 1));
-
-                                        if (c.getFromString().equals(statusString))
+                                            System.out.println(issue.getKey() + "\t " + issueDate + " ++");
+                                        }
+                                        if (c.getFromString().equals(statusString)) {
                                             m.put(issueDate, pair.sub(0, 1));
+                                            System.out.println(issue.getKey() + "\t " + issueDate + " --");
+                                        }
                                     }
                                 }
 
@@ -228,7 +231,6 @@ public class dataGenerator {
 
                     jsonArray.put(jsonItem);
 
-                  //  System.out.println(entry.getKey() + " Open: " + entry.getValue().open + " " + statusString + ": " + entry.getValue().closed);
                 }
                 jsonObject.put("issues", jsonArray);
 

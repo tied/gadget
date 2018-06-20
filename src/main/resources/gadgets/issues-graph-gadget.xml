@@ -221,7 +221,8 @@ view: {
                 var open = 0;
                 var closed = 0;
                 // Loop in acsending dates
-                for ( var i=0; i < jsonArray["length"]; i++) 
+                var i = 0;
+                while (  i < jsonArray["length"] ) 
                 {
                     //console.log("---------------Add Issue to graph----------------");
                     // Issues will be sorted in ascending order 
@@ -236,7 +237,11 @@ view: {
                             continue; 
                         }
 
-                        //stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                        /*console.log("issuedate: " + jsonArray[i].issuedate.toString().split(" ")[0]);
+                        console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString().split(" ")[0]);
+                        console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
+                        console.log("Add row:[" + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
+                        console.log("-------------------------------------------------");    */
                         data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
 
                         setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
@@ -248,12 +253,7 @@ view: {
                         open = parseInt(jsonArray[i].opened);
                         closed = parseInt(jsonArray[i].closed);
                     }
-                    
-                    /*console.log("issuedate: " + jsonArray[i].issuedate.toString().split(" ")[0]);
-                    console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString().split(" ")[0]);
-                    console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
-                    console.log("Add row:[" + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
-                    console.log("-------------------------------------------------");    */
+                    i++;
                 }
                 //console.log("Add Last row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
                 data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
