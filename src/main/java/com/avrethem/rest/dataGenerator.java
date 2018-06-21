@@ -122,7 +122,7 @@ public class dataGenerator {
                                                 @QueryParam("statusByName") String statusString)
     {
         ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
-        firstDateString += " 00:00"; // To be sure in searches, also search by minutes
+        //firstDateString += " 00:00"; // To be sure in searches, also search by minutes
         // Build map
         TreeMap<String, UtilPair> m = new TreeMap<String, UtilPair>();
 
@@ -139,11 +139,13 @@ public class dataGenerator {
             synchronized (issues) {
                 for (Issue issue : issues) {
 
-                    String issueDate = issue.getCreated().toString().substring(0, 16);
+                    String issueDate = issue.getCreated().toString().substring(0, 10);
                     System.out.println("----------------------------------------------------------------------------------------------------------");
                     System.out.println("Found new issue created\t " + issueDate + "\t\t" + issue.getKey() + "------------------");
-
-
+                    System.out.println("ResolutionDate \t\t" + ((issue.getResolutionDate() == null) ? "No resolutionDate" : issue.getResolutionDate().toString().substring(0, 16)) );
+                    System.out.println("Resolution \t\t" + ((issue.getResolution() == null) ? "No resolution" : issue.getResolution().toString().substring(0, 16)) );
+                    System.out.println("Resolution ID \t\t" + ((issue.getResolutionId() == null) ? "No resolutionID" : issue.getResolutionId()) );
+                    System.out.println("Summary : " + ((issue.getSummary() == null) ? "No-summary" : issue.getSummary()) );
                     if ( issueDate.compareTo(firstDateString) >= 0 ) {
                         System.out.println("## Add open issue \t[" + issueDate + "]");
                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
@@ -156,33 +158,33 @@ public class dataGenerator {
 
                     if (changeItemBeans.isEmpty() && issue.getStatus().getName().equals(statusString) )
                     {
-                        System.out.println("--- No-history-issue:" + "\t " + issue.getCreated().toString().substring(0, 116));
-                        System.out.println(">>> "+ statusString +" isssue \t\t[" + issue.getCreated().toString().substring(0, 16) + "]\t " + issue.getStatus().getName());
+                        System.out.println("--- No-history-issue:" + "\t " + issue.getCreated().toString().substring(0, 10));
+                        System.out.println(">>> "+ statusString +" isssue \t\t[" + issue.getCreated().toString().substring(0, 10) + "]\t " + issue.getStatus().getName());
 
                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                        m.put(issue.getCreated().toString().substring(0, 16), pair.add(0, 1));
+                        m.put(issue.getCreated().toString().substring(0, 10), pair.add(0, 1));
                    }
                     synchronized (m) {
                             for (ChangeItemBean c : changeItemBeans) {
                                 synchronized (c) {
 
-                                    issueDate = c.getCreated().toString().substring(0, 16);
+                                    issueDate = c.getCreated().toString().substring(0, 10);
 
-                                    System.out.println("----------- New Bean transistion" + "\t\t\t\t" + c.getFromString() + "\t -> \t" + c.getToString());
+                                    //System.out.println("----------- New Bean transistion" + "\t\t\t\t" + c.getFromString() + "\t -> \t" + c.getToString());
                                     if ( issueDate.compareTo(firstDateString) >= 0 ) {
-                                        String beanDate = c.getCreated().toString().substring(0,16);
+                                        String beanDate = c.getCreated().toString().substring(0,10);
                                         System.out.println("Transition happend: " + "\t " + beanDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
 
                                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                                        if ( !c.getFromString().equals("To Be Verified") && c.getToString().equals(statusString) )
-                                            System.out.println(" ()()()()()()   To Be Verified      ->    " + statusString + "  ()()()()()");
-                                        if (c.getToString().equals(statusString) ) {
+                                        //String resolutionDate = (issue.getResolutionDate() == null) ? "9999-99-99" : issue.getResolutionDate().toString().substring(0, 16);
+                                        String resolutionDate = ((issue.getResolutionDate() == null) ? "0000-00-00" : issue.getResolutionDate().toString().substring(0, 10));
+                                        if (c.getToString().equals(statusString) && resolutionDate.compareTo(firstDateString) >= 0) {
                                             m.put(beanDate, pair.add(0, 1));
-                                            System.out.println(">>> "+ statusString +" isssue \t[" + beanDate + "]\t\t@ " + c.getCreated());
+                                            System.out.println(">>> "+ statusString +" isssue \t[" + beanDate + "]\t\t@ ");
                                         }
-                                        if (c.getFromString().equals(statusString)) {
+                                        if (c.getFromString().equals(statusString) && resolutionDate.compareTo(firstDateString) >= 0) {
                                             m.put(beanDate, pair.sub(0, 1));
-                                            System.out.println("<<< Re-"+statusString+" isssue\t[" + beanDate + "]\t\t@ " + c.getCreated());
+                                            System.out.println("<<< Re-"+statusString+" isssue\t[" + beanDate + "]\t\t@ ");
                                         }
                                     } else {
                                         //System.out.println("--- Other transistion:" + "\t " + issueDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
@@ -223,10 +225,10 @@ public class dataGenerator {
         }
         System.out.println("Open: " + openBefore);
         System.out.println("Closed: " + closedBefore);
-
+/*
        UtilPair pair = m.containsKey(firstDateString) ? m.get(firstDateString) : new UtilPair();
        m.put(firstDateString, pair.add(openBefore, closedBefore)); // Insert into first date in map
-
+*/
 
         // Build Json
         int totOpen = 0;
@@ -238,8 +240,8 @@ public class dataGenerator {
                 for(Map.Entry<String, UtilPair> entry : m.entrySet()) {
                     JSONObject jsonItem = new JSONObject();
 
-                    totOpen += entry.getValue().open;
-                    totClosed += entry.getValue().closed;
+                    totOpen = entry.getValue().open;
+                    totClosed = entry.getValue().closed;
 
                     jsonItem.put("issuedate", entry.getKey());
                     jsonItem.put("opened", totOpen);
