@@ -3,20 +3,15 @@ package com.avrethem.rest;
 import com.atlassian.jira.bc.issue.search.SearchService;
 import com.atlassian.jira.component.ComponentAccessor;
 
-import com.atlassian.jira.config.StatusManager;
 import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.IssueFieldConstants;
-import com.atlassian.jira.issue.changehistory.ChangeHistory;
 import com.atlassian.jira.issue.changehistory.ChangeHistoryManager;
-import com.atlassian.jira.issue.comments.Comment;
 import com.atlassian.jira.issue.history.ChangeItemBean;
 import com.atlassian.jira.issue.search.SearchException;
-import com.atlassian.jira.issue.status.Status;
 import com.atlassian.jira.user.ApplicationUser;
 import com.atlassian.jira.util.json.JSONArray;
 import com.atlassian.jira.util.json.JSONException;
 import com.atlassian.jira.util.json.JSONObject;
-import com.atlassian.jira.util.ofbiz.GenericValueUtils;
 import com.atlassian.plugins.rest.common.security.AnonymousAllowed;
 import com.atlassian.query.Query;
 
@@ -24,7 +19,6 @@ import com.atlassian.query.Query;
 import com.avrethem.servlet.searchServlet;
 import com.avrethem.UtilPair;
 
-import javafx.util.Pair;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.GET;
@@ -34,7 +28,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.*;
-import java.util.Date;
 
 /*
  A resource of message.
@@ -64,7 +57,7 @@ public class dataGenerator {
                                                 @QueryParam("statusByName") String statusString)
     {
         ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
-        //firstDateString += " 23:59"; // To be sure in searches, also search by minutes
+        firstDateString += " 00:01"; // To be sure in searches, also search by minutes
         // Build map
         TreeMap<String, UtilPair> m = new TreeMap<String, UtilPair>();
 
@@ -74,7 +67,7 @@ public class dataGenerator {
 
             // Make Query
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
-            jqlString += " AND (createdDate >= endOfDay" + firstDateString + "\" OR (status CHANGED AFTER \"" + firstDateString + "\" OR status CHANGED ON \"" + firstDateString + "\"))";
+            jqlString += " AND (createdDate >= startOfDay(-" + timePeriodString + ") OR (status CHANGED AFTER \"" + firstDateString.substring(0, 10) + "\" OR status CHANGED ON \"" + firstDateString.substring(0, 10) + "\"))";
 
             List<Issue> issues = searchServlet.getIssuesByQueryString(user, jqlString);
 
@@ -83,12 +76,13 @@ public class dataGenerator {
 
                     String issueDate = issue.getCreated().toString().substring(0, 16);
                     System.out.println("----------------------------------------------------------------------------------------------------------");
-                    System.out.println("Found new issue created\t " + issueDate + "\t\t" + issue.getKey() + "------------------");
+                    System.out.println("Found new issue created\t" + issueDate + "\t\t" + issue.getKey() + "------------------");
                     System.out.println("ResolutionDate \t\t" + ((issue.getResolutionDate() == null) ? "No resolutionDate" : issue.getResolutionDate().toString().substring(0, 16)) );
                     System.out.println("Resolution \t\t" + ((issue.getResolution() == null) ? "No resolution" : issue.getResolution().toString().substring(0, 16)) );
                     System.out.println("Resolution ID \t\t" + ((issue.getResolutionId() == null) ? "No resolutionID" : issue.getResolutionId()) );
+                    System.out.println("FirstDate : \t\t " + firstDateString );
                     System.out.println("Summary : " + ((issue.getSummary() == null) ? "No-summary" : issue.getSummary()) );
-                    System.out.println("FirstDate : \t " + firstDateString );
+
 
                     if ( issueDate.compareTo(firstDateString) >= 0 ) {
                         System.out.println("## Add open issue \t[" + issueDate + "]");
@@ -122,21 +116,22 @@ public class dataGenerator {
                                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                                         String resolutionDate = ((issue.getResolutionDate() == null) ? "0000-00-00" : issue.getResolutionDate().toString().substring(0, 16));
 
-                                        if (c.getToString().equals(statusString) && resolutionDate.compareTo(firstDateString) > 0) {
-                                            m.put(beanDate.substring(0,10), pair.add(0, 1));
-                                            System.out.println(">>> "+ statusString +" isssue \t[" + beanDate + "]\t\t@ ");
+                                        if ( resolutionDate.compareTo(firstDateString) > 0 ) {
+                                            String resoslutionId = ((issue.getResolutionId() == null) ? "1" : issue.getResolutionId());
+                                            if (c.getToString().equals(statusString) && !resoslutionId.equals("1")) {
+                                                m.put(beanDate.substring(0,10), pair.add(0, 1));
+                                                System.out.println(">>> "+ statusString +" isssue \t[" + beanDate + "]\t\t@ ");
+                                            }
+                                            if ( c.getFromString().equals(statusString)  ) {
+                                                m.put(beanDate.substring(0, 10), pair.sub(0, 1));
+                                                System.out.println("<<< Re-"+statusString+" isssue\t[" + beanDate + "]\t\t@ ");
+                                            }
                                         }
-                                        if (c.getFromString().equals(statusString) && resolutionDate.compareTo(firstDateString) > 0) {
-                                            m.put(beanDate.substring(0, 10), pair.sub(0, 1));
-                                            System.out.println("<<< Re-"+statusString+" isssue\t[" + beanDate + "]\t\t@ ");
-                                        }
-                                    } else {
-                                        //System.out.println("--- Other transistion:" + "\t " + issueDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
                                     }
+
                                 }
 
                             }
-                        //}
 
                     }
                 }
@@ -145,19 +140,29 @@ public class dataGenerator {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        UtilPair startVal = getIssuesAtFirstDate(user, timePeriodString, statusString, filterIdString);
 
+        UtilPair pair = m.containsKey(firstDateString) ? m.get(firstDateString) : new UtilPair();
+        //m.put(firstDateString.substring(0, 10), pair.add(startVal.open, startVal.closed)); // Insert into first date in map
+
+        return buildAccumulativeJSON(m, false);
+    }
+
+
+    public UtilPair getIssuesAtFirstDate(ApplicationUser user, String timePeriodString, String statusString, String filterIdString)
+    {
         // Set start value of firstDate, because of imported projects showing wrong results
         int openBefore = 0;
         int closedBefore = 0;
         try {
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
-            jqlString += " AND createdDate <  \"" + firstDateString + "\" AND status = \"" + statusString + "\"";
+            jqlString += " AND createdDate <  startOfDay(-" + timePeriodString + ") AND status = \"" + statusString + "\"";
             List<Issue> issues_closed = searchServlet.getIssuesByQueryString(user, jqlString);
 
             closedBefore = issues_closed.size();
 
             jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
-            jqlString += " AND createdDate < \"" + firstDateString + "\" AND status != \"" + statusString + "\"";
+            jqlString += " AND createdDate < startOfDay(-" + timePeriodString + ") AND status != \"" + statusString + "\"";
             List<Issue> issues_open = searchServlet.getIssuesByQueryString(user, jqlString);
 
             openBefore = issues_open.size() + closedBefore;
@@ -170,43 +175,53 @@ public class dataGenerator {
         System.out.println("Open: " + openBefore);
         System.out.println("Closed: " + closedBefore);
 
-       UtilPair pair = m.containsKey(firstDateString) ? m.get(firstDateString) : new UtilPair();
-       m.put(firstDateString.substring(0, 10), pair.add(openBefore, closedBefore)); // Insert into first date in map
+        UtilPair ret = new UtilPair();
+        ret.add(openBefore, closedBefore);
+        return ret;
+    }
 
 
+
+    public Response buildAccumulativeJSON(TreeMap<String, UtilPair> m, boolean accumulative )
+    {
         // Build Json
         int totOpen = 0;
         int totClosed = 0;
         try {
-                JSONObject jsonObject = new JSONObject();
-                JSONArray jsonArray = new JSONArray();
+            JSONObject jsonObject = new JSONObject();
+            JSONArray jsonArray = new JSONArray();
 
-                for(Map.Entry<String, UtilPair> entry : m.entrySet()) {
-                    JSONObject jsonItem = new JSONObject();
+            for(Map.Entry<String, UtilPair> entry : m.entrySet()) {
+                JSONObject jsonItem = new JSONObject();
 
+                if ( accumulative ) {
                     totOpen += entry.getValue().open;
                     totClosed += entry.getValue().closed;
-
-                    jsonItem.put("issuedate", entry.getKey());
-                    jsonItem.put("opened", totOpen);
-                    jsonItem.put("closed", totClosed);
-
-                    jsonArray.put(jsonItem);
-
                 }
-                jsonObject.put("issues", jsonArray);
+                else {
+                    totOpen = entry.getValue().open;
+                    totClosed = entry.getValue().closed;
+                }
 
-                //If successfull
-                return Response.ok(jsonObject.toString(),  MediaType.APPLICATION_JSON).build();
+                jsonItem.put("issuedate", entry.getKey());
+                jsonItem.put("opened", totOpen);
+                jsonItem.put("closed", totClosed);
 
-            } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                jsonArray.put(jsonItem);
+
             }
-            // If failing
+            jsonObject.put("issues", jsonArray);
+
+            //If successfull
+            return Response.ok(jsonObject.toString(),  MediaType.APPLICATION_JSON).build();
+
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        // If failing
         return Response.serverError().build();
     }
-
 
     public String getJqlString(Query query) {
         return ComponentAccessor.getComponentOfType(SearchService.class).getJqlString(query);
