@@ -63,22 +63,21 @@ public class dataGenerator {
 
         try {
             filterIdString = filterIdString.split("filter-")[1];
-            //log.info("[SYSTEM] filterId: " + filterIdString);
 
             // Make Query
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
-            jqlString += " AND (createdDate >= startOfDay(-" + timePeriodString + ") OR (status CHANGED AFTER \"" + firstDateString.substring(0, 10) + "\" OR status CHANGED ON \"" + firstDateString.substring(0, 10) + "\"))";
-
+            jqlString += " AND (createdDate >= startOfDay(-" + timePeriodString + "))";
+            
             List<Issue> issues = searchServlet.getIssuesByQueryString(user, jqlString);
 
             synchronized (issues) {
                 for (Issue issue : issues) {
+                    String issueDateLong = issue.getCreated().toString().substring(0, 16);
+                    String issueDate = issueDateLong.substring(0, 10);
 
-                    String issueDateLongFormat = issue.getCreated().toString().substring(0, 16);
-                    String issueDate = issue.getCreated().toString().substring(0, 10);
 
                     System.out.println("----------------------------------------------------------------------------------------------------------");
-                    System.out.println("Found new issue created\t" + issueDate + "\t\t" + issue.getKey() + "------------------");
+                    System.out.println("Found new issue created\t" + issueDateLong + "\t\t" + issue.getKey() + "------------------");
                     System.out.println("ResolutionDate \t\t" + ((issue.getResolutionDate() == null) ? "No resolutionDate" : issue.getResolutionDate().toString().substring(0, 16)) );
                     System.out.println("Resolution \t\t" + ((issue.getResolution() == null) ? "No resolution" : issue.getResolution().toString().substring(0, 16)) );
                     System.out.println("Resolution ID \t\t" + ((issue.getResolutionId() == null) ? "No resolutionID" : issue.getResolutionId()) );
@@ -86,8 +85,7 @@ public class dataGenerator {
                     System.out.println("Summary : " + ((issue.getSummary() == null) ? "No-summary" : issue.getSummary()) );
 
 
-
-                    if ( issueDateLongFormat.compareTo(firstDateString) >= 0 ) {
+                    if ( issueDate.compareTo(firstDateString) >= 0 ) {
                         System.out.println("## Add open issue \t[" + issueDate + "]");
                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                         m.put(issueDate, pair.add(1, 0));
@@ -96,32 +94,19 @@ public class dataGenerator {
 
                     ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
                     List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS);
-                    /*
-                    if (changeItemBeans.isEmpty() && issue.getStatus().getName().equals(statusString) )
-                    {
-                        System.out.println("--- No-history-issue:" + "\t " + issue.getCreated().toString().substring(0, 16));
-                        System.out.println(">>> "+ statusString +" isssue \t\t[" + issue.getCreated().toString().substring(0, 16) + "]\t " + issue.getStatus().getName());
+                   for (ChangeItemBean c : changeItemBeans) {
 
-                        UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                        m.put(issue.getCreated().toString().substring(0, 16), pair.add(0, 1));
-                   }*/
-                    synchronized (m) {
-                            for (ChangeItemBean c : changeItemBeans) {
-                                synchronized (c) {
-
-                                    String beanDateLongFormat = c.getCreated().toString().substring(0, 16);
-                                    String beanDate = c.getCreated().toString().substring(0, 10);
+                        String beanDateLong = c.getCreated().toString().substring(0, 16);
+                        String beanDate = beanDateLong.substring(0, 10);
 
                                     //System.out.println("----------- New Bean transistion" + "\t\t\t\t" + c.getFromString() + "\t -> \t" + c.getToString());
-                                    if ( beanDateLongFormat.compareTo(firstDateString) >= 0 ) {
-                                        System.out.println("Transition happend: " + "\t " + beanDateLongFormat + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
+                                    if ( beanDateLong.compareTo(firstDateString) >= 0 ) {
+
+                                        System.out.println("Transition happend: " + "\t " + beanDateLong + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
 
                                         UtilPair pair = m.containsKey(beanDate) ? m.get(beanDate) : new UtilPair();
-                                        String resolutionDate = ((issue.getResolutionDate() == null) ? "0000-00-00" : issue.getResolutionDate().toString().substring(0, 16));
 
-                                        if ( resolutionDate.compareTo(firstDateString) > 0 ) {
-                                            String resolutionId = ((issue.getResolutionId() == null) ? "1" : issue.getResolutionId());
-                                            if (c.getToString().equals(statusString) && !resolutionId.equals("1")) {
+                                            if (c.getToString().equals(statusString) ) {
                                                 m.put(beanDate, pair.add(0, 1));
                                                 System.out.println(">>> "+ statusString +" isssue \t[" + beanDate + "]\t\t@ ");
                                             }
@@ -132,12 +117,7 @@ public class dataGenerator {
                                         }
                                     }
 
-                                }
-
-                            }
-
                     }
-                }
                 }
         } catch (SearchException e) {
             // TODO Auto-generated catch block
@@ -145,7 +125,7 @@ public class dataGenerator {
         }
         UtilPair startVal = getIssuesAtFirstDate(user, timePeriodString, statusString, filterIdString);
 
-        UtilPair pair = m.containsKey(firstDateString) ? m.get(firstDateString) : new UtilPair();
+        UtilPair pair = m.containsKey(firstDateString.substring(0, 10)) ? m.get(firstDateString.substring(0, 10)) : new UtilPair();
         m.put(firstDateString.substring(0, 10), pair.add(startVal.open, startVal.closed)); // Insert into first date in map
 
         return buildAccumulativeJSON(m, true);
