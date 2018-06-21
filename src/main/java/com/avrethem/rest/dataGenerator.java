@@ -139,9 +139,9 @@ public class dataGenerator {
             synchronized (issues) {
                 for (Issue issue : issues) {
 
-                    String issueDate = issue.getCreated().toString().substring(0, 10);
-                    System.out.println("-------------------------------------------------------------------------------------------");
-                    System.out.println("Found new issue created\t " + issueDate + "\t\t" + issue.getKey() );
+                    String issueDate = issue.getCreated().toString().substring(0, 16);
+                    System.out.println("----------------------------------------------------------------------------------------------------------");
+                    System.out.println("Found new issue created\t " + issueDate + "\t\t" + issue.getKey() + "------------------");
 
 
                     if ( issueDate.compareTo(firstDateString) >= 0 ) {
@@ -156,36 +156,36 @@ public class dataGenerator {
 
                     if (changeItemBeans.isEmpty() && issue.getStatus().getName().equals(statusString) )
                     {
-                        System.out.println("--- No-history-issue:" + "\t " + issue.getCreated().toString().substring(0, 10));
-                        System.out.println(">>> "+ statusString +" isssue \t\t[" + issue.getCreated().toString().substring(0, 10) + "]\t " + issue.getStatus().getName());
+                        System.out.println("--- No-history-issue:" + "\t " + issue.getCreated().toString().substring(0, 116));
+                        System.out.println(">>> "+ statusString +" isssue \t\t[" + issue.getCreated().toString().substring(0, 16) + "]\t " + issue.getStatus().getName());
 
                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                        m.put(issue.getCreated().toString().substring(0, 10), pair.add(0, 1));
+                        m.put(issue.getCreated().toString().substring(0, 16), pair.add(0, 1));
                    }
                     synchronized (m) {
                             for (ChangeItemBean c : changeItemBeans) {
                                 synchronized (c) {
 
-                                    issueDate = c.getCreated().toString().substring(0, 10);
+                                    issueDate = c.getCreated().toString().substring(0, 16);
 
-                                    System.out.println("-------------------------------------");
-                                    System.out.println("Found new Bean created" + "\t " + issueDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
+                                    System.out.println("----------- New Bean transistion" + "\t\t\t\t" + c.getFromString() + "\t -> \t" + c.getToString());
                                     if ( issueDate.compareTo(firstDateString) >= 0 ) {
-                                        String beanDate = c.getCreated().toString().substring(0,10);
-                                        System.out.println("--- New transistion:" + "\t " + beanDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
+                                        String beanDate = c.getCreated().toString().substring(0,16);
+                                        System.out.println("Transition happend: " + "\t " + beanDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
 
                                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-
-                                        if (c.getToString().equals(statusString) && !c.getFromString().equals("To Be Verified") ) {
+                                        if ( !c.getFromString().equals("To Be Verified") && c.getToString().equals(statusString) )
+                                            System.out.println(" ()()()()()()   To Be Verified      ->    " + statusString + "  ()()()()()");
+                                        if (c.getToString().equals(statusString) ) {
                                             m.put(beanDate, pair.add(0, 1));
-                                            System.out.println(">>> "+ statusString +" isssue \t\t[" + beanDate + "]\t\t@ " + c.getCreated());
+                                            System.out.println(">>> "+ statusString +" isssue \t[" + beanDate + "]\t\t@ " + c.getCreated());
                                         }
                                         if (c.getFromString().equals(statusString)) {
                                             m.put(beanDate, pair.sub(0, 1));
                                             System.out.println("<<< Re-"+statusString+" isssue\t[" + beanDate + "]\t\t@ " + c.getCreated());
                                         }
                                     } else {
-                                        System.out.println("--- Other transistion:" + "\t " + issueDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
+                                        //System.out.println("--- Other transistion:" + "\t " + issueDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
                                     }
                                 }
 
