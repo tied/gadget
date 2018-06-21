@@ -9,6 +9,11 @@ public class UtilPair {
         closed = 0;
     }
 
+    public UtilPair(int _open, int _closed) {
+        open   = _open;
+        closed = _closed;
+    }
+
     public UtilPair add(int add_open, int add_closed) {
         open    += add_open;
         closed  += add_closed;

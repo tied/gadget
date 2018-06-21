@@ -54,24 +54,24 @@ google.charts.load('current', {'packages':['corechart']});
 
 
 /**
-             * Turn back time in parameter date. (use period)
-             *
-             * Set date backawards in time depending on param 'num' and gadget.getPref
-             * @param {Date}    date        Date to set
-             * @param {int}     num         Number of time units to set date backwards
-             * 
-             * @return {type} void
-             */
-             function setDateBackwardsInTime(date, num, unit) {
-                if ( unit == "d" )
-                    date.setDate(date.getDate() - num);
-                else if ( unit == "w" )
-                    date.setDate(date.getDate() - num*7);
-                else if ( unit == "M" )
-                    date.setMonth(date.getMonth() - num);
-                else
-                    date.setYear(date.getFullYear() - num);
-            }
+* Turn back time in parameter date. (use period)
+*
+* Set date backawards in time depending on param 'num' and gadget.getPref
+* @param {Date}    date        Date to set
+* @param {int}     num         Number of time units to set date backwards
+* 
+* @return {type} void
+*/
+function setDateBackwardsInTime(date, num, unit) {
+    if ( unit == "d" )
+        date.setDate(date.getDate() - num);
+    else if ( unit == "w" )
+        date.setDate(date.getDate() - num*7);
+    else if ( unit == "M" )
+        date.setMonth(date.getMonth() - num);
+    else
+        date.setYear(date.getFullYear() - num);
+}
 
 (function () {
   var gadget = AJS.Gadget({
@@ -264,16 +264,16 @@ view: {
                 while ( date.toISOString().substr(0, 10) <= now.toISOString().substr(0, 10) )
                 {
                     if ( date.getDay() == 6 || date.getDay() == 0 && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == monday Only when day
-                        {
-                            date.setDate(date.getDate() +1 );
-                            continue; 
-                        }
+                    {
+                        date.setDate(date.getDate() +1 );
+                        continue; 
+                    }
 
                         //stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
                         data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
 
                         setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
-                }
+                    }
 
                 //console.log("First date to record: " + firstDate.toISOString().substr(0, 19).replace('T', ' '));
                 //console.log("Last date to record: " + new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+1).toISOString().substr(0, 19).replace('T', ' '));
