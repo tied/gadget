@@ -74,7 +74,9 @@ public class dataGenerator {
             synchronized (issues) {
                 for (Issue issue : issues) {
 
-                    String issueDate = issue.getCreated().toString().substring(0, 16);
+                    String issueDateLongFormat = issue.getCreated().toString().substring(0, 16);
+                    String issueDate = issue.getCreated().toString().substring(0, 10);
+
                     System.out.println("----------------------------------------------------------------------------------------------------------");
                     System.out.println("Found new issue created\t" + issueDate + "\t\t" + issue.getKey() + "------------------");
                     System.out.println("ResolutionDate \t\t" + ((issue.getResolutionDate() == null) ? "No resolutionDate" : issue.getResolutionDate().toString().substring(0, 16)) );
@@ -84,46 +86,47 @@ public class dataGenerator {
                     System.out.println("Summary : " + ((issue.getSummary() == null) ? "No-summary" : issue.getSummary()) );
 
 
-                    if ( issueDate.compareTo(firstDateString) >= 0 ) {
+
+                    if ( issueDateLongFormat.compareTo(firstDateString) >= 0 ) {
                         System.out.println("## Add open issue \t[" + issueDate + "]");
                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                        m.put(issueDate.substring(0, 10), pair.add(1, 0));
+                        m.put(issueDate, pair.add(1, 0));
 
                     }
 
                     ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
                     List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS);
-
+                    /*
                     if (changeItemBeans.isEmpty() && issue.getStatus().getName().equals(statusString) )
                     {
                         System.out.println("--- No-history-issue:" + "\t " + issue.getCreated().toString().substring(0, 16));
                         System.out.println(">>> "+ statusString +" isssue \t\t[" + issue.getCreated().toString().substring(0, 16) + "]\t " + issue.getStatus().getName());
 
                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                        m.put(issue.getCreated().toString().substring(0, 10), pair.add(0, 1));
-                   }
+                        m.put(issue.getCreated().toString().substring(0, 16), pair.add(0, 1));
+                   }*/
                     synchronized (m) {
                             for (ChangeItemBean c : changeItemBeans) {
                                 synchronized (c) {
 
-                                    issueDate = c.getCreated().toString().substring(0, 16);
+                                    String beanDateLongFormat = c.getCreated().toString().substring(0, 16);
+                                    String beanDate = c.getCreated().toString().substring(0, 10);
 
                                     //System.out.println("----------- New Bean transistion" + "\t\t\t\t" + c.getFromString() + "\t -> \t" + c.getToString());
-                                    if ( issueDate.compareTo(firstDateString) >= 0 ) {
-                                        String beanDate = c.getCreated().toString().substring(0,16);
-                                        System.out.println("Transition happend: " + "\t " + c.getCreated().toString().substring(0, 16) + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
+                                    if ( beanDateLongFormat.compareTo(firstDateString) >= 0 ) {
+                                        System.out.println("Transition happend: " + "\t " + beanDateLongFormat + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
 
-                                        UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
+                                        UtilPair pair = m.containsKey(beanDate) ? m.get(beanDate) : new UtilPair();
                                         String resolutionDate = ((issue.getResolutionDate() == null) ? "0000-00-00" : issue.getResolutionDate().toString().substring(0, 16));
 
                                         if ( resolutionDate.compareTo(firstDateString) > 0 ) {
-                                            String resoslutionId = ((issue.getResolutionId() == null) ? "1" : issue.getResolutionId());
-                                            if (c.getToString().equals(statusString) && !resoslutionId.equals("1")) {
-                                                m.put(beanDate.substring(0,10), pair.add(0, 1));
+                                            String resolutionId = ((issue.getResolutionId() == null) ? "1" : issue.getResolutionId());
+                                            if (c.getToString().equals(statusString) && !resolutionId.equals("1")) {
+                                                m.put(beanDate, pair.add(0, 1));
                                                 System.out.println(">>> "+ statusString +" isssue \t[" + beanDate + "]\t\t@ ");
                                             }
                                             if ( c.getFromString().equals(statusString)  ) {
-                                                m.put(beanDate.substring(0, 10), pair.sub(0, 1));
+                                                m.put(beanDate, pair.sub(0, 1));
                                                 System.out.println("<<< Re-"+statusString+" isssue\t[" + beanDate + "]\t\t@ ");
                                             }
                                         }
@@ -143,9 +146,9 @@ public class dataGenerator {
         UtilPair startVal = getIssuesAtFirstDate(user, timePeriodString, statusString, filterIdString);
 
         UtilPair pair = m.containsKey(firstDateString) ? m.get(firstDateString) : new UtilPair();
-        //m.put(firstDateString.substring(0, 10), pair.add(startVal.open, startVal.closed)); // Insert into first date in map
+        m.put(firstDateString.substring(0, 10), pair.add(startVal.open, startVal.closed)); // Insert into first date in map
 
-        return buildAccumulativeJSON(m, false);
+        return buildAccumulativeJSON(m, true);
     }
 
 
@@ -192,6 +195,7 @@ public class dataGenerator {
             JSONArray jsonArray = new JSONArray();
 
             for(Map.Entry<String, UtilPair> entry : m.entrySet()) {
+                System.out.println(entry.getKey() + " open: " + entry.getValue().open + " closed: " + entry.getValue().closed);
                 JSONObject jsonItem = new JSONObject();
 
                 if ( accumulative ) {
