@@ -122,7 +122,7 @@ public class dataGenerator {
                                                 @QueryParam("statusByName") String statusString)
     {
         ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
-
+        firstDateString += " 00:00"; // To be sure in searches, also search by minutes
         // Build map
         TreeMap<String, UtilPair> m = new TreeMap<String, UtilPair>();
 
@@ -132,7 +132,7 @@ public class dataGenerator {
 
             // Make Query
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
-            jqlString += "AND (createdDate >= " + firstDateString + " OR (status CHANGED AFTER " + firstDateString + " OR status CHANGED ON " + firstDateString + "))";
+            jqlString += " AND (createdDate >= \"" + firstDateString + "\" OR (status CHANGED AFTER \"" + firstDateString + "\" OR status CHANGED ON \"" + firstDateString + "\"))";
 
             List<Issue> issues = searchServlet.getIssuesByQueryString(user, jqlString);
 
@@ -141,11 +141,11 @@ public class dataGenerator {
 
                     String issueDate = issue.getCreated().toString().substring(0, 10);
                     System.out.println("-------------------------------------------------------------------------------------------");
-                    System.out.println("Found new issue created    " + issueDate );
+                    System.out.println("Found new issue created\t " + issueDate + "\t\t" + issue.getKey() );
 
 
                     if ( issueDate.compareTo(firstDateString) >= 0 ) {
-                        System.out.println("## Add open issue \t\t\t\t @ " + issue.getKey() );
+                        System.out.println("## Add open issue \t[" + issueDate + "]");
                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                         m.put(issueDate, pair.add(1, 0));
 
@@ -154,23 +154,35 @@ public class dataGenerator {
                     ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
                     List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS);
 
+                    if (changeItemBeans.isEmpty() && issue.getStatus().getName().equals(statusString) )
+                    {
+                        System.out.println("--- No-history-issue:" + "\t " + issue.getCreated().toString().substring(0, 10));
+                        System.out.println(">>> "+ statusString +" isssue \t\t[" + issue.getCreated().toString().substring(0, 10) + "]\t " + issue.getStatus().getName());
+
+                        UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
+                        m.put(issue.getCreated().toString().substring(0, 10), pair.add(0, 1));
+                   }
                     synchronized (m) {
                             for (ChangeItemBean c : changeItemBeans) {
-                                System.out.println("--------------------- New Bean " + c.getCreated().toString());
                                 synchronized (c) {
+
                                     issueDate = c.getCreated().toString().substring(0, 10);
+
+                                    System.out.println("-------------------------------------");
+                                    System.out.println("Found new Bean created" + "\t " + issueDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
                                     if ( issueDate.compareTo(firstDateString) >= 0 ) {
                                         String beanDate = c.getCreated().toString().substring(0,10);
                                         System.out.println("--- New transistion:" + "\t " + beanDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
 
                                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                                        if (c.getToString().equals(statusString)) {
+
+                                        if (c.getToString().equals(statusString) && !c.getFromString().equals("To Be Verified") ) {
                                             m.put(beanDate, pair.add(0, 1));
-                                            System.out.println(">>> Adding closed \t\t" + beanDate + "\t\t@ " + issue.getKey());
+                                            System.out.println(">>> "+ statusString +" isssue \t\t[" + beanDate + "]\t\t@ " + c.getCreated());
                                         }
                                         if (c.getFromString().equals(statusString)) {
                                             m.put(beanDate, pair.sub(0, 1));
-                                            System.out.println("<<< Reopen closed \t\t" + beanDate + "\t\t@ " + issue.getKey());
+                                            System.out.println("<<< Re-"+statusString+" isssue\t[" + beanDate + "]\t\t@ " + c.getCreated());
                                         }
                                     } else {
                                         System.out.println("--- Other transistion:" + "\t " + issueDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
@@ -193,13 +205,13 @@ public class dataGenerator {
         int closedBefore = 0;
         try {
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
-            jqlString += "AND createdDate < " + firstDateString + " AND status = " + statusString;
+            jqlString += " AND createdDate <  \"" + firstDateString + "\" AND status = \"" + statusString + "\"";
             List<Issue> issues_closed = searchServlet.getIssuesByQueryString(user, jqlString);
 
             closedBefore = issues_closed.size();
 
             jqlString = searchServlet.getQueryStringbyFilter(user, filterIdString);
-            jqlString += "AND createdDate < " + firstDateString + " AND status != " + statusString;
+            jqlString += " AND createdDate < \"" + firstDateString + "\" AND status != \"" + statusString + "\"";
             List<Issue> issues_open = searchServlet.getIssuesByQueryString(user, jqlString);
 
             openBefore = issues_open.size() + closedBefore;

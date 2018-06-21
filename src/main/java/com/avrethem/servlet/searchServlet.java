@@ -54,7 +54,7 @@ public class searchServlet extends HttpServlet{
             System.out.println("[issues-metric]@searchServlet::getIssuesByQueryString(...)]Do Query: '" + jqlQuery + "'");
             return results.getIssues();
         } else {
-            System.out.println("[issues-metric]@searchServlet::getIssueInQuery] Error parsing query:" + jqlQuery);
+            System.out.println(">< >< >< Error >< >< >< parsing query: '" + jqlQuery + "'");
             return Collections.emptyList();
         }
     }
