@@ -156,21 +156,24 @@ public class dataGenerator {
 
                     synchronized (m) {
                             for (ChangeItemBean c : changeItemBeans) {
+                                System.out.println("--------------------- New Bean " + c.getCreated().toString());
                                 synchronized (c) {
                                     issueDate = c.getCreated().toString().substring(0, 10);
-                                    if ( issueDate.compareTo(firstDateString) > 0 ) {
+                                    if ( issueDate.compareTo(firstDateString) >= 0 ) {
                                         String beanDate = c.getCreated().toString().substring(0,10);
                                         System.out.println("--- New transistion:" + "\t " + beanDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
 
                                         UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                                         if (c.getToString().equals(statusString)) {
                                             m.put(beanDate, pair.add(0, 1));
-                                            System.out.println(">> Adding closed isssue    " + beanDate + "\t\t@ " + issue.getKey());
+                                            System.out.println(">>> Adding closed \t\t" + beanDate + "\t\t@ " + issue.getKey());
                                         }
                                         if (c.getFromString().equals(statusString)) {
                                             m.put(beanDate, pair.sub(0, 1));
-                                            System.out.println("<< Reopen closed isssue    " + beanDate + "\t\t@ " + issue.getKey());
+                                            System.out.println("<<< Reopen closed \t\t" + beanDate + "\t\t@ " + issue.getKey());
                                         }
+                                    } else {
+                                        System.out.println("--- Other transistion:" + "\t " + issueDate + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
                                     }
                                 }
 
