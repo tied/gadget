@@ -5,6 +5,7 @@ import com.atlassian.jira.component.ComponentAccessor;
 
 import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.IssueFieldConstants;
+import com.atlassian.jira.issue.IssueKey;
 import com.atlassian.jira.issue.IssueManager;
 import com.atlassian.jira.issue.changehistory.ChangeHistoryManager;
 import com.atlassian.jira.issue.history.ChangeItemBean;
@@ -147,11 +148,11 @@ public class dataGenerator {
 
 
             System.out.println("----------------------------------------------------------------------------------------------------------");
-            System.out.println("Found new issue created\t" + longDateFormat.format(issueDate) + "\t\t" + "---------- " + issue.getKey() + " --------");
+            System.out.println("Found new issue created\t" + longDateFormat.format(issueDate) + "\t\t" + "-------- " + issue.getKey() + " --------");
             //System.out.println("ResolutionDate \t\t" + ((issue.getResolutionDate() == null) ? "No resolutionDate" : issue.getResolutionDate().toString().substring(0, 16)) );
             //System.out.println("Resolution \t\t" + ((issue.getResolution() == null) ? "No resolution" : issue.getResolution().toString().substring(0, 16)) );
             //System.out.println("Resolution ID \t\t" + ((issue.getResolutionId() == null) ? "No resolutionID" : issue.getResolutionId()) );
-            System.out.println("FirstDate is : \t\t " + longDateFormat.format(firstDate));
+            System.out.println("FirstDate is :\t\t" + longDateFormat.format(firstDate));
             System.out.println("Summary : " + ((issue.getSummary() == null) ? "No-summary" : issue.getSummary()) );
 
 
@@ -164,9 +165,23 @@ public class dataGenerator {
             ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
             List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS);
 
-            if ( changeItemBeans.isEmpty() )
-                System.out.println("--- No-history-issue" + "\t " + longDateFormat.format(issueDate));
-                System.out.println(" In Status : \t" + issue.getStatus() + "\t\t @" + issue.getKey());
+            if ( changeItemBeans.isEmpty() ) {
+                System.out.println("--- No-history-issue" + "\t " + longDateFormat.format(issueDate) + " In Status : " + issue.getStatus().getName());
+
+
+                if (keyStatus.equals(issue.getStatus().getName()) ) {
+                    UtilPair pair = m.containsKey(shortDateFormat.format(issueDate)) ? m.get(shortDateFormat.format(issueDate)) : new UtilPair();
+                    m.put(shortDateFormat.format(issueDate), pair.add(0, 1));
+                    System.out.println("||| " + keyStatus + " isssue   \t[" + shortDateFormat.format(issueDate) + "]\t\t@ ");
+                }
+            } else {
+                // IF issue started in status keyStatus
+                if ( changeItemBeans.get(0).getFromString().equals(keyStatus) )  {
+                    UtilPair pair = m.containsKey(shortDateFormat.format(issueDate)) ? m.get(shortDateFormat.format(issueDate)) : new UtilPair();
+                    m.put(shortDateFormat.format(issueDate), pair.add(0, 1));
+                    System.out.println("||| " + keyStatus + " isssue   \t[" + shortDateFormat.format(issueDate) + "]\t\t@ ");
+                }
+            }
 
             for (ChangeItemBean c : changeItemBeans) {
 
@@ -177,7 +192,7 @@ public class dataGenerator {
                     e.printStackTrace();
                 }
 
-                System.out.println("----------- New Bean transistion" + longDateFormat.format(beanDate) + "\t\t\t\t" + c.getFromString() + "\t -> \t" + c.getToString());
+                //System.out.println("----------- New Bean transistion" + longDateFormat.format(beanDate) + "\t\t\t\t" + c.getFromString() + "\t -> \t" + c.getToString());
                 if ( beanDate.after(firstDate) ) {
 
                     System.out.println("Transition happend: " + "\t " + longDateFormat.format(beanDate) + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
