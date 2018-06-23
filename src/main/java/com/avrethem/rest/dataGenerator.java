@@ -78,7 +78,7 @@ public class dataGenerator {
 
         try {
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterId);
-            jqlString += " AND (createdDate >= startOfDay(-" + timePeriod + "))";
+            jqlString += " AND (createdDate >= startOfDay(-" + timePeriod + ") OR (status CHANGED AFTER \"" + currentDate.substring(0, 10) + "\" OR status CHANGED ON \"" + currentDate.substring(0, 10) + "\"))";
 
             List<Issue> issues = searchServlet.getIssuesByQueryString(user, jqlString);
             listToMap(issues, m);
@@ -102,13 +102,13 @@ public class dataGenerator {
         int closedBefore = 0;
         try {
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterId);
-            jqlString += " AND createdDate <  startOfDay(-" + timePeriod + ") AND status = \"" + keyStatus + "\"";
+            jqlString += " AND createdDate <  startOfDay(-" + timePeriod + ") AND STATUS WAS \"" + keyStatus + "\"";
             List<Issue> issues_closed = searchServlet.getIssuesByQueryString(user, jqlString);
 
             closedBefore = issues_closed.size();
 
             jqlString = searchServlet.getQueryStringbyFilter(user, filterId);
-            jqlString += " AND createdDate < startOfDay(-" + timePeriod + ") AND status != \"" + keyStatus + "\"";
+            jqlString += " AND createdDate < startOfDay(-" + timePeriod + ") AND STATUS WAS NOT \"" + keyStatus + "\"";
             List<Issue> issues_open = searchServlet.getIssuesByQueryString(user, jqlString);
 
             openBefore = issues_open.size() + closedBefore;
@@ -140,19 +140,23 @@ public class dataGenerator {
             System.out.println("Summary : " + ((issue.getSummary() == null) ? "No-summary" : issue.getSummary()) );
 
 
-            if ( issueDate.compareTo(currentDate) >= 0 ) {
+            if ( issueDate.compareTo(currentDate.substring(0, 10)) >= 0 ) {
                 System.out.println("## Add open issue \t[" + issueDate + "]");
                 UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
                 m.put(issueDate, pair.add(1, 0));
-
             }
 
             ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
             List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS);
+
+            if ( changeItemBeans.isEmpty() )
+                System.out.println("--- No-history-issue:" + "\t " + issue.getCreated().toString().substring(0, 16));
+
             for (ChangeItemBean c : changeItemBeans) {
 
                 String beanDateLong = c.getCreated().toString().substring(0, 16);
                 String beanDate = beanDateLong.substring(0, 10);
+
 
                 //System.out.println("----------- New Bean transistion" + "\t\t\t\t" + c.getFromString() + "\t -> \t" + c.getToString());
                 if ( beanDateLong.compareTo(currentDate) >= 0 ) {
@@ -170,6 +174,7 @@ public class dataGenerator {
                         System.out.println("<<< Re-" + keyStatus + " isssue\t[" + beanDate + "]\t\t@ ");
                     }
                 }
+
             }
 
         }

@@ -63,7 +63,7 @@ public class searchServlet extends HttpServlet{
         SearchRequestManager srm = ComponentAccessor.getComponentOfType(SearchRequestManager.class);
         SearchRequest filter = srm.getSearchRequestById(user, Long.valueOf(filterId));
         //System.out.println("getQueryByString: " + filter.getQuery().getQueryString());
-        return filter.getQuery().getQueryString();
+        return "(" + filter.getQuery().getQueryString() + ")";
     }
 
 
