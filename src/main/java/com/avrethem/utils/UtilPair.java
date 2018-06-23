@@ -1,4 +1,6 @@
-package com.avrethem;
+package com.avrethem.utils;
+
+import javax.rmi.CORBA.Util;
 
 public class UtilPair {
     public int open;
@@ -13,6 +15,12 @@ public class UtilPair {
         open   = _open;
         closed = _closed;
     }
+
+    public UtilPair add(UtilPair add) {
+        this.add(add.open, add.closed);
+        return this;
+    }
+
 
     public UtilPair add(int add_open, int add_closed) {
         open    += add_open;
