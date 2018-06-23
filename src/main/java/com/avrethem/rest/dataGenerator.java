@@ -31,17 +31,17 @@ import javax.ws.rs.core.Response;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+
 /*
  A resource of message.
  */
 @Path("/message")
 public class dataGenerator {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(dataGenerator.class);
-    private String currentDateLong;
-    private String currentDate;
-    private String timePeriod;
     private String filterId;
     private String keyStatus;
+    private SimpleDateFormat longDateFormat;
+    private SimpleDateFormat shortDateFormat;
 
     @GET
     @AnonymousAllowed
@@ -64,15 +64,18 @@ public class dataGenerator {
                                                 @QueryParam("statusByName") String searchStatusString)
     {
         ApplicationUser user = ComponentAccessor.getJiraAuthenticationContext().getLoggedInUser();
+        longDateFormat  = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        shortDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date firstDate = null;
         try {
             filterId = filterIdString.split("filter-")[1];
-        } catch (ArrayIndexOutOfBoundsException e) {
-            log.error("Invalid filter string");
+            firstDate = longDateFormat.parse(currentDateString);
+        } catch (Exception e) {
+            System.out.println("Invalid filter string");
         }
-       
-        timePeriod  = timePeriodString;
-        currentDateLong = currentDateString + " 00:01"; // To be sure in searches, also search by first min at firstDay
-        currentDate = currentDateLong.substring(0, 10);
+
+
+
         keyStatus = searchStatusString;
 
 
@@ -83,37 +86,36 @@ public class dataGenerator {
 
         try {
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterId);
-            jqlString += " AND (createdDate > \"" + currentDateLong +"\" OR (status CHANGED AFTER \"" + currentDateLong + "\"))";
+            jqlString += " AND (createdDate > \"" + longDateFormat.format(firstDate) +"\" OR (status CHANGED AFTER \"" + longDateFormat.format(firstDate) + "\"))";
 
             List<Issue> issues = searchServlet.getIssuesByQueryString(user, jqlString);
-            listToMap(issues, m);
+            listToMap(issues, m, firstDate);
         } catch (SearchException e) {
             e.printStackTrace();
         }
 
-        UtilPair startVal = getIssueCountPriorToDate(user);
+        UtilPair startVal = getIssueCountPriorToDate(user, firstDate);
 
-        UtilPair pair = m.containsKey(currentDateLong.substring(0, 10)) ? m.get(currentDateLong.substring(0, 10)) : new UtilPair();
-        m.put(currentDateLong.substring(0, 10), pair.add(startVal.open, startVal.closed));
+        UtilPair pair = m.containsKey(shortDateFormat.format(firstDate)) ? m.get(shortDateFormat.format(firstDate)) : new UtilPair();
+        m.put(shortDateFormat.format(firstDate), pair.add(startVal.open, startVal.closed));
 
         return buildAccumulativeJSON(m, true);
     }
 
-
-    public UtilPair getIssueCountPriorToDate(ApplicationUser user)
+    public UtilPair getIssueCountPriorToDate(ApplicationUser user, Date firstDate)
     {
         // Set start value of firstDate, because of imported projects showing wrong results
         int openBefore = 0;
         int closedBefore = 0;
         try {
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterId);
-            jqlString += " AND createdDate <= \"" + currentDateLong + "\" AND STATUS WAS \"" + keyStatus + "\" ON \"" + currentDateLong + "\"";
+            jqlString += " AND createdDate <= \"" + longDateFormat.format(firstDate) + "\" AND STATUS WAS \"" + keyStatus + "\" ON \"" + longDateFormat.format(firstDate) + "\"";
             List<Issue> issues_closed = searchServlet.getIssuesByQueryString(user, jqlString);
 
             closedBefore = issues_closed.size();
 
             jqlString = searchServlet.getQueryStringbyFilter(user, filterId);
-            jqlString += " AND createdDate <= \"" + currentDateLong + "\" AND STATUS WAS NOT \"" + keyStatus + "\" ON \"" + currentDateLong + "\"";
+            jqlString += " AND createdDate <= \"" + longDateFormat.format(firstDate) + "\" AND STATUS WAS NOT \"" + keyStatus + "\" ON \"" + longDateFormat.format(firstDate) + "\"";
             List<Issue> issues_open = searchServlet.getIssuesByQueryString(user, jqlString);
 
             openBefore = issues_open.size() + closedBefore;
@@ -129,56 +131,66 @@ public class dataGenerator {
         return new UtilPair(openBefore, closedBefore);
     }
 
-    public void listToMap(List<Issue> issues, TreeMap<String, UtilPair> m)
+    public void listToMap(List<Issue> issues, TreeMap<String, UtilPair> m, Date firstDate)
     {
+        System.out.println(" LOG: " + longDateFormat.format(firstDate) );
+
         for (Issue issue : issues) {
-            String issueDateLong = issue.getCreated().toString().substring(0, 16);
-            String issueDate = issueDateLong.substring(0, 10);
+            //String issueDateLong = issue.getCreated().toString().substring(0, 16);
+            //String issueDate = issueDateLong.substring(0, 10);
+            Date issueDate = null;
+            try {
+                issueDate = longDateFormat.parse(issue.getCreated().toString().substring(0, 16));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
 
             System.out.println("----------------------------------------------------------------------------------------------------------");
-            System.out.println("Found new issue created\t" + issueDateLong + "\t\t" + issue.getKey() + "------------------");
-            System.out.println("ResolutionDate \t\t" + ((issue.getResolutionDate() == null) ? "No resolutionDate" : issue.getResolutionDate().toString().substring(0, 16)) );
-            System.out.println("Resolution \t\t" + ((issue.getResolution() == null) ? "No resolution" : issue.getResolution().toString().substring(0, 16)) );
-            System.out.println("Resolution ID \t\t" + ((issue.getResolutionId() == null) ? "No resolutionID" : issue.getResolutionId()) );
-            System.out.println("FirstDate : \t\t " + currentDateLong);
+            System.out.println("Found new issue created\t" + longDateFormat.format(issueDate) + "\t\t" + "---------- " + issue.getKey() + " --------");
+            //System.out.println("ResolutionDate \t\t" + ((issue.getResolutionDate() == null) ? "No resolutionDate" : issue.getResolutionDate().toString().substring(0, 16)) );
+            //System.out.println("Resolution \t\t" + ((issue.getResolution() == null) ? "No resolution" : issue.getResolution().toString().substring(0, 16)) );
+            //System.out.println("Resolution ID \t\t" + ((issue.getResolutionId() == null) ? "No resolutionID" : issue.getResolutionId()) );
+            System.out.println("FirstDate is : \t\t " + longDateFormat.format(firstDate));
             System.out.println("Summary : " + ((issue.getSummary() == null) ? "No-summary" : issue.getSummary()) );
 
 
-            if ( issueDateLong.compareTo(currentDateLong) > 0 ) {
-                System.out.println("## Add open issue \t[" + issueDate + "]");
-                UtilPair pair = m.containsKey(issueDate) ? m.get(issueDate) : new UtilPair();
-                m.put(issueDate, pair.add(1, 0));
+            if ( issueDate.after(firstDate) ) {
+                System.out.println("## Add open issue \t[" + shortDateFormat.format(issueDate) + "]");
+                UtilPair pair = m.containsKey(shortDateFormat.format(issueDate)) ? m.get(shortDateFormat.format(issueDate)) : new UtilPair();
+                m.put(shortDateFormat.format(issueDate), pair.add(1, 0));
             }
 
             ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
             List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS);
 
             if ( changeItemBeans.isEmpty() )
-                System.out.println("--- No-history-issue:" + "\t " + issue.getCreated().toString().substring(0, 16));
+                System.out.println("--- No-history-issue" + "\t " + longDateFormat.format(issueDate));
+                System.out.println(" In Status : \t" + issue.getStatus() + "\t\t @" + issue.getKey());
 
             for (ChangeItemBean c : changeItemBeans) {
 
-                String beanDateLong = c.getCreated().toString().substring(0, 16);
-                String beanDate = beanDateLong.substring(0, 10);
+                Date beanDate = null;
+                try {
+                    beanDate = longDateFormat.parse(c.getCreated().toString().substring(0, 16));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
+                System.out.println("----------- New Bean transistion" + longDateFormat.format(beanDate) + "\t\t\t\t" + c.getFromString() + "\t -> \t" + c.getToString());
+                if ( beanDate.after(firstDate) ) {
 
-                //System.out.println("----------- New Bean transistion" + "\t\t\t\t" + c.getFromString() + "\t -> \t" + c.getToString());
-                if ( beanDateLong.compareTo(currentDateLong) > 0 ) {
+                    System.out.println("Transition happend: " + "\t " + longDateFormat.format(beanDate) + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
 
-                    System.out.println("Transition happend: " + "\t " + beanDateLong + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
+                    UtilPair pair = m.containsKey(shortDateFormat.format(beanDate)) ? m.get(shortDateFormat.format(beanDate)) : new UtilPair();
 
-                    UtilPair pair = m.containsKey(beanDate) ? m.get(beanDate) : new UtilPair();
-                    c.getTo();
-                    //IssueManager issueManager = ComponentAccessor.getIssueManager();
-                    //issueManager.
                     if (c.getToString().equals(keyStatus) ) {
-                        m.put(beanDate, pair.add(0, 1));
-                        System.out.println(">>> " + keyStatus + " isssue   \t[" + beanDate + "]\t\t@ ");
+                        m.put(shortDateFormat.format(beanDate), pair.add(0, 1));
+                        System.out.println(">>> " + keyStatus + " isssue   \t[" + shortDateFormat.format(beanDate) + "]\t\t@ ");
                     }
                     if ( c.getFromString().equals(keyStatus)  ) {
-                        m.put(beanDate, pair.sub(0, 1));
-                        System.out.println("<<< Re-" + keyStatus + " isssue\t[" + beanDate + "]\t\t@ ");
+                        m.put(shortDateFormat.format(beanDate), pair.sub(0, 1));
+                        System.out.println("<<< Re-" + keyStatus + " isssue\t[" + shortDateFormat.format(beanDate) + "]\t\t@ ");
                     }
                 }
 
@@ -189,7 +201,6 @@ public class dataGenerator {
 
     public Response buildAccumulativeJSON(TreeMap<String, UtilPair> m, boolean accumulative )
     {
-
         int totOpen = 0;
         int totClosed = 0;
         try {
