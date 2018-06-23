@@ -5,6 +5,7 @@ import com.atlassian.jira.component.ComponentAccessor;
 
 import com.atlassian.jira.issue.Issue;
 import com.atlassian.jira.issue.IssueFieldConstants;
+import com.atlassian.jira.issue.IssueManager;
 import com.atlassian.jira.issue.changehistory.ChangeHistoryManager;
 import com.atlassian.jira.issue.history.ChangeItemBean;
 import com.atlassian.jira.issue.search.SearchException;
@@ -27,6 +28,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /*
@@ -67,6 +69,7 @@ public class dataGenerator {
         } catch (ArrayIndexOutOfBoundsException e) {
             log.error("Invalid filter string");
         }
+       
         timePeriod  = timePeriodString;
         currentDateLong = currentDateString + " 00:01"; // To be sure in searches, also search by first min at firstDay
         currentDate = currentDateLong.substring(0, 10);
@@ -80,7 +83,7 @@ public class dataGenerator {
 
         try {
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterId);
-            jqlString += " AND (createdDate >= startOfDay(-" + timePeriod + ") OR (status CHANGED AFTER \"" + currentDateLong.substring(0, 10) + "\" OR status CHANGED ON \"" + currentDateLong.substring(0, 10) + "\"))";
+            jqlString += " AND (createdDate > \"" + currentDateLong +"\" OR (status CHANGED AFTER \"" + currentDateLong + "\"))";
 
             List<Issue> issues = searchServlet.getIssuesByQueryString(user, jqlString);
             listToMap(issues, m);
@@ -104,13 +107,13 @@ public class dataGenerator {
         int closedBefore = 0;
         try {
             String jqlString = searchServlet.getQueryStringbyFilter(user, filterId);
-            jqlString += " AND createdDate <  startOfDay(-" + timePeriod + ") AND STATUS WAS \"" + keyStatus + "\" ON \"" + currentDateLong + "\"";
+            jqlString += " AND createdDate <= \"" + currentDateLong + "\" AND STATUS WAS \"" + keyStatus + "\" ON \"" + currentDateLong + "\"";
             List<Issue> issues_closed = searchServlet.getIssuesByQueryString(user, jqlString);
 
             closedBefore = issues_closed.size();
 
             jqlString = searchServlet.getQueryStringbyFilter(user, filterId);
-            jqlString += " AND createdDate < startOfDay(-" + timePeriod + ") AND STATUS WAS NOT \"" + keyStatus + "\" ON \"" + currentDateLong + "\"";
+            jqlString += " AND createdDate <= \"" + currentDateLong + "\" AND STATUS WAS NOT \"" + keyStatus + "\" ON \"" + currentDateLong + "\"";
             List<Issue> issues_open = searchServlet.getIssuesByQueryString(user, jqlString);
 
             openBefore = issues_open.size() + closedBefore;
@@ -166,7 +169,9 @@ public class dataGenerator {
                     System.out.println("Transition happend: " + "\t " + beanDateLong + " \t\t" + c.getFromString() + "\t ->\t" + c.getToString());
 
                     UtilPair pair = m.containsKey(beanDate) ? m.get(beanDate) : new UtilPair();
-
+                    c.getTo();
+                    //IssueManager issueManager = ComponentAccessor.getIssueManager();
+                    //issueManager.
                     if (c.getToString().equals(keyStatus) ) {
                         m.put(beanDate, pair.add(0, 1));
                         System.out.println(">>> " + keyStatus + " isssue   \t[" + beanDate + "]\t\t@ ");
