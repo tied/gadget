@@ -208,7 +208,7 @@ view: {
                 var data = new google.visualization.DataTable();
                 data.addColumn('string', 'Date');                                                       // Format settings for data rows in chart
                 data.addColumn('number', gadget.getPref("statusName"));
-                data.addColumn('number', 'Open');
+                data.addColumn('number', (gadget.getPref("isCumulative") == "true") ? 'Open' : 'Total');
 
                 var date = new Date(); 
                 date.setTime( date.getTime() - new Date().getTimezoneOffset()*60*1000 );                  // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
@@ -260,11 +260,6 @@ view: {
                 now.setTime( now.getTime() - new Date().getTimezoneOffset()*60*1000 );
                 while ( date.toISOString().substr(0, 10) <= now.toISOString().substr(0, 10) )
                 {
-                    console.log(date.toISOString().substr(0, 19).replace('T', ' '));
-                        if (date.getUTCDay() == 6 ) 
-                            console.log("saturday");
-                        else if ( date.getUTCDay() == 0)
-                            console.log("Sunday");
                     if ( (date.getUTCDay() == 6 || date.getUTCDay() == 0) && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == sunday Only when day
                     {
                         date.setDate(date.getDate() +1 );

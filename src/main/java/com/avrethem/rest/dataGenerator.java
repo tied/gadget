@@ -160,69 +160,74 @@ public class dataGenerator {
 
     public void insertToMap(Issue issue, IssueMap m) throws Exception
     {
-            Date createdDate = ldf.parse(issue.getCreated().toString().substring(0, 16));
+        printIssueToLog(issue);
+        Date createdDate = ldf.parse(issue.getCreated().toString().substring(0, 16));
 
-            System.out.println("--------------------------------------------------------------------------------------------------------------------------------------");
-            if ( createdDate.after(firstDate) ) {
-                System.out.println("Found issue created \t      AFTER\t\t\t----- " + issue.getKey() + " -----");
-            } else {
-                System.out.println("Found issue created \t      BEFORE\t\t\t----- " + issue.getKey() + " -----");
-            }
-            System.out.println("Created  \t\t\t " + ldf.format(createdDate));
-            System.out.println("FirstDate\t\t\t " + ldf.format(firstDate));
-            //System.out.println("Summary : " + ((issue.getSummary() == null) ? "No-summary" : issue.getSummary()) );
-            System.out.println("--------------------------------------------");
-
-            ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
-            List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS);
+        ChangeHistoryManager changeHistoryManager = ComponentAccessor.getChangeHistoryManager();
+        List<ChangeItemBean> changeItemBeans = changeHistoryManager.getChangeItemsForField(issue, IssueFieldConstants.STATUS);
 
 
-            if ( createdDate.after(firstDate) ) {
-                // Created AFTER firstDate
+        if ( createdDate.after(firstDate) ) {
+            // Created AFTER firstDate
 
-                m.incrementTotal(sdf.format(createdDate));
+            m.incrementTotal(sdf.format(createdDate));
 
-                // NO-HISTORY
-                if (changeItemBeans.isEmpty()) {
-                    System.out.println("No history for issue in Status : " + issue.getStatus().getName());
-                    if (keyStatus.equals(issue.getStatus().getName())) {
-                        m.incrementClosed(sdf.format(createdDate));
-                    }
-                }
-                // HAS HISTORY
-                else {
-                    System.out.printf("First history transition\t %-20s\t\t%-12s -> %-12s\n", changeItemBeans.get(0).getCreated().toString().substring(0, 16), changeItemBeans.get(0).getFromString(), changeItemBeans.get(0).getToString());
-
-                    // If issue Started in status 'keyStatus'
-                    if ( changeItemBeans.get(0).getFromString().equals(keyStatus) ) {
-                        m.incrementClosed(changeItemBeans.get(0).getCreated().toString().substring(0, 10));
-                    }
-
-                    for (ChangeItemBean c : changeItemBeans) {
-                        Date beanDate = ldf.parse(c.getCreated().toString().substring(0, 16));
-                        insertFromHistoryBeans(c, m, beanDate);
-                    }
+            // NO-HISTORY
+            if (changeItemBeans.isEmpty()) {
+                System.out.println("No history for issue in Status : " + issue.getStatus().getName());
+                if (keyStatus.equals(issue.getStatus().getName())) {
+                    m.incrementClosed(sdf.format(createdDate));
                 }
             }
+            // HAS HISTORY
             else {
-                // Crated BEFORE firstDate
+                System.out.printf("First history transition\t %-20s\t\t%-12s -> %-12s\n", changeItemBeans.get(0).getCreated().toString().substring(0, 16), changeItemBeans.get(0).getFromString(), changeItemBeans.get(0).getToString());
 
-                // NO-HISTORY
-                    // Issue must have history
+                // If issue Started in status 'keyStatus'
+                if ( changeItemBeans.get(0).getFromString().equals(keyStatus) ) {
+                    m.incrementClosed(changeItemBeans.get(0).getCreated().toString().substring(0, 10));
+                }
 
-                // HAS HISTORY
                 for (ChangeItemBean c : changeItemBeans) {
                     Date beanDate = ldf.parse(c.getCreated().toString().substring(0, 16));
-
-                    if (beanDate.after(firstDate)) {
-                        insertFromHistoryBeans(c, m, beanDate);
-                    }
+                    insertFromHistoryBeans(c, m, beanDate);
                 }
-
             }
+        }
+        else {
+            // Crated BEFORE firstDate
+
+            // NO-HISTORY
+            // Issue must have history
+
+            // HAS HISTORY
+            for (ChangeItemBean c : changeItemBeans) {
+                Date beanDate = ldf.parse(c.getCreated().toString().substring(0, 16));
+
+                if (beanDate.after(firstDate)) {
+                    insertFromHistoryBeans(c, m, beanDate);
+                }
+            }
+
+        }
     }
 
 
+    private void printIssueToLog(Issue issue) throws ParseException
+    {
+        Date createdDate = ldf.parse(issue.getCreated().toString().substring(0, 16));
+
+        System.out.println("--------------------------------------------------------------------------------------------------------------------------------------");
+        if ( createdDate.after(firstDate) ) {
+            System.out.println("Found issue created \t      AFTER\t\t\t----- " + issue.getKey() + " -----");
+        } else {
+            System.out.println("Found issue created \t      BEFORE\t\t\t----- " + issue.getKey() + " -----");
+        }
+        System.out.println("Created  \t\t\t " + ldf.format(createdDate));
+        System.out.println("FirstDate\t\t\t " + ldf.format(firstDate));
+        System.out.println("Summary : " + ((issue.getSummary() == null) ? "No-summary" : issue.getSummary()) );
+        System.out.println("--------------------------------------------");
+    }
     /*
     *
     *
