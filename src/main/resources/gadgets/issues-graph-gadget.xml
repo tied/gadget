@@ -210,12 +210,13 @@ view: {
                 data.addColumn('number', gadget.getPref("statusName"));
                 data.addColumn('number', 'Open');
 
-                var date = new Date();                                                                  // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
+                var date = new Date(); 
+                date.setTime( date.getTime() - new Date().getTimezoneOffset()*60*1000 );                  // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
                 //console.log("Today is : " + lastDate.toISOString().substr(0, 19).replace('T', ' '));
 
                 setDateBackwardsInTime(date, gadget.getPref("timeUnitsBox"), gadget.getPref("timeUnit"));
                 var firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);       // Get the date where iteration should start
-                
+
                 var jsonArray = args.dataset["issues"];                                             // get Json object array from args [{...}] that pulls it from GET-request 
 
                 var open = 0;
@@ -250,7 +251,7 @@ view: {
                     if ( date.toISOString().substr(0, 10) >= jsonArray[i].issuedate.toString().split(" ")[0] )
                     {
 
-                        open = parseInt(jsonArray[i].opened);
+                        open = parseInt(jsonArray[i].total);
                         closed = parseInt(jsonArray[i].closed);
                     }
                     i++;
@@ -309,10 +310,11 @@ view: {
                 key: "dataset",
                 ajaxOptions: function() {
                     var d = new Date();
+                    d.setTime( d.getTime() - new Date().getTimezoneOffset()*60*1000 );
                     setDateBackwardsInTime(d, this.getPref("timeUnitsBox"), this.getPref("timeUnit"));
                     return {
                         contentType: 'application/json',
-                        url: "__ATLASSIAN_BASE_URL__/rest/datagenerator/1.0/message/getDatesetByStatusAndByDate",
+                        url: "__ATLASSIAN_BASE_URL__/rest/datagenerator/1.0/message/getJSONdataset",
                         data: {
                             filterId : gadgets.util.unescapeString(this.getPref("filterId")),
                             timePeriod : gadgets.util.unescapeString(this.getPref("timeUnitsBox") + this.getPref("timeUnit")),
