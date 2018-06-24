@@ -215,7 +215,7 @@ view: {
                 //console.log("Today is : " + lastDate.toISOString().substr(0, 19).replace('T', ' '));
 
                 setDateBackwardsInTime(date, gadget.getPref("timeUnitsBox"), gadget.getPref("timeUnit"));
-                var firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate()+1);       // Get the date where iteration should start
+                var firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate());       // Get the date where iteration should start
 
                 var jsonArray = args.dataset["issues"];                                             // get Json object array from args [{...}] that pulls it from GET-request 
 
@@ -232,7 +232,7 @@ view: {
                     while ( date.toISOString().substr(0, 10).replace('T', ' ') < 
                         jsonArray[i].issuedate.toString().split(" ")[0]   ) 
                     { 
-                        if ( date.getDay() == 6 || date.getDay() == 0 && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == monday Only when day
+                        if ( (date.getDay() == 6 || date.getDay()) == 0 && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == Sunday Only when day
                         {
                             date.setDate(date.getDate() +1 );
                             continue; 
@@ -243,7 +243,7 @@ view: {
                         console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
                         console.log("Add row:[" + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
                         console.log("-------------------------------------------------");    */
-                        data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+                        data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "true") ? open - closed : open ]);
 
                         setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
                     }
@@ -264,14 +264,14 @@ view: {
                 var now = new Date();
                 while ( date.toISOString().substr(0, 10) <= now.toISOString().substr(0, 10) )
                 {
-                    if ( date.getDay() == 6 || date.getDay() == 0 && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == monday Only when day
+                    if ( (date.getDay() == 6 || date.getDay() == 0) && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == sunday Only when day
                     {
                         date.setDate(date.getDate() +1 );
                         continue; 
                     }
 
                         //stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-                        data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
+                        data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "true") ? open - closed : open ]);
 
                         setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
                     }
@@ -281,23 +281,27 @@ view: {
 
                 var options = {
                   title: 'Open vs ' + gadget.getPref("statusName") + ' issues',
+                  isStacked: (gadget.getPref("isCumulative") == "false") ? false : true,
                   curveType: 'none',
                   legend: { position: 'bottom' },
-                  lineWidth: 4,
+                  lineWidth: 5,
                   hAxis: {
+                    gridlines: {count: -1},
                     viewWindow: {
                         min: new Date(firstDate.getFullYear(), (firstDate.getMonth()), firstDate.getDate()),
-                        max: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+1)
+                        max: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
                     },
-                    //title: 'Time',
-                    gridlines: {count: 15}
+                    title: 'Time'
                 },
                 vAxis: {
-                  //title: 'Issues'
-              }
+                  title: 'Issues',
+                  format: '#',
+                  gridlines: {count: -1}
+                }
+
           };
 
-          var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+          var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
           chart.draw(data, options);
             } // End drawChart()
 

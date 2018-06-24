@@ -227,7 +227,7 @@ public class dataGenerator {
     *
     *
      */
-    public void insertFromHistoryBeans(ChangeItemBean c, IssueMap m, Date beanDate) 
+    public void insertFromHistoryBeans(ChangeItemBean c, IssueMap m, Date beanDate)
     {
         if (c.getToString().equals(keyStatus) ) {
             System.out.printf("<Found Transition>\t %-20s\t\t%-12s -> %-12s\n", ldf.format(beanDate), c.getFromString(), c.getToString());
