@@ -229,20 +229,18 @@ view: {
                     // Issues will be sorted in ascending order 
                     // Loop until date == createdDate for next issue in jsonArray
                     // Compare String, no need to parse to a date? Date.parse("2018-10-15") 
-                    while ( date.toISOString().substr(0, 10).replace('T', ' ') < 
-                        jsonArray[i].issuedate.toString().split(" ")[0]   ) 
+                    while ( date.toISOString().substr(0, 10).replace('T', ' ') < jsonArray[i].issuedate.toString().split(" ")[0] ) 
                     { 
-                        if ( (date.getDay() == 6 || date.getDay()) == 0 && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == Sunday Only when day
+                        if ( (date.getUTCDay() == 6 || date.getUTCDay() == 0) && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == Sunday Only when day
                         {
                             date.setDate(date.getDate() +1 );
                             continue; 
                         }
 
                         /*console.log("issuedate: " + jsonArray[i].issuedate.toString().split(" ")[0]);
-                        console.log("resolvedDate: " + jsonArray[i].resolutionDate.toString().split(" ")[0]);
                         console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
-                        console.log("Add row:[" + stupidDateFormat.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
-                        console.log("-------------------------------------------------");    */
+                        console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
+                        console.log("-------------------------------------------------");*/    
                         data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "true") ? open - closed : open ]);
 
                         setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
@@ -256,29 +254,33 @@ view: {
                     }
                     i++;
                 }
-                //console.log("Add Last row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
-                //data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "false") ? open - closed : open ]);
-
 
                 // If date have not iterated to todays date
                 var now = new Date();
+                now.setTime( now.getTime() - new Date().getTimezoneOffset()*60*1000 );
                 while ( date.toISOString().substr(0, 10) <= now.toISOString().substr(0, 10) )
                 {
-                    if ( (date.getDay() == 6 || date.getDay() == 0) && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == sunday Only when day
+                    console.log(date.toISOString().substr(0, 19).replace('T', ' '));
+                        if (date.getUTCDay() == 6 ) 
+                            console.log("saturday");
+                        else if ( date.getUTCDay() == 0)
+                            console.log("Sunday");
+                    if ( (date.getUTCDay() == 6 || date.getUTCDay() == 0) && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == sunday Only when day
                     {
                         date.setDate(date.getDate() +1 );
                         continue; 
                     }
 
-                        //stupidDateFormat = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                        /*console.log("issuedate: " + jsonArray[i].issuedate.toString().split(" ")[0]);
+                        console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
+                        console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
+                        console.log("-------------------------------------------------"); */
                         data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "true") ? open - closed : open ]);
 
                         setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
                     }
 
-                //console.log("First date to record: " + firstDate.toISOString().substr(0, 19).replace('T', ' '));
-                //console.log("Last date to record: " + new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+1).toISOString().substr(0, 19).replace('T', ' '));
-
+                    // Google line visual options
                 var options = {
                   title: 'Open vs ' + gadget.getPref("statusName") + ' issues',
                   isStacked: (gadget.getPref("isCumulative") == "false") ? false : true,
