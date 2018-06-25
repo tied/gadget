@@ -33,7 +33,6 @@ Other
 <UserPref name="refresh" datatype="hidden" default_value="false"/>
 <UserPref name="timeUnitsBox" datatype="hidden" default_value="30"/>
 <UserPref name="timeUnit" datatype="hidden" default_value="d"/>
-<UserPref name="isCumulative" datatype="hidden" default_value="true"/>
 <UserPref name="filterId" datatype="hidden" />
 <UserPref name="statusName" datatype="hidden"/>
 <UserPref name="countFromZero" datatype="hidden" default_value="false"/>
@@ -130,23 +129,6 @@ function setDateBackwardsInTime(date, num, unit) {
                     value: gadget.getPref("timeUnitsBox")
                 },
                 {
-                    userpref: "isCumulative",
-                    label: gadget.getMsg("isCumulative.label"),
-                    description: gadget.getMsg("isCumulative.description"),
-                    type: "select",
-                    selected: gadget.getPref("isCumulative"),
-                    options:[
-                    {
-                        label: "True",
-                        value: "true"
-                    },
-                    {
-                        label: "False",
-                        value: "false"
-                    }
-                    ]
-                },
-                {
                     userpref: "countFromZero",
                     label: gadget.getMsg("countFromZero.label"),
                     description: gadget.getMsg("countFromZero.description"),
@@ -219,8 +201,9 @@ view: {
             //Dataset for Open vs Closed graph
             var chartData = new google.visualization.DataTable();
             chartData.addColumn('string', 'Date');                                                       // Format settings for data rows in chart
+            chartData.addColumn('number', 'Total');
             chartData.addColumn('number', gadget.getPref("statusName"));
-            chartData.addColumn('number', (gadget.getPref("isCumulative") == "true") ? 'Open' : 'Total');
+            chartData.addColumn('number', (gadget.getPref("countFromZero") == "true") ? 'Created' : 'Open');
 
             var date = new Date(); 
             date.setTime( date.getTime() - new Date().getTimezoneOffset()*60*1000 );                  // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
@@ -255,31 +238,21 @@ view: {
                         var insertTotal = open;
                         var insertClosed = closed;
                         if ( gadget.getPref("countFromZero") == "true" ) {
-                            if (gadget.getPref("isCumulative") == "true") {
                                 insertTotal -=  parseInt(jsonArray[0].total);
                                 insertClosed -= parseInt(jsonArray[0].closed);
-                                inserTotal = insertClosed - insertTotal;
-                            }
-                            else {
-                                insertTotal -=  parseInt(jsonArray[0].total);
-                                insertClosed -= parseInt(jsonArray[0].closed);
-                            }
                         }
                         else {
-                            if (gadget.getPref("isCumulative") == "true") {
                             insertTotal -= insertClosed;
-                            }
                         }
 
                         console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + insertClosed + " | Open :" + insertTotal + " ]");
-                        chartData.addRow([date.toISOString().substr(0, 10), insertClosed, insertTotal ]);
+                        chartData.addRow([date.toISOString().substr(0, 10), open, insertClosed, insertTotal ]);
                         trendData.addRow([date.toISOString().substr(0, 10), (open - closed) - firstTrendPoint]);
                         setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
                     }
 
                     if ( date.toISOString().substr(0, 10) >= jsonArray[i].issuedate.toString().split(" ")[0] )
                     {
-
                         open = parseInt(jsonArray[i].total);
                         closed = parseInt(jsonArray[i].closed);
                     }
@@ -301,29 +274,20 @@ view: {
                     console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
                     console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
                     console.log("-------------------------------------------------"); */
-                    var insertTotal =  open;
+                    var insertTotal = open;
                     var insertClosed = closed;
                     if ( gadget.getPref("countFromZero") == "true" ) {
                         if ( jsonArray["length"] > 0 ) {
-                            if (gadget.getPref("isCumulative") == "true") {
-                                insertTotal -=  parseInt(jsonArray[0].total);
-                                insertClosed -= parseInt(jsonArray[0].closed);
-                                inserTotal = insertClosed - insertTotal;
-                            }
-                            else {
-                                insertTotal -=  parseInt(jsonArray[0].total);
-                                insertClosed -= parseInt(jsonArray[0].closed);
-                            }
+                            insertTotal -=  parseInt(jsonArray[0].total);
+                            insertClosed -= parseInt(jsonArray[0].closed);
                         }
                     }
                     else {
-                        if (gadget.getPref("isCumulative") == "true") {
-                            insertTotal -= insertClosed;
-                        }
+                        insertTotal -= insertClosed;
                     }
 
                     console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + insertClosed + " | Open :" + insertTotal + " ]");
-                    chartData.addRow([date.toISOString().substr(0, 10), insertClosed, insertTotal ]);
+                    chartData.addRow([date.toISOString().substr(0, 10), open, insertClosed, insertTotal ]);
                     trendData.addRow([date.toISOString().substr(0, 10), (open - closed) - firstTrendPoint]);
 
                     setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
@@ -343,8 +307,21 @@ view: {
                     // Google line visual options
                     var chartOptions = {
                       title: 'Open vs ' + gadget.getPref("statusName") + ' issues',
-                      isStacked: (gadget.getPref("isCumulative") == "false") ? false : true,
+                      isStacked: (gadget.getPref("countFromZero") == "true") ? false : true,
                       curveType: 'none',
+                      focusTarget: 'category',
+                      seriesType: 'area',
+                      series: {
+                        0: {
+                            type: 'line',
+                            lineWidth: 0,
+                            pointSize: 0,
+                            visibleInLegend: false,
+                            pointsVisible: false
+                        },
+                        1: { pointsVisible: true, color: '#8eb021'}, // set options for the Open
+                        2: { pointsVisible: true, color: '#d04437'}  // set options for the Closed
+                    },
                       legend: { position: 'bottom' },
                       lineWidth: 5,
                       hAxis: {
@@ -362,11 +339,8 @@ view: {
                         },
                         format: '#',
                         gridlines: {count: -1}
-                    },
-                    series: {
-                        0: { color: '#8eb021'}, // set options for the Open
-                        1: { color: '#d04437'}  // set options for the Closed
                     }
+                    
                     //chartArea:{ left:'5%',top:'2%',width:'90%',height:'90%'}
 
                 };
@@ -388,7 +362,7 @@ view: {
                     //chartArea:{ left:'5%',top:'2%',width:'90%',height:'900%'}
                 }
 
-                var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
                 chart.draw(chartData, chartOptions);
 
                 var trend = new  google.visualization.LineChart(document.getElementById('trend_chart_div')); 

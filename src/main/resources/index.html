@@ -5,62 +5,25 @@
     google.charts.load('current', {'packages':['corechart']});
     google.charts.setOnLoadCallback(drawChart);
 
-    function drawChart() {
-      var rows = 30;
-      var data = new google.visualization.DataTable();
-      data.addColumn('datetime', 'Date');
-      data.addColumn('number', 'Closed');
-      data.addColumn('number', 'Open');
 
-      for (var i=rows; i > 0; i--) 
-      {
-        var closed = 0;
-        /*
-                        AJS.$.ajax({
-                            url: AJS.escapeHtml("/rest/api/2/project"), //"/rest/api/2/search?jql=project=%27PROJ%27",
-                            type: 'get',
-                            contentType: "application/json",
-                            dataType: "json",
-                            async: false,
-                            success: function(data) { res = data["total"]; }
-                        });
-                        */
-                        var open = 0;
-                        /*
-                        AJS.$.ajax({
-                            url: AJS.escapeHtml("/rest/api/2/project"), //"/rest/api/2/search?jql=project=%27PROJ%27",
-                            type: 'get',
-                            contentType: "application/json",
-                            dataType: "json",
-                            async: false,
-                            success: function(data) { res = data["total"]; }
-                        });
-                        */
-                        var d = new Date(new Date().setDate(new Date().getDate() - i));
-                        data.addRow([d, i, i+2 ]);
-                      }
+				  function drawChart() {
+				    var dataTable = new google.visualization.DataTable();
+				    dataTable.addColumn('string', 'Year');
+				    dataTable.addColumn('number', 'Sales');
+				    // A column for custom tooltip content
+				    dataTable.addColumn({type: 'string', role: 'tooltip'});
+				    dataTable.addRows([
+				      ['2010', 600,'600: 15% growth'],
+				      ['2011', 1500, '1500: 50% growth'],
+				      ['2012', 800, '800: -40% growth'],
+				      ['2013', 1000, '1000: 25% growth']
+				    ]);
 
-
-                      var options = {
-                        title: 'Open vs Closed issues',
-                        curveType: 'none',
-                        legend: { position: 'bottom' },
-                        lineWidth: 4,
-                        hAxis: {
-                          title: 'Time'
-                        },
-                        vAxis: {
-                          title: 'Popularity'
-                        },
-                        series: {
-                          1: {curveType: 'function'}
-                        }
-                      };
-
-                      var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-
-                      chart.draw(data, options);
-                    }
+				    var options = { legend: 'none', focusTarget: 'category'};
+				    var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+				    chart.draw(dataTable, options);
+				  }
+                    
 
 
                   </script>
