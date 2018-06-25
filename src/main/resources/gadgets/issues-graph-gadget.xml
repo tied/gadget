@@ -52,25 +52,7 @@ console.log("Load Google chart");
 google.charts.load('current', {'packages':['corechart']});
 
 
-/**
-* Turn back time in parameter date. (use period)
-*
-* Set date backawards in time depending on param 'num' and gadget.getPref
-* @param {Date}    date        Date to set
-* @param {int}     num         Number of time units to set date backwards
-* 
-* @return {type} void
-*/
-function setDateBackwardsInTime(date, num, unit) {
-    if ( unit == "d" )
-        date.setDate(date.getDate() - num);
-    else if ( unit == "w" )
-        date.setDate(date.getDate() - num*7);
-    else if ( unit == "M" )
-        date.setMonth(date.getMonth() - num);
-    else
-        date.setYear(date.getFullYear() - num);
-}
+
 
 (function () {
   var gadget = AJS.Gadget({
@@ -191,110 +173,9 @@ view: {
             // Filter comes in format 'filter-filterID'
             var filter = gadget.getPref("filterId").split("filter-")[1];
 
-            // Dataset for trendline chart
-            var trendData = new google.visualization.DataTable();
-            trendData.addColumn('string', 'Date');                                                      
-            trendData.addColumn('number', 'Trend');
-            var firstTrendPoint = (jsonArray.length > 0) ? (parseInt(jsonArray[0].total) - parseInt(jsonArray[0].closed)) : 0;
-
-            var rows = gadget.getPref("timeUnitsBox");
-            //Dataset for Open vs Closed graph
-            var chartData = new google.visualization.DataTable();
-            chartData.addColumn('string', 'Date');                                                       // Format settings for data rows in chart
-            chartData.addColumn('number', 'Total');
-            chartData.addColumn('number', gadget.getPref("statusName"));
-            chartData.addColumn('number', (gadget.getPref("countFromZero") == "true") ? 'Created' : 'Open');
-
-            var date = new Date(); 
-            date.setTime( date.getTime() - new Date().getTimezoneOffset()*60*1000 );                  // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
-
-            setDateBackwardsInTime(date, gadget.getPref("timeUnitsBox"), gadget.getPref("timeUnit"));
-            var firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate());       // Get the date where iteration should start
-
-                
-
-                var open = 0;
-                var closed = 0;
-                // Loop in acsending dates
-                var i = 0;
-                while (  i < jsonArray["length"] ) 
-                {
-                    //console.log("---------------Add Issue to graph----------------");
-                    // Issues will be sorted in ascending order 
-                    // Loop until date == createdDate for next issue in jsonArray
-                    // Compare String, no need to parse to a date? Date.parse("2018-10-15") 
-                    while ( date.toISOString().substr(0, 10).replace('T', ' ') < jsonArray[i].issuedate.toString().split(" ")[0] ) 
-                    { 
-                        if ( (date.getUTCDay() == 6 || date.getUTCDay() == 0) && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == Sunday Only when day
-                        {
-                            date.setDate(date.getDate() +1 );
-                            continue; 
-                        }
-
-                        /*console.log("issuedate: " + jsonArray[i].issuedate.toString().split(" ")[0]);
-                        console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
-                        console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
-                        console.log("-------------------------------------------------");*/    
-                        var insertTotal = open;
-                        var insertClosed = closed;
-                        if ( gadget.getPref("countFromZero") == "true" ) {
-                                insertTotal -=  parseInt(jsonArray[0].total);
-                                insertClosed -= parseInt(jsonArray[0].closed);
-                        }
-                        else {
-                            insertTotal -= insertClosed;
-                        }
-
-                        console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + insertClosed + " | Open :" + insertTotal + " ]");
-                        chartData.addRow([date.toISOString().substr(0, 10), open, insertClosed, insertTotal ]);
-                        trendData.addRow([date.toISOString().substr(0, 10), (open - closed) - firstTrendPoint]);
-                        setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
-                    }
-
-                    if ( date.toISOString().substr(0, 10) >= jsonArray[i].issuedate.toString().split(" ")[0] )
-                    {
-                        open = parseInt(jsonArray[i].total);
-                        closed = parseInt(jsonArray[i].closed);
-                    }
-                    i++;
-                }
-
-                // If date have not iterated to todays date
-                var now = new Date();
-                now.setTime( now.getTime() - new Date().getTimezoneOffset()*60*1000 );
-                while ( date.toISOString().substr(0, 10) <= now.toISOString().substr(0, 10) )
-                {
-                    if ( (date.getUTCDay() == 6 || date.getUTCDay() == 0) && gadget.getPref("timeUnit") == "d") // Ship 6 == saturday and 0 == sunday Only when day
-                    {
-                        date.setDate(date.getDate() +1 );
-                        continue; 
-                    }
-
-                    /*console.log("issuedate: " + jsonArray[i].issuedate.toString().split(" ")[0]);
-                    console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
-                    console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
-                    console.log("-------------------------------------------------"); */
-                    var insertTotal = open;
-                    var insertClosed = closed;
-                    if ( gadget.getPref("countFromZero") == "true" ) {
-                        if ( jsonArray["length"] > 0 ) {
-                            insertTotal -=  parseInt(jsonArray[0].total);
-                            insertClosed -= parseInt(jsonArray[0].closed);
-                        }
-                    }
-                    else {
-                        insertTotal -= insertClosed;
-                    }
-
-                    console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + insertClosed + " | Open :" + insertTotal + " ]");
-                    chartData.addRow([date.toISOString().substr(0, 10), open, insertClosed, insertTotal ]);
-                    trendData.addRow([date.toISOString().substr(0, 10), (open - closed) - firstTrendPoint]);
-
-                    setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
-                }
+            var minValueTMP = (jsonArray.length > 0) ? jsonArray[0].closed : 0;
 
 
-                var minValueTMP = (jsonArray.length > 0) ? jsonArray[0].closed : 0;
             /**
              * Prepares dataset and draws it
              *
@@ -304,6 +185,31 @@ view: {
              * @return {type} void
              */
              function drawChart() {
+
+                // Dataset for trendline chart
+                var trendData = new google.visualization.DataTable();
+                trendData.addColumn('string', 'Date');                                                      
+                trendData.addColumn('number', 'Trend');
+                
+
+                //Dataset for Open vs Closed graph
+                var chartData = new google.visualization.DataTable();
+                chartData.addColumn('string', 'Date');                                                       // Format settings for data rows in chart
+                chartData.addColumn('number', 'Total');
+                chartData.addColumn('number', gadget.getPref("statusName"));
+                chartData.addColumn('number', (gadget.getPref("countFromZero") == "true") ? 'Created' : 'Open');
+
+                var date = new Date(); 
+                date.setTime( date.getTime() - new Date().getTimezoneOffset()*60*1000 );                  // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
+
+                setDateBackwardsInTime(date, gadget.getPref("timeUnitsBox"), gadget.getPref("timeUnit"));
+                var firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate());       // Get the date where iteration should start
+
+
+                parseDataToChart({json: args.dataset["issues"], date: date, timeUnit: gadget.getPref("timeUnit"), countFromZero: gadget.getPref("countFromZero"), chartData: chartData, trendData: trendData});
+                    
+
+
                     // Google line visual options
                     var chartOptions = {
                       title: 'Open vs ' + gadget.getPref("statusName") + ' issues',
