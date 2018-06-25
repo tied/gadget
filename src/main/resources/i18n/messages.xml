@@ -15,12 +15,13 @@
 	<msg name="timeUnitsBox.label">Time units:</msg>
 
 	<msg name="timeUnit.startVal">Day</msg>
-	<msg name="timeUnit.description">Choses time unit interval</msg>
+	<msg name="timeUnit.description">Chooses time unit interval</msg>
 	<msg name="timeUnit.label">Resolution:</msg>
 
-	<msg name="isCumulative.startVal">true</msg>
 	<msg name="isCumulative.description">Add closed issues count ontop of open issues</msg>
 	<msg name="isCumulative.label">Cumulative:</msg>
-	
+
+	<msg name="countFromZero.description">Select true to start counting from zero</msg>
+	<msg name="countFromZero.label">Count start at zero:</msg>
 
 </messagebundle>

@@ -36,6 +36,7 @@ Other
 <UserPref name="isCumulative" datatype="hidden" default_value="true"/>
 <UserPref name="filterId" datatype="hidden" />
 <UserPref name="statusName" datatype="hidden"/>
+<UserPref name="countFromZero" datatype="hidden" default_value="false"/>
 <Content type="html" view="profile,canvas"> <!-- HTML, canvas is needed for 'resizing' button  -->
 <![CDATA[
 #requireResource("com.atlassian.gadgets.publisher:ajs-gadgets")
@@ -146,6 +147,23 @@ function setDateBackwardsInTime(date, num, unit) {
                     ]
                 },
                 {
+                    userpref: "countFromZero",
+                    label: gadget.getMsg("countFromZero.label"),
+                    description: gadget.getMsg("countFromZero.description"),
+                    type: "select",
+                    selected: gadget.getPref("countFromZero"),
+                    options:[
+                    {
+                        label: "True",
+                        value: "true"
+                    },
+                    {
+                        label: "False",
+                        value: "false"
+                    }
+                    ]
+                },
+                {
                     userpref: "statusName",
                     label: "Status:",
                     description: "Choose status",
@@ -195,7 +213,8 @@ view: {
             var trendData = new google.visualization.DataTable();
             trendData.addColumn('string', 'Date');                                                      
             trendData.addColumn('number', 'Trend');
-            var firstTrendPoint = (jsonArray.length > 0) ? (jsonArray[0].total - jsonArray[0].closed) : 0;
+            var firstTrendPoint = (jsonArray.length > 0) ? (parseInt(jsonArray[0].total) - parseInt(jsonArray[0].closed)) : 0;
+
             console.log("First trendlinePoint = " + firstTrendPoint);
 
             var rows = gadget.getPref("timeUnitsBox");
@@ -235,7 +254,15 @@ view: {
                         console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
                         console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
                         console.log("-------------------------------------------------");*/    
-                        chartData.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "true") ? open - closed : open ]);
+                        var insertTotal = (gadget.getPref("isCumulative") == "true") ? open - closed : open;
+                        var insertClosed = closed;
+                        if ( gadget.getPref("countFromZero") == "true" ) {
+                            insertTotal -= (gadget.getPref("isCumulative") == "true") ? (parseInt(jsonArray[0].total) - parseInt(jsonArray[0].closed)) : parseInt(jsonArray[0].total);  // Inside while block jsonArray.length is > 0 
+                            insertClosed -= parseInt(jsonArray[0].closed);
+                        }
+
+                        console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + insertClosed + " | Open :" + insertTotal + " ]");
+                        chartData.addRow([date.toISOString().substr(0, 10), insertClosed, insertTotal ]);
                         trendData.addRow([date.toISOString().substr(0, 10), (open - closed) - firstTrendPoint]);
                         setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
                     }
@@ -264,7 +291,17 @@ view: {
                     console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
                     console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
                     console.log("-------------------------------------------------"); */
-                    chartData.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "true") ? open - closed : open ]);
+                    var insertTotal = (gadget.getPref("isCumulative") == "true") ? open - closed : open;
+                    var insertClosed = closed;
+                    if ( gadget.getPref("countFromZero") == "true" ) {
+                        if ( jsonArray["length"] > 0 ) {
+                            insertTotal -= (gadget.getPref("isCumulative") == "true") ? (parseInt(jsonArray[0].total) - parseInt(jsonArray[0].closed)) : parseInt(jsonArray[0].total);  // Inside while block jsonArray.length is > 0 
+                            insertClosed -= parseInt(jsonArray[0].closed);     
+                        }
+                    }
+
+                    console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + insertClosed + " | Open :" + insertTotal + " ]");
+                    chartData.addRow([date.toISOString().substr(0, 10), insertClosed, insertTotal ]);
                     trendData.addRow([date.toISOString().substr(0, 10), (open - closed) - firstTrendPoint]);
 
                     setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
@@ -298,7 +335,7 @@ view: {
                     vAxis: {
                         //title: 'Issues',
                         viewWindow: {
-                            min: (jsonArray.length > 0) ? jsonArray[0].closed : 0,
+                            min: (jsonArray.length > 0 ) ? jsonArray[0].closed : 0,
                         },
                         format: '#',
                         gridlines: {count: -1}
