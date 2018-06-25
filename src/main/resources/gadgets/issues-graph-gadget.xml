@@ -19,7 +19,7 @@ Other
 <Require feature="oauthpopup" />
 <Require feature="dynamic-height"/>
 <Require feature="setprefs" />
-<Require feature="settitle"/>
+<Require feature="settitle"/> <!-- Required to use 'gadgets.window' -->
 <Require feature="views" />
 <Optional feature='auth-refresh' />
 <Optional feature="atlassian.util" />
@@ -184,39 +184,34 @@ view: {
 
             //console.log("Chosen status by name: " + gadget.getPref("statusName"));
             console.log(args.dataset);
+            var jsonArray = args.dataset["issues"];                                             // get Json object array from args [{...}] that pulls it from GET-request 
 
             gadget.getView().empty(); // Reset view
 
             // Filter comes in format 'filter-filterID'
             var filter = gadget.getPref("filterId").split("filter-")[1];
-            //console.log("Found filter by Id: " + filter);
 
             
+            var trendData = new google.visualization.DataTable();
+            trendData.addColumn('string', 'Date');                                                      
+            trendData.addColumn('number', 'Trend');
+            var firstTrendPoint = (jsonArray.length > 0) ? (jsonArray[0].total - jsonArray[0].closed) : 0;
+            console.log("First trendlinePoint = " + firstTrendPoint);
 
-            
-            /**
-             * Prepares dataset and draws it
-             *
-             * Prepares dataset by adding rows, draws a Google line chart
-             *
-             *
-             * @return {type} void
-             */
-             function drawChart() {
-                var rows = gadget.getPref("timeUnitsBox");
-                var data = new google.visualization.DataTable();
-                data.addColumn('string', 'Date');                                                       // Format settings for data rows in chart
-                data.addColumn('number', gadget.getPref("statusName"));
-                data.addColumn('number', (gadget.getPref("isCumulative") == "true") ? 'Open' : 'Total');
+            var rows = gadget.getPref("timeUnitsBox");
+            var chartData = new google.visualization.DataTable();
+            chartData.addColumn('string', 'Date');                                                       // Format settings for data rows in chart
+            chartData.addColumn('number', gadget.getPref("statusName"));
+            chartData.addColumn('number', (gadget.getPref("isCumulative") == "true") ? 'Open' : 'Total');
 
-                var date = new Date(); 
-                date.setTime( date.getTime() - new Date().getTimezoneOffset()*60*1000 );                  // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
-                //console.log("Today is : " + lastDate.toISOString().substr(0, 19).replace('T', ' '));
+            var date = new Date(); 
+            date.setTime( date.getTime() - new Date().getTimezoneOffset()*60*1000 );                  // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
+            //console.log("Today is : " + lastDate.toISOString().substr(0, 19).replace('T', ' '));
 
-                setDateBackwardsInTime(date, gadget.getPref("timeUnitsBox"), gadget.getPref("timeUnit"));
+            setDateBackwardsInTime(date, gadget.getPref("timeUnitsBox"), gadget.getPref("timeUnit"));
                 var firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate());       // Get the date where iteration should start
 
-                var jsonArray = args.dataset["issues"];                                             // get Json object array from args [{...}] that pulls it from GET-request 
+                
 
                 var open = 0;
                 var closed = 0;
@@ -240,8 +235,8 @@ view: {
                         console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
                         console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
                         console.log("-------------------------------------------------");*/    
-                        data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "true") ? open - closed : open ]);
-
+                        chartData.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "true") ? open - closed : open ]);
+                        trendData.addRow([date.toISOString().substr(0, 10), (open - closed) - firstTrendPoint]);
                         setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
                     }
 
@@ -265,46 +260,80 @@ view: {
                         continue; 
                     }
 
-                        /*console.log("issuedate: " + jsonArray[i].issuedate.toString().split(" ")[0]);
-                        console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
-                        console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
-                        console.log("-------------------------------------------------"); */
-                        data.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "true") ? open - closed : open ]);
+                    /*console.log("issuedate: " + jsonArray[i].issuedate.toString().split(" ")[0]);
+                    console.log("Current date: " + date.toISOString().substr(0, 19).replace('T', ' '));//.split(" ")[0]);           
+                    console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " | Closed: " + closed + " | Open :" + open + " ]");
+                    console.log("-------------------------------------------------"); */
+                    chartData.addRow([date.toISOString().substr(0, 10), closed, (gadget.getPref("isCumulative") == "true") ? open - closed : open ]);
+                    trendData.addRow([date.toISOString().substr(0, 10), (open - closed) - firstTrendPoint]);
 
-                        setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
-                    }
-
-                    // Google line visual options
-                var options = {
-                  title: 'Open vs ' + gadget.getPref("statusName") + ' issues',
-                  isStacked: (gadget.getPref("isCumulative") == "false") ? false : true,
-                  curveType: 'none',
-                  legend: { position: 'bottom' },
-                  lineWidth: 5,
-                  hAxis: {
-                    gridlines: {count: -1},
-                    viewWindow: {
-                        min: new Date(firstDate.getFullYear(), (firstDate.getMonth()), firstDate.getDate()),
-                        max: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
-                    },
-                    title: 'Time'
-                },
-                vAxis: {
-                    viewWindow: {
-                        min: (jsonArray.length > 0) ? jsonArray[0].closed : 0,
-                    },
-                  title: 'Issues',
-                  format: '#',
-                  gridlines: {count: -1}
+                    setDateBackwardsInTime(date, -1, gadget.getPref("timeUnit"));
                 }
 
-          };
 
-          var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-          chart.draw(data, options);
+            /**
+             * Prepares dataset and draws it
+             *
+             * Prepares dataset by adding rows, draws a Google line chart
+             *
+             *
+             * @return {type} void
+             */
+             function drawChart() {
+                    // Google line visual options
+                    var chartOptions = {
+                      title: 'Open vs ' + gadget.getPref("statusName") + ' issues',
+                      isStacked: (gadget.getPref("isCumulative") == "false") ? false : true,
+                      curveType: 'none',
+                      legend: { position: 'bottom' },
+                      lineWidth: 5,
+                      hAxis: {
+                        //title: 'Time'
+                        gridlines: {count: -1},
+                        viewWindow: {
+                            min: new Date(firstDate.getFullYear(), (firstDate.getMonth()), firstDate.getDate()),
+                            max: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
+                        }
+                    },
+                    vAxis: {
+                        //title: 'Issues',
+                        viewWindow: {
+                            min: (jsonArray.length > 0) ? jsonArray[0].closed : 0,
+                        },
+                        format: '#',
+                        gridlines: {count: -1}
+                    }
+                    //chartArea:{ left:'5%',top:'2%',width:'90%',height:'90%'}
+
+                };
+
+                var trendLineOptions = {
+                    curveType: 'none',
+                    legend: { position: 'none' },
+                    vAxis: {
+                        format: '#',
+                    },
+                    hAxis: {
+                        //title: 'Time'
+                        gridlines: {count: -1},
+                        viewWindow: {
+                            min: new Date(firstDate.getFullYear(), (firstDate.getMonth()), firstDate.getDate()),
+                            max: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())
+                        }
+                    }
+                    //chartArea:{ left:'5%',top:'2%',width:'90%',height:'900%'}
+                }
+
+                var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                chart.draw(chartData, chartOptions);
+
+                var trend = new  google.visualization.AreaChart(document.getElementById('trend_chart_div')); 
+                trend.draw(trendData, trendLineOptions);
+
             } // End drawChart()
 
-            gadget.getView().append("<div id='chart_div' align='center' style='width: 98%; height: 99%'/>");    // Append element with id of 'curve_chart' 
+            gadget.getView().append("<div id='chart_div' align='center' style='width: 98%; height: 65%'/>");    // Append element with id of 'curve_chart' 
+            gadget.getView().append("<div id='trend_chart_div' align='center' style='width: 98%; height: 35%'/>");
             google.charts.setOnLoadCallback(drawChart);
             console.log("IssueLinePlotter 2D loaded");
 
