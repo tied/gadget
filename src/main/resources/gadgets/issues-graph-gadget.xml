@@ -327,13 +327,14 @@ view: {
                 var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
                 chart.draw(chartData, chartOptions);
 
-                var trend = new  google.visualization.AreaChart(document.getElementById('trend_chart_div')); 
+                var trend = new  google.visualization.LineChart(document.getElementById('trend_chart_div')); 
                 trend.draw(trendData, trendLineOptions);
 
             } // End drawChart()
-
-            gadget.getView().append("<div id='chart_div' align='center' style='width: 98%; height: 65%'/>");    // Append element with id of 'curve_chart' 
-            gadget.getView().append("<div id='trend_chart_div' align='center' style='width: 98%; height: 35%'/>");
+            gadget.getView().append("<div>");
+            gadget.getView().append("<div id='chart_div' height: 65%'/>");    // Append element with id of 'curve_chart' 
+            gadget.getView().append("<div id='trend_chart_div' height: 34%'/>");
+            gadget.getView().append("</div>");
             google.charts.setOnLoadCallback(drawChart);
             console.log("IssueLinePlotter 2D loaded");
 
