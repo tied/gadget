@@ -191,7 +191,7 @@ view: {
             // Filter comes in format 'filter-filterID'
             var filter = gadget.getPref("filterId").split("filter-")[1];
 
-            
+            // Dataset for trendline chart
             var trendData = new google.visualization.DataTable();
             trendData.addColumn('string', 'Date');                                                      
             trendData.addColumn('number', 'Trend');
@@ -199,6 +199,7 @@ view: {
             console.log("First trendlinePoint = " + firstTrendPoint);
 
             var rows = gadget.getPref("timeUnitsBox");
+            //Dataset for Open vs Closed graph
             var chartData = new google.visualization.DataTable();
             chartData.addColumn('string', 'Date');                                                       // Format settings for data rows in chart
             chartData.addColumn('number', gadget.getPref("statusName"));
@@ -206,10 +207,9 @@ view: {
 
             var date = new Date(); 
             date.setTime( date.getTime() - new Date().getTimezoneOffset()*60*1000 );                  // Info on Date() https://docs.microsoft.com/en-us/scripting/javascript/reference/date-object-javascript
-            //console.log("Today is : " + lastDate.toISOString().substr(0, 19).replace('T', ' '));
 
             setDateBackwardsInTime(date, gadget.getPref("timeUnitsBox"), gadget.getPref("timeUnit"));
-                var firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate());       // Get the date where iteration should start
+            var firstDate =  new Date(date.getFullYear(), date.getMonth(), date.getDate());       // Get the date where iteration should start
 
                 
 
@@ -302,6 +302,10 @@ view: {
                         },
                         format: '#',
                         gridlines: {count: -1}
+                    },
+                    series: {
+                        0: { color: '#8eb021'}, // set options for the Open
+                        1: { color: '#d04437'}  // set options for the Closed
                     }
                     //chartArea:{ left:'5%',top:'2%',width:'90%',height:'90%'}
 
