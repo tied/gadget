@@ -24,7 +24,7 @@ Other
 <Optional feature='auth-refresh' />
 <Optional feature="atlassian.util" />
 
-#oauth
+#oauth <!-- For authentication -->
 #supportedLocales("gadget.common")
 #supportLocales
 <Locale messages="__ATLASSIAN_BASE_URL__/download/resources/com.avrethem.issues-metric/i18n/messages.xml"/>
@@ -35,9 +35,8 @@ Other
 <UserPref name="timeUnit" datatype="hidden" default_value="d"/>
 <UserPref name="isCumulative" datatype="hidden" default_value="true"/>
 <UserPref name="filterId" datatype="hidden" />
-<UserPref name="statusName" datatype="hidden" default_value="Done"/>
-<UserPref name="statusSelected" datatype="hidden" default_value="Done" />
-<Content type="html" view="profile,canvas">
+<UserPref name="statusName" datatype="hidden"/>
+<Content type="html" view="profile,canvas"> <!-- HTML, canvas is needed for 'resizing' button  -->
 <![CDATA[
 #requireResource("com.atlassian.gadgets.publisher:ajs-gadgets")
 #requireResource("com.atlassian.jira.gadgets:jira-global")
@@ -291,6 +290,9 @@ view: {
                     title: 'Time'
                 },
                 vAxis: {
+                    viewWindow: {
+                        min: (jsonArray.length > 0) ? jsonArray[0].closed : 0,
+                    },
                   title: 'Issues',
                   format: '#',
                   gridlines: {count: -1}

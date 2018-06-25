@@ -145,14 +145,12 @@ public class dataGenerator {
             List<Issue> issues_open = searchServlet.getIssuesByQueryString(user, jqlString);
 
             totBefore = issues_open.size() + closedBefore;
-
-
         }catch (SearchException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        System.out.println("Tot: " + totBefore);
-        System.out.println("Closed: " + closedBefore);
+        log.debug("Tot: " + totBefore);
+        log.debug("Closed: " + closedBefore);
 
         return new UtilPair(totBefore, closedBefore);
     }
@@ -174,14 +172,14 @@ public class dataGenerator {
 
             // NO-HISTORY
             if (changeItemBeans.isEmpty()) {
-                System.out.println("No history for issue in Status : " + issue.getStatus().getName());
+                log.debug("No history for issue in Status : " + issue.getStatus().getName());
                 if (keyStatus.equals(issue.getStatus().getName())) {
                     m.incrementClosed(sdf.format(createdDate));
                 }
             }
             // HAS HISTORY
             else {
-                System.out.printf("First history transition\t %-20s\t\t%-12s -> %-12s\n", changeItemBeans.get(0).getCreated().toString().substring(0, 16), changeItemBeans.get(0).getFromString(), changeItemBeans.get(0).getToString());
+                //System.out.printf("First history transition\t %-20s\t\t%-12s -> %-12s\n", changeItemBeans.get(0).getCreated().toString().substring(0, 16), changeItemBeans.get(0).getFromString(), changeItemBeans.get(0).getToString());
 
                 // If issue Started in status 'keyStatus'
                 if ( changeItemBeans.get(0).getFromString().equals(keyStatus) ) {
@@ -217,16 +215,16 @@ public class dataGenerator {
     {
         Date createdDate = ldf.parse(issue.getCreated().toString().substring(0, 16));
 
-        System.out.println("--------------------------------------------------------------------------------------------------------------------------------------");
+        log.debug("--------------------------------------------------------------------------------------------------------------------------------------");
         if ( createdDate.after(firstDate) ) {
-            System.out.println("Found issue created \t      AFTER\t\t\t----- " + issue.getKey() + " -----");
+            log.debug("Found issue created \t      AFTER\t\t\t----- " + issue.getKey() + " -----");
         } else {
-            System.out.println("Found issue created \t      BEFORE\t\t\t----- " + issue.getKey() + " -----");
+            log.debug("Found issue created \t      BEFORE\t\t\t----- " + issue.getKey() + " -----");
         }
-        System.out.println("Created  \t\t\t " + ldf.format(createdDate));
-        System.out.println("FirstDate\t\t\t " + ldf.format(firstDate));
-        System.out.println("Summary : " + ((issue.getSummary() == null) ? "No-summary" : issue.getSummary()) );
-        System.out.println("--------------------------------------------");
+        log.debug("Created  \t\t\t " + ldf.format(createdDate));
+        log.debug("FirstDate\t\t\t " + ldf.format(firstDate));
+        log.debug("Summary : " + ((issue.getSummary() == null) ? "No-summary" : issue.getSummary()) );
+        log.debug("--------------------------------------------");
     }
     /*
     *
@@ -235,11 +233,11 @@ public class dataGenerator {
     public void insertFromHistoryBeans(ChangeItemBean c, IssueMap m, Date beanDate)
     {
         if (c.getToString().equals(keyStatus) ) {
-            System.out.printf("<Found Transition>\t %-20s\t\t%-12s -> %-12s\n", ldf.format(beanDate), c.getFromString(), c.getToString());
+            //System.out.printf("<Found Transition>\t %-20s\t\t%-12s -> %-12s\n", ldf.format(beanDate), c.getFromString(), c.getToString());
             m.incrementClosed(sdf.format(beanDate));
         }
         if ( c.getFromString().equals(keyStatus)  ) {
-            System.out.printf("<Found Transition>\t %-20s\t\t%-12s -> %-12s\n", ldf.format(beanDate), c.getFromString(), c.getToString());
+            //System.out.printf("<Found Transition>\t %-20s\t\t%-12s -> %-12s\n", ldf.format(beanDate), c.getFromString(), c.getToString());
             m.decrementClosed(sdf.format(beanDate));
         }
     }

@@ -51,10 +51,10 @@ public class searchServlet extends HttpServlet{
         if (parseResult.isValid()) {
             Query query = parseResult.getQuery();
             SearchResults results = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
-            System.out.println("[issues-metric]@searchServlet::getIssuesByQueryString(...)]Do Query: '" + jqlQuery + "'");
+            log.info("[issues-metric]@searchServlet::getIssuesByQueryString(...)]Do Query: '" + jqlQuery + "'");
             return results.getIssues();
         } else {
-            System.out.println(">< >< >< Error >< >< >< parsing query: '" + jqlQuery + "'");
+            log.error(">< >< >< Error >< >< >< parsing query: '" + jqlQuery + "'");
             return Collections.emptyList();
         }
     }
@@ -62,7 +62,7 @@ public class searchServlet extends HttpServlet{
     static public String getQueryStringbyFilter(ApplicationUser user, String filterId ) throws SearchException {
         SearchRequestManager srm = ComponentAccessor.getComponentOfType(SearchRequestManager.class);
         SearchRequest filter = srm.getSearchRequestById(user, Long.valueOf(filterId));
-        //System.out.println("getQueryByString: " + filter.getQuery().getQueryString());
+        //log.debug("getQueryByString: " + filter.getQuery().getQueryString());
         return "(" + filter.getQuery().getQueryString() + ")";
     }
 
@@ -75,7 +75,7 @@ public class searchServlet extends HttpServlet{
         // filterName == filter.getQuery().getQueryString();
 
         String jqlQuery = filter.getQuery().getQueryString();
-        System.out.println("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
+        log.info("[issues-metric]@searchServlet::getIssuesInFilterBackInTime(...)] Do query: '" + jqlQuery + "'");
             Query query = filter.getQuery();
             SearchResults results = searchService.search(user, query, PagerFilter.getUnlimitedFilter());
             return results.getIssues();
