@@ -49,9 +49,9 @@ function parseDataToChart(arg) {
 	// Loop in acsending dates
 	var i = 0;
 	while (  i < arg["json"].length ) 
-	{
+	{	
 		var dateString = arg["json"][i].issuedate.toString().split(" ")[0];
-		addRow(arg["json"], arg["date"], dateString, arg["timeUnit"], arg["countFromZero"], arg["chartData"], arg["trendData"], total, closed)
+		addRow(arg, dateString, total, closed)
 
 	    if ( arg["date"].toISOString().substr(0, 10) >= arg["json"][i].issuedate.toString().split(" ")[0] )
 	    {
@@ -67,7 +67,7 @@ function parseDataToChart(arg) {
 	while ( arg["date"].toISOString().substr(0, 10) <= now.toISOString().substr(0, 10) )
 	{
 		var dateString = now.toISOString().substr(0, 10);
-		addRow(arg["json"], arg["date"], dateString, arg["timeUnit"], arg["countFromZero"], arg["chartData"], arg["trendData"], total, closed);
+		addRow(arg, dateString, total, closed);
 	    setDateBackwardsInTime(arg["date"], -1, arg["timeUnit"]);
 	}
 }
@@ -84,33 +84,34 @@ function parseDataToChart(arg) {
 * 
 * @return {type} void
 */
-function addRow(json, date, dateString, timeUnit, countFromZero, chartData, trendData, total, closed) {
-	var firstTrendPoint = (json.length > 0) ? (parseInt(json[0].total) - parseInt(json[0].closed)) : 0;
-	while ( date.toISOString().substr(0, 10).replace('T', ' ') < dateString ) 
+function addRow(arg, dateString, total, closed) {
+	console.log("D2" +arg["json"]);
+	var firstTrendPoint = (arg["json"].length > 0) ? (parseInt(arg["json"][0].total) - parseInt(arg["json"][0].closed)) : 0;
+	while ( arg["date"].toISOString().substr(0, 10).replace('T', ' ') < dateString ) 
 	{ 
 		// Ship 6 == saturday and 0 == Sunday Only when day
-	    if ( (date.getUTCDay() == 6 || date.getUTCDay() == 0) && timeUnit == "d") 
+	    if ( (arg["date"].getUTCDay() == 6 || arg["date"].getUTCDay() == 0) && arg["timeUnit"] == "d") 
 	    {
-	        date.setDate(date.getDate() +1 );
+	        arg["date"].setDate(arg["date"].getDate() +1 );
 	        continue; 
 	    }
 
 	    var insertOpen = total;
 	    var insertClosed = closed;
-	    if ( countFromZero == "true" ) {
-	    	if ( json["length"] > 0 ) {
-	            insertOpen -=  parseInt(json[0].total);
-	            insertClosed -= parseInt(json[0].closed);
+	    if ( arg["countFromZero"] == "true" ) {
+	    	if ( arg["json"].length > 0 ) {
+	            insertOpen -=  parseInt(arg["json"][0].total);
+	            insertClosed -= parseInt(arg["json"][0].closed);
 	        }
 	    }
 	    else {
 	        insertOpen -= insertClosed;
 	    }
 
-	    console.log("Add row:[" + date.toISOString().substr(0, 19).replace('T', ' ') + " Total: " + total + " | Closed: " + insertClosed + " | Open :" + insertOpen + " ]");
-	    chartData.addRow([date.toISOString().substr(0, 10), total, insertClosed, insertOpen ]);
-	    trendData.addRow([date.toISOString().substr(0, 10), (total - closed) - firstTrendPoint]);
-	    setDateBackwardsInTime(date, -1, timeUnit);
+	    //console.log("Add row:[" + arg["date"].toISOString().substr(0, 19).replace('T', ' ') + " Total: " + total + " | Closed: " + insertClosed + " | Open :" + insertOpen + " ]");
+	    arg["chartData"].addRow([arg["date"].toISOString().substr(0, 10), total, insertClosed, insertOpen ]);
+	    arg["trendData"].addRow([arg["date"].toISOString().substr(0, 10), (total - closed) - firstTrendPoint]);
+	    setDateBackwardsInTime(arg["date"], -1, arg["timeUnit"]);
 	}
 }
 

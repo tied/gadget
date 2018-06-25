@@ -118,11 +118,11 @@ google.charts.load('current', {'packages':['corechart']});
                     selected: gadget.getPref("countFromZero"),
                     options:[
                     {
-                        label: "True",
+                        label: "Start counting from zero",
                         value: "true"
                     },
                     {
-                        label: "False",
+                        label: "Count previous issues",
                         value: "false"
                     }
                     ]
@@ -212,10 +212,10 @@ view: {
 
                     // Google line visual options
                     var chartOptions = {
-                      title: 'Open vs ' + gadget.getPref("statusName") + ' issues',
+                      title: (gadget.getPref("countFromZero") == "false") ? 'Open over ' + gadget.getPref("statusName") + ' issues' : 'Created VS ' + gadget.getPref("statusName") + ' issues' ,
                       isStacked: (gadget.getPref("countFromZero") == "true") ? false : true,
                       curveType: 'none',
-                      focusTarget: 'category',
+                      focusTarget: (gadget.getPref("countFromZero") == "false") ? 'category' : 'datum',
                       seriesType: 'area',
                       series: {
                         0: {
